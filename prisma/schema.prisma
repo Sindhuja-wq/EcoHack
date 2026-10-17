@@ -1,0 +1,208 @@
+// This is your Prisma schema file for EcoHack
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String
+  name          String
+  avatar        String?
+  bio           String?
+  role          String    @default("USER") // "USER" | "ADMIN"
+  points        Int       @default(0)
+  streak        Int       @default(0)
+  lastActiveAt  DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  submissions          ChallengeSubmission[]
+  analyses             WasteAnalysis[]
+  savedIdeas           SavedIdea[]
+  projectSubmissions   RecyclingProjectSubmission[]
+  pointTransactions    PointTransaction[]
+  badges               UserBadge[]
+  reviewedSubmissions  ChallengeSubmission[]        @relation("AdminReviews")
+  reviewedProjects     RecyclingProjectSubmission[] @relation("AdminProjectReviews")
+
+  @@index([points(sort: Desc)])
+  @@index([role])
+}
+
+model Challenge {
+  id                     String   @id @default(cuid())
+  title                  String
+  slug                   String   @unique
+  description            String
+  whyItMatters           String
+  difficulty             String   // "Easy", "Medium", "Advanced"
+  suggestedActions       String   // JSON array of strings
+  completionRequirements String
+  pointsReward           Int      @default(50)
+  category               String   // "plastic", "energy", "transport", "food", "zero-waste", etc.
+  isActive               Boolean  @default(true)
+  isDaily                Boolean  @default(false)
+  dayOfWeek              Int?     // 0=Sunday, 1=Monday...
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  submissions            ChallengeSubmission[]
+
+  @@index([isActive])
+}
+
+model ChallengeSubmission {
+  id               String   @id @default(cuid())
+  challengeId      String
+  userId           String
+  evidenceUrl      String
+  description      String?
+  status           String   @default("PENDING") // "PENDING", "APPROVED", "REJECTED"
+  reviewerFeedback String?
+  reviewedAt       DateTime?
+  reviewerId       String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  challenge        Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reviewer         User?     @relation("AdminReviews", fields: [reviewerId], references: [id])
+
+  @@index([userId])
+  @@index([challengeId])
+  @@index([status])
+}
+
+model WasteAnalysis {
+  id                 String   @id @default(cuid())
+  userId             String?
+  imageUrl           String
+  detectedItem       String
+  materialCategory   String   // "plastic", "paper", "cardboard", "glass", "metal", "fabric", "electronics", "organic", "mixed", "unknown"
+  confidence         Float    // 0.0 - 1.0
+  isReusable         Boolean  @default(false)
+  isRepairable       Boolean  @default(false)
+  isRecyclable       Boolean  @default(false)
+  isCompostable      Boolean  @default(false)
+  isUnsuitable       Boolean  @default(false)
+  safetyConcerns     String   // text summary
+  qualitativeImpact  String   // JSON or text of environmental impact analysis
+  localNotes         String?  // local recycling caveats
+  isDemoSample       Boolean  @default(false)
+  createdAt          DateTime @default(now())
+
+  user               User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  options            TransformationOption[]
+
+  @@index([userId])
+}
+
+model TransformationOption {
+  id                    String   @id @default(cuid())
+  analysisId            String
+  title                 String
+  shortExplanation      String
+  difficulty            String   // "Easy", "Medium", "Advanced"
+  estimatedTime         String   // e.g. "30 mins", "2 hours"
+  materialsTools        String   // JSON array of strings
+  estimatedCost         String   // e.g. "$0 - $5"
+  stepByStep            String   // JSON array of steps { step: number, instruction: string }
+  safetyPrecautions     String
+  expectedResult        String
+  environmentalBenefits String
+  limitations           String
+  disposalMethod        String
+  createdAt             DateTime @default(now())
+
+  analysis              WasteAnalysis                @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  savedBy               SavedIdea[]
+  projectSubmissions    RecyclingProjectSubmission[]
+
+  @@index([analysisId])
+}
+
+model SavedIdea {
+  id                     String   @id @default(cuid())
+  userId                 String
+  transformationOptionId String
+  notes                  String?
+  createdAt              DateTime @default(now())
+
+  user                   User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transformationOption   TransformationOption @relation(fields: [transformationOptionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, transformationOptionId])
+  @@index([userId])
+}
+
+model RecyclingProjectSubmission {
+  id                     String    @id @default(cuid())
+  userId                 String
+  transformationOptionId String
+  evidenceUrl            String
+  notes                  String?
+  status                 String    @default("PENDING") // "PENDING", "APPROVED", "REJECTED"
+  reviewerFeedback       String?
+  pointsAwarded          Int       @default(40)
+  reviewedAt             DateTime?
+  reviewerId             String?
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  user                   User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transformationOption   TransformationOption @relation(fields: [transformationOptionId], references: [id], onDelete: Cascade)
+  reviewer               User?                @relation("AdminProjectReviews", fields: [reviewerId], references: [id])
+
+  @@index([userId])
+  @@index([status])
+}
+
+model PointTransaction {
+  id          String   @id @default(cuid())
+  userId      String
+  amount      Int
+  source      String   // "CHALLENGE_COMPLETION", "TRANSFORMATION_COMPLETION", "WEEKLY_GOAL", "STREAK_BONUS", "ADMIN_ADJUSTMENT"
+  referenceId String?  // ID of submission or challenge
+  description String
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([source, referenceId])
+}
+
+model Badge {
+  id          String      @id @default(cuid())
+  code        String      @unique // "green-starter", "plastic-reducer", "reuse-champion", "eco-explorer", "sustainability-hero"
+  name        String
+  description String
+  icon        String
+  minPoints   Int         @default(0)
+  category    String      @default("general")
+  createdAt   DateTime    @default(now())
+
+  users       UserBadge[]
+}
+
+model UserBadge {
+  id        String   @id @default(cuid())
+  userId    String
+  badgeId   String
+  awardedAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge     Badge    @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badgeId])
+  @@index([userId])
+}
