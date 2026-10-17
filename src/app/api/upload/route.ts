@@ -1,8 +1,5 @@
 import { NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
-import crypto from "crypto";
-import { getSession } from "@/lib/auth";
+import { uploadEvidenceImage } from "@/lib/storage";
 
 const ALLOWED_MIME_TYPES = new Set([
   "image/jpeg",
@@ -47,29 +44,19 @@ export async function POST(request: Request) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Determine safe extension
-    let ext = ".jpg";
-    if (file.type === "image/png") ext = ".png";
-    if (file.type === "image/webp") ext = ".webp";
-    if (file.type === "image/gif") ext = ".gif";
-
-    const uniqueId = crypto.randomBytes(16).toString("hex");
-    const fileName = `upload_${Date.now()}_${uniqueId}${ext}`;
-
-    const uploadDir = path.join(process.cwd(), "public", "uploads");
-    await mkdir(uploadDir, { recursive: true });
-
-    const filePath = path.join(uploadDir, fileName);
-    await writeFile(filePath, buffer);
-
-    const publicUrl = `/uploads/${fileName}`;
+    const uploadResult = await uploadEvidenceImage(
+      buffer,
+      file.type,
+      file.name
+    );
 
     return NextResponse.json({
       success: true,
-      url: publicUrl,
-      fileName,
-      mimeType: file.type,
-      size: file.size,
+      url: uploadResult.url,
+      fileName: uploadResult.fileName,
+      mimeType: uploadResult.mimeType,
+      size: uploadResult.size,
+      storageProvider: uploadResult.provider,
     });
   } catch (error: any) {
     console.error("Upload handler error:", error);
@@ -79,3 +66,4 @@ export async function POST(request: Request) {
     );
   }
 }
+

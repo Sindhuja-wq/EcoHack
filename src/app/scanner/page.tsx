@@ -290,7 +290,7 @@ export default function ScannerPage() {
           err.message.toLowerCase().includes("networkerror"))
       ) {
         errorMsg =
-          "Unable to connect to the EcoHack analysis server (http://localhost:3000). Please verify that the Next.js dev server is running.";
+          "Unable to connect to the EcoHack analysis server. Please check your internet connection and try again.";
       } else {
         errorMsg = err.message || "An unexpected error occurred during waste analysis.";
       }
