@@ -22,7 +22,7 @@ export function getWasteAnalysisProvider(): {
     return {
       provider: new GeminiWasteAnalysisProvider(apiKey, process.env.GEMINI_MODEL),
       isMock: false,
-      providerName: `Google Gemini (${process.env.GEMINI_MODEL || "gemini-3.8-flash"})`,
+      providerName: `Google Gemini (${process.env.GEMINI_MODEL || "gemini-3.5-flash-lite"})`,
     };
   }
 

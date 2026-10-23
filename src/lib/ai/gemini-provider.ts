@@ -1,84 +1,37 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import type { IWasteAnalysisProvider, WasteAnalysisResult } from "./types.ts";
 
+// Prioritized list of high-availability, low-latency Gemini vision models
+const VERIFIED_VISION_MODELS = [
+  "gemini-3.5-flash-lite",
+  "gemini-flash-lite-latest",
+  "gemini-3.5-flash",
+  "gemini-3.6-flash",
+];
+
+// Overall and per-attempt time budgets (in milliseconds)
+const OVERALL_TIMEOUT_MS = 28000; // 28s overall budget to finish well within Vercel execution limits
+const PER_CALL_TIMEOUT_MS = 18000; // 18s max per single model call to allow rich blueprint generation
+
 export class GeminiWasteAnalysisProvider implements IWasteAnalysisProvider {
   private apiKey: string;
   private modelName: string;
-  private static cachedSupportedModels: string[] | null = null;
-  private static lastModelCheckTime = 0;
 
   constructor(apiKey?: string, modelName?: string) {
     this.apiKey = apiKey || process.env.GEMINI_API_KEY || "";
-    this.modelName = modelName || process.env.GEMINI_MODEL || "gemini-3.8-flash";
-    if (this.modelName === "gemini-3.8-pro" || this.modelName.includes("pro")) {
-      this.modelName = "gemini-3.8-flash";
+    this.modelName = modelName || process.env.GEMINI_MODEL || "gemini-3.5-flash-lite";
+    if (this.modelName.includes("pro") || this.modelName.includes("omni") || this.modelName.includes("tts")) {
+      this.modelName = "gemini-3.5-flash-lite";
     }
   }
 
-  private async getAvailableVisionModels(): Promise<string[]> {
-    const verifiedFallbacks = [
-      "gemini-3.8-flash",
-      "gemini-3.7-flash",
-      "gemini-3.5-flash",
-      "gemini-2.5-flash",
-      "gemini-2.0-flash",
-      "gemini-1.5-flash",
-    ];
-
-    const requestedModel =
-      this.modelName === "gemini-3.8-pro" || this.modelName.includes("pro")
-        ? "gemini-3.8-flash"
-        : this.modelName;
-
-    // Cache model list for 10 minutes to avoid overhead on every request
-    const now = Date.now();
-    if (
-      GeminiWasteAnalysisProvider.cachedSupportedModels &&
-      now - GeminiWasteAnalysisProvider.lastModelCheckTime < 10 * 60 * 1000
-    ) {
-      const candidates = [requestedModel, ...GeminiWasteAnalysisProvider.cachedSupportedModels, ...verifiedFallbacks];
-      return Array.from(new Set(candidates)).filter((m) => Boolean(m) && !m.includes("pro"));
-    }
-
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3500);
-      const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${this.apiKey}`;
-      const res = await fetch(url, { signal: controller.signal });
-      clearTimeout(timeoutId);
-
-      if (res.ok) {
-        const data = await res.json();
-        const availableFromApi: string[] = [];
-        for (const m of data.models || []) {
-          const name = (m.name || "").replace("models/", "");
-          const methods = m.supportedGenerationMethods || [];
-          if (
-            methods.includes("generateContent") &&
-            name.includes("flash") &&
-            !name.includes("tts") &&
-            !name.includes("preview") &&
-            !name.includes("pro")
-          ) {
-            availableFromApi.push(name);
-          }
-        }
-
-        availableFromApi.sort((a, b) => b.localeCompare(a));
-
-        if (availableFromApi.length > 0) {
-          GeminiWasteAnalysisProvider.cachedSupportedModels = availableFromApi;
-          GeminiWasteAnalysisProvider.lastModelCheckTime = now;
-          const combined = [requestedModel, ...availableFromApi, ...verifiedFallbacks];
-          return Array.from(new Set(combined)).filter((m) => Boolean(m) && !m.includes("pro"));
-        }
-      }
-    } catch {
-      // Dynamic query timed out or offline, safely proceed with verified fallbacks
-    }
-
-    const fallbackList = [requestedModel, ...verifiedFallbacks];
-    return Array.from(new Set(fallbackList)).filter((m) => Boolean(m) && !m.includes("pro"));
+  private getCandidateModels(): string[] {
+    const requested = this.modelName.trim();
+    const candidates = [requested, ...VERIFIED_VISION_MODELS];
+    // Filter out duplicate, audio/tts, omni, pro, or empty model strings
+    return Array.from(new Set(candidates)).filter(
+      (m) => Boolean(m) && !m.includes("pro") && !m.includes("omni") && !m.includes("tts")
+    );
   }
 
   async analyzeImage(
@@ -104,7 +57,7 @@ export class GeminiWasteAnalysisProvider implements IWasteAnalysisProvider {
     } else {
       cleanBase64 = imageBase64.replace(/^data:[^;]+;base64,/, "");
     }
-    // Remove any whitespace or newline characters introduced during transport
+    // Remove whitespace or newline characters introduced during transport
     cleanBase64 = cleanBase64.replace(/\s+/g, "");
 
     // Validate base64 payload length
@@ -153,6 +106,7 @@ CRITICAL INSTRUCTIONS:
 6. For Environmental Impact:
    - Provide transparent assumptions, qualitative advantages, possible disadvantages, and a comparison matrix across: (1) Reuse/Repair, (2) DIY Transformation, (3) Formal Recycling, (4) Safe Disposal.
    - Recommend the best overall route based on item condition.
+7. Keep descriptions, instructions, and comparison text clear, practical, and concise (1-2 sentences max per step or section; avoid unnecessary filler).
 
 ${locationContext}
 
@@ -251,11 +205,22 @@ Return ONLY valid JSON matching this exact structure:
       },
     };
 
-    // Dynamically query supported models or use verified vision models
-    const verifiedModels = await this.getAvailableVisionModels();
-
+    const modelsToTry = this.getCandidateModels();
+    const overallStartTime = Date.now();
     let lastError: any = null;
-    for (const modelToTry of verifiedModels) {
+
+    for (const modelToTry of modelsToTry) {
+      // Calculate remaining overall time budget
+      const elapsedTotal = Date.now() - overallStartTime;
+      const remainingTotal = OVERALL_TIMEOUT_MS - elapsedTotal;
+
+      if (remainingTotal < 3500) {
+        console.warn(`Overall time budget nearly exhausted (${elapsedTotal}ms elapsed). Halting fallback attempts.`);
+        break;
+      }
+
+      const callTimeout = Math.min(PER_CALL_TIMEOUT_MS, remainingTotal);
+
       try {
         const model = genAI.getGenerativeModel({
           model: modelToTry,
@@ -266,29 +231,51 @@ Return ONLY valid JSON matching this exact structure:
           },
         });
 
+        const executeCall = async (timeoutMs: number): Promise<any> => {
+          let timeoutHandle: NodeJS.Timeout | null = null;
+          const timeoutPromise = new Promise<never>((_, reject) => {
+            timeoutHandle = setTimeout(
+              () => reject(new Error(`Model ${modelToTry} request timed out after ${timeoutMs}ms`)),
+              timeoutMs
+            );
+          });
+
+          try {
+            const apiPromise = model.generateContent([prompt, imagePart]);
+            return await Promise.race([apiPromise, timeoutPromise]);
+          } finally {
+            if (timeoutHandle) clearTimeout(timeoutHandle);
+          }
+        };
+
         let response: any;
         try {
-          response = await model.generateContent([prompt, imagePart]);
+          response = await executeCall(callTimeout);
         } catch (callErr: any) {
-          const isTransient =
+          const errLower = (callErr.message || "").toLowerCase();
+          const isDemandSpike =
             callErr.status === 503 ||
-            callErr.status === 429 ||
-            callErr.message?.includes("503") ||
-            callErr.message?.includes("overloaded") ||
-            callErr.message?.includes("spikes in demand") ||
-            callErr.message?.includes("Resource has been exhausted");
+            errLower.includes("503") ||
+            errLower.includes("overloaded") ||
+            errLower.includes("spikes in demand");
 
-          if (isTransient) {
-            console.warn(`Transient notice on ${modelToTry} (${callErr.message}). Retrying in 1.2s...`);
-            await new Promise((resolve) => setTimeout(resolve, 1200));
-            response = await model.generateContent([prompt, imagePart]);
+          const currentIndex = modelsToTry.indexOf(modelToTry);
+          const hasAlternative = currentIndex >= 0 && currentIndex < modelsToTry.length - 1;
+          const remainingAfterErr = OVERALL_TIMEOUT_MS - (Date.now() - overallStartTime);
+
+          // If another candidate model is available, proceed immediately to the next candidate
+          // Only retry the same model if it is the last candidate and sufficient time budget remains
+          if (isDemandSpike && !hasAlternative && remainingAfterErr > 12000) {
+            console.warn(`Transient 503 on final candidate [${modelToTry}]. Waiting 600ms before single retry...`);
+            await new Promise((resolve) => setTimeout(resolve, 600));
+            const retryTimeout = Math.min(PER_CALL_TIMEOUT_MS, OVERALL_TIMEOUT_MS - (Date.now() - overallStartTime));
+            response = await executeCall(retryTimeout);
           } else {
             throw callErr;
           }
         }
 
         const responseText = response.response.text();
-
         let cleanedJson = responseText.trim();
         if (cleanedJson.startsWith("```json")) {
           cleanedJson = cleanedJson.replace(/^```json\s*/i, "").replace(/\s*```$/, "");
@@ -302,24 +289,34 @@ Return ONLY valid JSON matching this exact structure:
         return parsed;
       } catch (err: any) {
         lastError = err;
-        console.warn(`Gemini model ${modelToTry} attempt notice: ${err.message || err}. Trying next candidate...`);
-        // If it's an authentication error (e.g. invalid API key), do not retry other models
+        const msg = err.message || "";
+        const lower = msg.toLowerCase();
+
+        console.warn(`Model [${modelToTry}] attempt note: ${msg}`);
+
+        // Immediate fatal errors: DO NOT try other models if credentials/API key are invalid
         if (
-          err.message?.includes("API_KEY_INVALID") ||
-          err.message?.includes("API key not valid") ||
-          err.message?.includes("API_KEY") ||
+          lower.includes("api_key_invalid") ||
+          lower.includes("api key not valid") ||
+          lower.includes("api_key") ||
           err.status === 401 ||
-          (err.status === 403 && (err.message?.toLowerCase().includes("key") || err.message?.toLowerCase().includes("credential")))
+          (err.status === 403 && (lower.includes("key") || lower.includes("credential")))
         ) {
           throw new Error(
-            `Gemini API Key validation failed: ${err.message}. Please verify your GEMINI_API_KEY in .env.`
+            `Gemini API Key validation failed: ${msg}. Please verify your GEMINI_API_KEY in .env.`
           );
+        }
+
+        // For Quota exceeded (429), log clearly and move to next model without retrying the same model
+        if (lower.includes("quota exceeded") || lower.includes("resource_exhausted") || err.status === 429) {
+          console.warn(`Quota reached on ${modelToTry}. Continuing to alternative model...`);
         }
       }
     }
 
+    const finalMsg = lastError?.message || "All Gemini vision service attempts timed out or failed.";
     throw new Error(
-      `Gemini Vision Analysis failed: ${lastError?.message || "Unable to reach Gemini vision services"}. Please check your GEMINI_API_KEY and network connection.`
+      `Gemini Vision Analysis unavailable: ${finalMsg}. Please check network connection and try again.`
     );
   }
 }

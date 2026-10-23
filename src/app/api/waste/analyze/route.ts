@@ -8,7 +8,10 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 const AnalyzeRequestSchema = z.object({
-  imageBase64: z.string().min(20, "Valid image data is required"),
+  imageBase64: z
+    .string()
+    .min(20, "Valid image data is required")
+    .max(10 * 1024 * 1024, "Image payload is too large. Please upload an image under 8MB."),
   mimeType: z.string().default("image/jpeg"),
   imageUrl: z.string().optional(),
   userCity: z.string().max(100).optional(),
@@ -154,7 +157,7 @@ export async function POST(request: Request) {
       status = 404;
       errorType = "MODEL_ERROR";
       userFacingMessage =
-        "The configured Gemini model is unavailable or unsupported for vision analysis. EcoHack requires gemini-3.8-flash.";
+        "The configured Gemini model is unavailable or unsupported for vision analysis. EcoHack recommends gemini-3.5-flash-lite.";
     }
     // 3. Quota or rate limit exceeded
     else if (

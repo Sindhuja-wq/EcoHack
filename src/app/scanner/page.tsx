@@ -74,6 +74,8 @@ export default function ScannerPage() {
   const [imageName, setImageName] = useState<string>("");
   const [userCity, setUserCity] = useState<string>("");
   const [analyzing, setAnalyzing] = useState<boolean>(false);
+  const [optimizingImage, setOptimizingImage] = useState<boolean>(false);
+  const [analysisProgressMessage, setAnalysisProgressMessage] = useState<string>("Analyzing waste item...");
   const [analysisResult, setAnalysisResult] = useState<any | null>(null);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
   const [analysisId, setAnalysisId] = useState<string | null>(null);
@@ -107,16 +109,17 @@ export default function ScannerPage() {
       return;
     }
 
-    const effectiveType = file.type || "image/jpeg";
-    setMimeType(effectiveType);
     setImageName(file.name);
+    setOptimizingImage(true);
 
     const reader = new FileReader();
     reader.onload = () => {
       const rawDataUrl = reader.result as string;
       const img = new window.Image();
       img.onload = () => {
-        const maxDimension = 1400;
+        // Downscale oversized images to max dimension 1024px
+        // Preserves sharp visual indicators (resin codes, seams, textures) while shrinking payload by >95%
+        const maxDimension = 1024;
         let { width, height } = img;
         if (width > maxDimension || height > maxDimension) {
           if (width > height) {
@@ -126,30 +129,49 @@ export default function ScannerPage() {
             width = Math.round((width * maxDimension) / height);
             height = maxDimension;
           }
+        }
+
+        try {
           const canvas = document.createElement("canvas");
           canvas.width = width;
           canvas.height = height;
           const ctx = canvas.getContext("2d");
           if (ctx) {
             ctx.drawImage(img, 0, 0, width, height);
-            const optimizedDataUrl = canvas.toDataURL(effectiveType, 0.92);
+            // Export as standard JPEG at 0.82 quality to strip EXIF and dramatically reduce transport overhead
+            const optimizedDataUrl = canvas.toDataURL("image/jpeg", 0.82);
             setSelectedImage(optimizedDataUrl);
+            setMimeType("image/jpeg");
           } else {
             setSelectedImage(rawDataUrl);
+            setMimeType(file.type || "image/jpeg");
           }
-        } else {
+        } catch {
           setSelectedImage(rawDataUrl);
+          setMimeType(file.type || "image/jpeg");
+        } finally {
+          setOptimizingImage(false);
+          setAnalysisResult(null);
+          setAnalysisError(null);
         }
-        setAnalysisResult(null);
-        setAnalysisError(null);
       };
+
       img.onerror = () => {
         setSelectedImage(rawDataUrl);
+        setMimeType(file.type || "image/jpeg");
+        setOptimizingImage(false);
         setAnalysisResult(null);
         setAnalysisError(null);
       };
+
       img.src = rawDataUrl;
     };
+
+    reader.onerror = () => {
+      setOptimizingImage(false);
+      showToast("Could not read image file. Please try again.", "error");
+    };
+
     reader.readAsDataURL(file);
   };
 
@@ -225,9 +247,23 @@ export default function ScannerPage() {
     setAnalyzing(true);
     setAnalysisResult(null);
     setAnalysisError(null);
+    setAnalysisProgressMessage("Preparing photo & connecting to AI vision...");
+
+    // Stepped honest loading feedback to keep the user informed if network/AI is busy
+    const progressTimer1 = setTimeout(() => {
+      setAnalysisProgressMessage("Analyzing waste material composition via AI...");
+    }, 3500);
+
+    const progressTimer2 = setTimeout(() => {
+      setAnalysisProgressMessage("Inspecting material purity and generating transformation blueprints...");
+    }, 9000);
+
+    const progressTimer3 = setTimeout(() => {
+      setAnalysisProgressMessage("Finalizing environmental impact and localized guidelines...");
+    }, 17000);
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 60000);
+    const timeoutId = setTimeout(() => controller.abort(), 45000);
 
     try {
       const res = await fetch("/api/waste/analyze", {
@@ -243,6 +279,9 @@ export default function ScannerPage() {
       });
 
       clearTimeout(timeoutId);
+      clearTimeout(progressTimer1);
+      clearTimeout(progressTimer2);
+      clearTimeout(progressTimer3);
 
       let data: any = null;
       try {
@@ -280,10 +319,13 @@ export default function ScannerPage() {
       );
     } catch (err: any) {
       clearTimeout(timeoutId);
-      let errorMsg: string;
+      clearTimeout(progressTimer1);
+      clearTimeout(progressTimer2);
+      clearTimeout(progressTimer3);
 
+      let errorMsg: string;
       if (err.name === "AbortError") {
-        errorMsg = "Analysis request timed out after 60 seconds. Please try again with a clear photo.";
+        errorMsg = "Analysis request timed out after 45 seconds. Please try again with a clear photo.";
       } else if (
         err instanceof TypeError &&
         (err.message.toLowerCase().includes("failed to fetch") ||
@@ -298,6 +340,10 @@ export default function ScannerPage() {
       setAnalysisError(errorMsg);
       showToast(errorMsg, "error");
     } finally {
+      clearTimeout(timeoutId);
+      clearTimeout(progressTimer1);
+      clearTimeout(progressTimer2);
+      clearTimeout(progressTimer3);
       setAnalyzing(false);
     }
   };
@@ -463,18 +509,26 @@ export default function ScannerPage() {
             <div className="space-y-6">
               {/* Dropzone Area */}
               <div
-                onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-emerald-500/35 hover:border-emerald-500 rounded-3xl p-8 sm:p-12 text-center cursor-pointer transition-all hover:bg-emerald-500/5 group flex flex-col items-center justify-center space-y-4"
+                onClick={() => {
+                  if (!analyzing && !optimizingImage) fileInputRef.current?.click();
+                }}
+                className={`border-2 border-dashed border-emerald-500/35 hover:border-emerald-500 rounded-3xl p-8 sm:p-12 text-center transition-all group flex flex-col items-center justify-center space-y-4 ${
+                  analyzing || optimizingImage
+                    ? "opacity-60 cursor-not-allowed"
+                    : "cursor-pointer hover:bg-emerald-500/5"
+                }`}
               >
                 <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 flex items-center justify-center group-hover:scale-110 transition-transform">
                   <UploadCloud className="w-8 h-8" />
                 </div>
                 <div className="space-y-1">
                   <p className="text-base font-bold text-emerald-950 dark:text-emerald-100">
-                    Click to browse or drag and drop your waste photo
+                    {optimizingImage
+                      ? "Optimizing photo for fast AI inspection..."
+                      : "Click to browse or drag and drop your waste photo"}
                   </p>
                   <p className="text-xs text-emerald-900/60 dark:text-emerald-400">
-                    Supports high-resolution JPEG, PNG, WebP up to 8MB
+                    Supports high-resolution JPEG, PNG, WebP up to 15MB (automatically optimized)
                   </p>
                 </div>
               </div>
@@ -486,11 +540,13 @@ export default function ScannerPage() {
                   type="file"
                   accept="image/jpeg,image/png,image/webp"
                   onChange={handleFileChange}
+                  disabled={analyzing || optimizingImage}
                   className="hidden"
                 />
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="w-full sm:w-auto px-6 py-3 rounded-xl font-bold text-sm text-white bg-emerald-700 hover:bg-emerald-800 transition-colors shadow-soft flex items-center justify-center gap-2"
+                  disabled={analyzing || optimizingImage}
+                  className="w-full sm:w-auto px-6 py-3 rounded-xl font-bold text-sm text-white bg-emerald-700 hover:bg-emerald-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-soft flex items-center justify-center gap-2"
                 >
                   <UploadCloud className="w-4 h-4" />
                   <span>Choose Photo File</span>
@@ -503,11 +559,13 @@ export default function ScannerPage() {
                   accept="image/*"
                   capture="environment"
                   onChange={handleFileChange}
+                  disabled={analyzing || optimizingImage}
                   className="hidden"
                 />
                 <button
                   onClick={() => cameraInputRef.current?.click()}
-                  className="w-full sm:w-auto px-6 py-3 rounded-xl font-bold text-sm text-emerald-900 dark:text-emerald-100 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/25 transition-colors flex items-center justify-center gap-2"
+                  disabled={analyzing || optimizingImage}
+                  className="w-full sm:w-auto px-6 py-3 rounded-xl font-bold text-sm text-emerald-900 dark:text-emerald-100 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/25 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
                 >
                   <Camera className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                   <span>Take Live Photo (Mobile)</span>
@@ -524,7 +582,8 @@ export default function ScannerPage() {
                     <button
                       key={idx}
                       onClick={() => handleSelectSample(s)}
-                      className="px-3 py-1.5 rounded-xl border border-emerald-500/20 bg-emerald-50/50 dark:bg-night-hover/60 hover:bg-emerald-100/60 dark:hover:bg-night-border text-xs font-semibold text-emerald-900 dark:text-emerald-200 transition-colors flex items-center gap-1.5"
+                      disabled={analyzing || optimizingImage}
+                      className="px-3 py-1.5 rounded-xl border border-emerald-500/20 bg-emerald-50/50 dark:bg-night-hover/60 hover:bg-emerald-100/60 dark:hover:bg-night-border text-xs font-semibold text-emerald-900 dark:text-emerald-200 disabled:opacity-50 transition-colors flex items-center gap-1.5"
                     >
                       <span>{s.icon}</span>
                       <span>{s.name}</span>
@@ -542,13 +601,15 @@ export default function ScannerPage() {
                   alt="Selected waste item"
                   className="w-full h-full object-cover"
                 />
-                <button
-                  onClick={handleRemoveImage}
-                  className="absolute top-4 right-4 p-2 rounded-full bg-black/60 hover:bg-black/80 text-white backdrop-blur-md transition-colors"
-                  aria-label="Remove image"
-                >
-                  <X className="w-5 h-5" />
-                </button>
+                {!analyzing && (
+                  <button
+                    onClick={handleRemoveImage}
+                    className="absolute top-4 right-4 p-2 rounded-full bg-black/60 hover:bg-black/80 text-white backdrop-blur-md transition-colors"
+                    aria-label="Remove image"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                )}
               </div>
 
               {/* Optional City Input for localized recycling rules */}
@@ -564,8 +625,9 @@ export default function ScannerPage() {
                     type="text"
                     value={userCity}
                     onChange={(e) => setUserCity(e.target.value)}
+                    disabled={analyzing}
                     placeholder="e.g. Seattle, Mumbai, London, Toronto"
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-emerald-500/25 dark:border-emerald-500/30 bg-white/70 dark:bg-night-hover/70 text-emerald-950 dark:text-white placeholder:text-emerald-900/40 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-emerald-500/25 dark:border-emerald-500/30 bg-white/70 dark:bg-night-hover/70 text-emerald-950 dark:text-white placeholder:text-emerald-900/40 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-60"
                   />
                 </div>
               </div>
@@ -574,19 +636,20 @@ export default function ScannerPage() {
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
                 <button
                   onClick={handleRemoveImage}
-                  className="w-full sm:w-auto px-5 py-3 rounded-xl border border-emerald-500/20 text-emerald-800 dark:text-emerald-200 text-sm font-semibold hover:bg-emerald-50 dark:hover:bg-night-hover transition-colors"
+                  disabled={analyzing}
+                  className="w-full sm:w-auto px-5 py-3 rounded-xl border border-emerald-500/20 text-emerald-800 dark:text-emerald-200 text-sm font-semibold hover:bg-emerald-50 dark:hover:bg-night-hover disabled:opacity-50 transition-colors"
                 >
                   Choose Different Item
                 </button>
                 <button
                   onClick={handleAnalyze}
-                  disabled={analyzing}
-                  className="w-full sm:w-auto px-8 py-3.5 rounded-xl font-bold text-white bg-gradient-to-r from-emerald-700 to-green-600 hover:from-emerald-800 hover:to-green-700 shadow-soft-lg transition-all transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2.5 text-sm disabled:opacity-60"
+                  disabled={analyzing || optimizingImage}
+                  className="w-full sm:w-auto px-8 py-3.5 rounded-xl font-bold text-white bg-gradient-to-r from-emerald-700 to-green-600 hover:from-emerald-800 hover:to-green-700 shadow-soft-lg transition-all transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2.5 text-sm disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {analyzing ? (
                     <>
                       <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      <span>Analyzing Material via AI...</span>
+                      <span>{analysisProgressMessage}</span>
                     </>
                   ) : (
                     <>
@@ -599,17 +662,34 @@ export default function ScannerPage() {
             </div>
           )}
 
-          {/* Analysis Error Alert */}
+          {/* Analysis Error Alert with Preserved Photo and Retry Button */}
           {analysisError && (
-            <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-start gap-3">
+            <div className="p-5 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-start gap-3">
               <AlertTriangle className="w-5 h-5 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
-              <div className="space-y-1 text-xs">
-                <h4 className="font-bold text-rose-900 dark:text-rose-200">Analysis Notice</h4>
+              <div className="space-y-2 text-xs flex-1">
+                <h4 className="font-bold text-rose-900 dark:text-rose-200 text-sm">Analysis Notice</h4>
                 <p className="text-rose-800 dark:text-rose-300 leading-relaxed">{analysisError}</p>
                 {analysisError.includes("GEMINI_API_KEY") && (
-                  <p className="text-rose-700 dark:text-rose-400 mt-1.5 font-medium">
+                  <p className="text-rose-700 dark:text-rose-400 mt-1 font-medium">
                     To enable live AI vision, configure your Gemini API key in <code className="px-1.5 py-0.5 bg-rose-500/20 rounded">.env</code>. Or, to explore with sample blueprints without a key, set <code className="px-1.5 py-0.5 bg-rose-500/20 rounded">AI_PROVIDER="mock"</code> in <code className="px-1.5 py-0.5 bg-rose-500/20 rounded">.env</code>.
                   </p>
+                )}
+                {selectedImage && !analyzing && (
+                  <div className="pt-2 flex flex-wrap items-center gap-2">
+                    <button
+                      onClick={handleAnalyze}
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-soft transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5" />
+                      <span>Retry Analysis (Keep Photo)</span>
+                    </button>
+                    <button
+                      onClick={handleRemoveImage}
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-rose-500/30 bg-white/60 dark:bg-night-hover/60 hover:bg-white text-rose-800 dark:text-rose-300 font-semibold text-xs transition-colors"
+                    >
+                      <span>Take / Upload Another Photo</span>
+                    </button>
+                  </div>
                 )}
               </div>
             </div>
@@ -632,9 +712,9 @@ export default function ScannerPage() {
                 <Sparkles className="w-8 h-8 text-emerald-600 dark:text-emerald-400 animate-pulse" />
               </div>
             </div>
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               <h3 className="text-xl font-black text-emerald-950 dark:text-emerald-100">
-                Inspecting Material Composition
+                {analysisProgressMessage}
               </h3>
               <p className="text-xs text-emerald-900/60 dark:text-emerald-400 max-w-sm mx-auto">
                 Running vision inspection for polymer codes, fiber density, safety guidelines, and calculating potential divertible mass...
