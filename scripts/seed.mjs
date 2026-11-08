@@ -74,6 +74,24 @@ process.on("unhandledRejection", (err) => {
 
 if (isPostgresTarget) {
   if (!process.env.POSTGRES_PRISMA_URL) {
+    const fallback = process.env.POSTGRES_URL || process.env.DATABASE_URL;
+    if (fallback && (fallback.startsWith("postgresql://") || fallback.startsWith("postgres://"))) {
+      process.env.POSTGRES_PRISMA_URL = fallback;
+    }
+  }
+
+  if (!process.env.POSTGRES_URL_NON_POOLING) {
+    const fallbackDirect =
+      process.env.DATABASE_URL_UNPOOLED ||
+      process.env.POSTGRES_PRISMA_URL ||
+      process.env.DATABASE_URL ||
+      process.env.POSTGRES_URL;
+    if (fallbackDirect && (fallbackDirect.startsWith("postgresql://") || fallbackDirect.startsWith("postgres://"))) {
+      process.env.POSTGRES_URL_NON_POOLING = fallbackDirect;
+    }
+  }
+
+  if (!process.env.POSTGRES_PRISMA_URL) {
     console.error("❌ ERROR: Required PostgreSQL environment variable POSTGRES_PRISMA_URL is missing.");
     console.error("Please configure POSTGRES_PRISMA_URL in .env.local or your environment.");
     process.exit(1);

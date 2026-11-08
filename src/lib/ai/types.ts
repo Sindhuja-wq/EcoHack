@@ -35,6 +35,24 @@ export interface EnvironmentalImpactDTO {
   recommendationRationale: string;
 }
 
+export type RecoveryStatus =
+  | "Reusable"
+  | "Repairable"
+  | "Recyclable"
+  | "Special Disposal Required"
+  | "No Safe Recovery Option Identified";
+
+export interface SmartDisposalGuideDTO {
+  categoryTitle: string;
+  recoveryStatus: RecoveryStatus;
+  primaryGuidance: string;
+  safeDisposalSteps: string[];
+  safetyWarnings?: string[];
+  municipalDiscretionNote: string;
+  residualDisposalRoute: string;
+  requiresSpecialHandling: boolean;
+}
+
 export interface WasteAnalysisResult {
   detectedItem: string;
   materialCategory:
@@ -64,6 +82,16 @@ export interface WasteAnalysisResult {
   uncertaintyNotes?: string;
   isDemoSample: boolean;
   providerUsed: string;
+
+  // Smart Waste Disposal & Analysis Enhancement properties
+  recoveryStatus: RecoveryStatus;
+  smartDisposalGuide: SmartDisposalGuideDTO;
+  reusePossibilities: string[];
+  repairPossibilities: string[];
+  recyclingPossibilities: string[];
+  environmentalBenefits: string[];
+  environmentalDisadvantages: string[];
+  confirmedRecycling: boolean;
 }
 
 export interface IWasteAnalysisProvider {

@@ -66,10 +66,10 @@ export default function AboutPage() {
 
             <div className="p-4 rounded-2xl bg-emerald-50/70 dark:bg-night-hover/70 border border-emerald-500/15 space-y-1.5">
               <h4 className="font-bold text-sm text-emerald-900 dark:text-emerald-100">
-                3. Regional Caveats
+                3. Smart Waste Disposal Guide
               </h4>
               <p>
-                Municipal recycling rules vary by province, city, and sorting facility capabilities (MRFs). We prompt users for their locality and clearly caution when materials like polystyrene or glass require specialized drop-off depots.
+                Municipal recycling rules vary by province, city, and sorting facility capabilities (MRFs). Our Smart Waste Disposal Guide provides safe, category-specific instructions for when reuse, repair, or recycling are unavailable, and clearly distinguishes between confirmed recyclables and items requiring local verification.
               </p>
             </div>
           </div>

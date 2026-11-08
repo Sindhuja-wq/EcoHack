@@ -4,83 +4,98 @@
 
 @layer base {
   :root {
-    --background: 145 60% 98%;
-    --foreground: 155 35% 15%;
-    --card: 0 0% 100%;
-    --card-foreground: 155 35% 15%;
-    --primary: 142 69% 30%;
+    --background: 44 33% 94%; /* #F5F3EA Warm cream */
+    --foreground: 140 14% 15%; /* #202A24 Charcoal */
+    --card: 0 0% 100%; /* #FFFFFF White */
+    --card-foreground: 140 14% 15%;
+    --primary: 156 53% 19%; /* #174B35 Forest green */
     --primary-foreground: 0 0% 100%;
-    --secondary: 145 60% 95%;
-    --secondary-foreground: 142 69% 25%;
-    --muted: 145 30% 92%;
-    --muted-foreground: 155 15% 45%;
-    --accent: 142 76% 45%;
-    --accent-foreground: 0 0% 100%;
+    --secondary: 107 19% 69%; /* #A8BFA3 Sage green */
+    --secondary-foreground: 156 53% 19%;
+    --muted: 45 20% 90%;
+    --muted-foreground: 140 10% 40%;
+    --accent: 74 58% 66%; /* #C4DC78 Lime accent */
+    --accent-foreground: 140 14% 15%;
+    --terracotta: 21 47% 55%; /* #C47B55 Terracotta */
     --destructive: 0 84% 60%;
-    --border: 145 30% 88%;
+    --border: 107 18% 80%;
   }
 
   .dark {
-    --background: 160 48% 8%;
-    --foreground: 145 30% 94%;
-    --card: 160 45% 11%;
-    --card-foreground: 145 30% 94%;
-    --primary: 142 71% 45%;
-    --primary-foreground: 160 50% 8%;
-    --secondary: 160 40% 16%;
-    --secondary-foreground: 142 70% 85%;
-    --muted: 160 30% 18%;
-    --muted-foreground: 145 15% 65%;
-    --accent: 142 76% 45%;
-    --accent-foreground: 0 0% 100%;
+    --background: 140 14% 10%; /* #151C17 Deep charcoal/forest */
+    --foreground: 44 33% 94%; /* #F5F3EA Warm cream */
+    --card: 142 14% 13%; /* #1C2520 Dark charcoal card */
+    --card-foreground: 44 33% 94%;
+    --primary: 74 58% 66%; /* Lime accent in dark mode */
+    --primary-foreground: 140 14% 10%;
+    --secondary: 107 19% 45%;
+    --secondary-foreground: 44 33% 94%;
+    --muted: 142 12% 18%;
+    --muted-foreground: 107 15% 65%;
+    --accent: 74 58% 66%;
+    --accent-foreground: 140 14% 10%;
+    --terracotta: 21 47% 55%;
     --destructive: 0 62% 45%;
-    --border: 160 30% 20%;
+    --border: 140 15% 22%;
   }
 
   body {
-    background-color: #ECFDF5;
-    color: #16352A;
+    background-color: #F5F3EA; /* Premium Warm Cream */
+    color: #202A24; /* Charcoal */
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     -webkit-font-smoothing: antialiased;
   }
 
   .dark body,
   html.dark body {
-    background-color: #0B1F17;
-    color: #E2F5EC;
+    background-color: #151C17; /* Deep charcoal */
+    color: #F5F3EA; /* Warm cream */
   }
 }
 
 /* Glassmorphism utility classes */
 .glass-panel {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(34, 197, 94, 0.15);
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(168, 191, 163, 0.35);
 }
 
 .dark .glass-panel {
-  background: rgba(15, 43, 32, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(34, 197, 94, 0.2);
+  background: rgba(28, 37, 32, 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(168, 191, 163, 0.20);
 }
 
-/* Premium gradient backgrounds */
+/* Premium Warm Eco-Tech gradient backgrounds (no solid oversaturated greens) */
 .bg-nature-gradient {
-  background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 50%, #A7F3D0 100%);
+  background: radial-gradient(circle at 50% 0%, rgba(168, 191, 163, 0.25) 0%, rgba(245, 243, 234, 0.85) 55%, #F5F3EA 100%);
 }
 
 .dark .bg-nature-gradient {
-  background: linear-gradient(135deg, #0B1F17 0%, #0F2D21 50%, #143C2C 100%);
+  background: radial-gradient(circle at 50% 0%, rgba(23, 75, 53, 0.35) 0%, rgba(21, 28, 23, 0.95) 55%, #151C17 100%);
 }
 
 .bg-hero-gradient {
-  background: radial-gradient(circle at 50% 0%, rgba(34, 197, 94, 0.18) 0%, rgba(22, 101, 52, 0.05) 50%, transparent 80%);
+  background: radial-gradient(ellipse at 50% 20%, rgba(196, 220, 120, 0.18) 0%, rgba(168, 191, 163, 0.12) 40%, transparent 75%);
 }
 
 .dark .bg-hero-gradient {
-  background: radial-gradient(circle at 50% 0%, rgba(34, 197, 94, 0.12) 0%, rgba(11, 31, 23, 0.05) 50%, transparent 80%);
+  background: radial-gradient(ellipse at 50% 20%, rgba(196, 220, 120, 0.10) 0%, rgba(23, 75, 53, 0.18) 45%, transparent 75%);
+}
+
+/* 3D Perspective helper classes */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.perspective-1500 {
+  perspective: 1500px;
+}
+
+.transform-style-3d {
+  transform-style: preserve-3d;
 }
 
 /* Custom scrollbars */
@@ -94,12 +109,12 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(34, 197, 94, 0.3);
+  background: rgba(168, 191, 163, 0.5);
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(34, 197, 94, 0.5);
+  background: rgba(23, 75, 53, 0.5);
 }
 
 /* Respect reduced motion */

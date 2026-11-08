@@ -30,37 +30,61 @@ loadEnvFile(".env");
 // Determine whether to generate Prisma Client for PostgreSQL or SQLite:
 // 1. Explicit override via USE_POSTGRES=true
 // 2. Running inside Vercel serverless environment (VERCEL=1)
-// 3. DATABASE_URL points to a PostgreSQL connection (postgresql:// or postgres://)
+// 3. DATABASE_URL or POSTGRES_PRISMA_URL points to a PostgreSQL connection
 const dbUrl = process.env.DATABASE_URL || "";
+const postgresPrismaUrl = process.env.POSTGRES_PRISMA_URL || "";
 const isPostgres =
   process.env.USE_POSTGRES === "true" ||
   process.env.VERCEL === "1" ||
   dbUrl.startsWith("postgresql://") ||
-  dbUrl.startsWith("postgres://");
+  dbUrl.startsWith("postgres://") ||
+  postgresPrismaUrl.startsWith("postgresql://") ||
+  postgresPrismaUrl.startsWith("postgres://");
 
 const schemaFile = isPostgres
   ? "prisma/schema.postgresql.prisma"
   : "prisma/schema.prisma";
 
+// Prepare environment variables for Prisma Client generation
+const execEnv = { ...process.env };
+
 if (isPostgres) {
-  if (!process.env.POSTGRES_PRISMA_URL) {
-    console.error(
-      "[Prisma Auto-Selector] ❌ ERROR: Required PostgreSQL environment variable POSTGRES_PRISMA_URL is missing."
-    );
-    console.error(
-      "[Prisma Auto-Selector] Please configure POSTGRES_PRISMA_URL in .env.local or your environment."
-    );
-    process.exit(1);
+  // Alias common variable names if POSTGRES_PRISMA_URL is missing
+  if (!execEnv.POSTGRES_PRISMA_URL) {
+    const fallback = execEnv.POSTGRES_URL || execEnv.DATABASE_URL;
+    if (fallback && (fallback.startsWith("postgresql://") || fallback.startsWith("postgres://"))) {
+      execEnv.POSTGRES_PRISMA_URL = fallback;
+    }
   }
 
-  if (!process.env.POSTGRES_URL_NON_POOLING) {
-    console.error(
-      "[Prisma Auto-Selector] ❌ ERROR: Required PostgreSQL environment variable POSTGRES_URL_NON_POOLING is missing."
+  // Alias non-pooling direct URL if missing
+  if (!execEnv.POSTGRES_URL_NON_POOLING) {
+    const fallbackDirect =
+      execEnv.DATABASE_URL_UNPOOLED ||
+      execEnv.POSTGRES_PRISMA_URL ||
+      execEnv.DATABASE_URL ||
+      execEnv.POSTGRES_URL;
+    if (fallbackDirect && (fallbackDirect.startsWith("postgresql://") || fallbackDirect.startsWith("postgres://"))) {
+      execEnv.POSTGRES_URL_NON_POOLING = fallbackDirect;
+    }
+  }
+
+  // Prisma Client code generation only builds TypeScript types and query engine bindings.
+  // It does not connect to the database. If running on Vercel before environment variables
+  // are configured in the dashboard, provide build-time placeholders so npm install and next build
+  // succeed without crashing, and emit an explicit runtime setup reminder.
+  if (!execEnv.POSTGRES_PRISMA_URL || !execEnv.POSTGRES_URL_NON_POOLING) {
+    console.warn(
+      "[Prisma Auto-Selector] ⚠️ Note: Neither POSTGRES_PRISMA_URL nor DATABASE_URL was supplied in build environment."
     );
-    console.error(
-      "[Prisma Auto-Selector] Please configure POSTGRES_URL_NON_POOLING in .env.local or your environment."
+    console.warn(
+      "[Prisma Auto-Selector] ℹ️ Using schema placeholder for Prisma Client code generation (Prisma generate does not require database connection)."
     );
-    process.exit(1);
+    console.warn(
+      "[Prisma Auto-Selector] ℹ️ Ensure POSTGRES_PRISMA_URL is configured in your Vercel Project Settings for production runtime database queries."
+    );
+    execEnv.POSTGRES_PRISMA_URL = execEnv.POSTGRES_PRISMA_URL || "postgresql://placeholder:placeholder@localhost:5432/placeholder?sslmode=require";
+    execEnv.POSTGRES_URL_NON_POOLING = execEnv.POSTGRES_URL_NON_POOLING || execEnv.POSTGRES_PRISMA_URL;
   }
 }
 
@@ -73,7 +97,7 @@ console.log(
 try {
   execSync(`npx prisma generate --schema=${schemaFile}`, {
     stdio: "inherit",
-    env: process.env,
+    env: execEnv,
   });
   console.log(`[Prisma Auto-Selector] Prisma Client generation complete.`);
 } catch (error) {

@@ -63,25 +63,25 @@ export function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full backdrop-blur-md bg-white/80 dark:bg-night-card/85 border-b border-emerald-500/15 dark:border-emerald-500/20 transition-colors">
+    <header className="sticky top-0 z-40 w-full backdrop-blur-md bg-cream/90 dark:bg-night-card/90 border-b border-sage/30 dark:border-forest/30 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         {/* Brand Logo */}
         <Link href="/" className="flex items-center gap-3 group focus:outline-none">
-          <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-700 via-emerald-600 to-green-400 p-0.5 shadow-soft transition-transform group-hover:scale-105 flex items-center justify-center">
-            <div className="w-full h-full bg-white dark:bg-night rounded-[14px] flex items-center justify-center">
-              <Leaf className="w-6 h-6 text-emerald-600 dark:text-emerald-400 group-hover:rotate-12 transition-transform duration-300" />
+          <div className="w-11 h-11 rounded-2xl bg-forest p-0.5 shadow-soft transition-transform group-hover:scale-105 flex items-center justify-center">
+            <div className="w-full h-full bg-cream dark:bg-night rounded-[14px] flex items-center justify-center">
+              <Leaf className="w-6 h-6 text-forest dark:text-limeaccent group-hover:rotate-12 transition-transform duration-300" />
             </div>
           </div>
           <div>
             <div className="flex items-center gap-1.5">
-              <span className="font-extrabold text-2xl tracking-tight bg-gradient-to-r from-emerald-800 via-emerald-600 to-green-500 dark:from-emerald-300 dark:via-emerald-400 dark:to-green-300 bg-clip-text text-transparent">
+              <span className="font-extrabold text-2xl tracking-tight text-forest dark:text-cream">
                 EcoHack
               </span>
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-300/40">
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-limeaccent text-forest border border-limeaccent/40">
                 AI
               </span>
             </div>
-            <p className="text-[11px] font-medium text-emerald-700/80 dark:text-emerald-400/80 hidden sm:block tracking-wide">
+            <p className="text-[11px] font-medium text-charcoal/70 dark:text-cream/70 hidden sm:block tracking-wide">
               Turn Waste Into Worth
             </p>
           </div>
@@ -98,16 +98,16 @@ export function Navbar() {
                 href={item.href}
                 className={`relative px-3.5 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all ${
                   active
-                    ? "text-emerald-800 dark:text-emerald-200 bg-emerald-500/10 dark:bg-emerald-500/15"
-                    : "text-emerald-950/70 dark:text-emerald-200/70 hover:text-emerald-900 dark:hover:text-white hover:bg-emerald-500/5 dark:hover:bg-emerald-500/10"
+                    ? "text-forest dark:text-limeaccent bg-forest/10 dark:bg-forest/20"
+                    : "text-charcoal/70 dark:text-cream/70 hover:text-forest dark:hover:text-cream hover:bg-forest/5"
                 }`}
               >
-                <Icon className={`w-4 h-4 ${active ? "text-emerald-600 dark:text-emerald-400" : ""}`} />
+                <Icon className={`w-4 h-4 ${active ? "text-forest dark:text-limeaccent" : ""}`} />
                 <span>{item.label}</span>
                 {active && (
                   <motion.div
                     layoutId="activeNavIndicator"
-                    className="absolute bottom-0 left-3 right-3 h-0.5 bg-emerald-500 rounded-full"
+                    className="absolute bottom-0 left-3 right-3 h-0.5 bg-forest dark:bg-limeaccent rounded-full"
                     transition={{ type: "spring", stiffness: 380, damping: 30 }}
                   />
                 )}
@@ -120,8 +120,8 @@ export function Navbar() {
               href="/admin"
               className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all ${
                 isActive("/admin")
-                  ? "bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30"
-                  : "bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500/15"
+                  ? "bg-terracotta/20 text-terracotta border border-terracotta/40"
+                  : "bg-terracotta/10 text-terracotta hover:bg-terracotta/15"
               }`}
             >
               <ShieldCheck className="w-3.5 h-3.5" />
@@ -136,9 +136,9 @@ export function Navbar() {
           <button
             onClick={toggleTheme}
             aria-label="Toggle theme"
-            className="p-2.5 rounded-xl border border-emerald-500/20 bg-white/70 dark:bg-night-hover/80 text-emerald-800 dark:text-emerald-200 hover:bg-emerald-50 dark:hover:bg-night-border transition-colors focus:outline-none"
+            className="p-2.5 rounded-xl border border-sage/40 dark:border-forest/40 bg-white/70 dark:bg-night-hover/80 text-charcoal dark:text-cream hover:bg-cream dark:hover:bg-night-border transition-colors focus:outline-none"
           >
-            {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-emerald-700" />}
+            {isDark ? <Sun className="w-4 h-4 text-limeaccent" /> : <Moon className="w-4 h-4 text-forest" />}
           </button>
 
           {/* User state */}
@@ -148,17 +148,17 @@ export function Navbar() {
               <div className="hidden sm:flex items-center gap-2">
                 <div
                   title="Total Eco-Points"
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-200 border border-emerald-500/25 text-xs font-bold"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-forest/10 dark:bg-forest/20 text-forest dark:text-limeaccent border border-forest/25 text-xs font-bold"
                 >
-                  <Sparkles className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                  <Sparkles className="w-3.5 h-3.5 text-forest dark:text-limeaccent" />
                   <span>{user.points} pts</span>
                 </div>
 
                 <div
                   title="Daily Sustainability Streak"
-                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-amber-500/10 dark:bg-amber-500/20 text-amber-800 dark:text-amber-200 border border-amber-500/25 text-xs font-bold"
+                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-terracotta/15 text-terracotta border border-terracotta/25 text-xs font-bold"
                 >
-                  <Flame className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                  <Flame className="w-3.5 h-3.5 text-terracotta fill-terracotta" />
                   <span>{user.streak}d</span>
                 </div>
               </div>
@@ -167,12 +167,12 @@ export function Navbar() {
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                  className="flex items-center gap-2 p-1.5 pl-2.5 rounded-2xl border border-emerald-500/20 hover:border-emerald-500/40 bg-white dark:bg-night-hover text-sm font-semibold transition-all focus:outline-none"
+                  className="flex items-center gap-2 p-1.5 pl-2.5 rounded-2xl border border-sage/40 hover:border-forest bg-white dark:bg-night-hover text-sm font-semibold transition-all focus:outline-none"
                 >
-                  <span className="hidden md:inline max-w-[120px] truncate text-emerald-950 dark:text-emerald-100">
+                  <span className="hidden md:inline max-w-[120px] truncate text-charcoal dark:text-cream">
                     {user.name.split(" ")[0]}
                   </span>
-                  <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-600 to-green-400 text-white flex items-center justify-center font-bold text-xs uppercase shadow-sm">
+                  <div className="w-8 h-8 rounded-xl bg-forest text-limeaccent flex items-center justify-center font-bold text-xs uppercase shadow-sm">
                     {user.name.slice(0, 2)}
                   </div>
                 </button>
@@ -183,11 +183,11 @@ export function Navbar() {
                       initial={{ opacity: 0, y: 10, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      className="absolute right-0 mt-2 w-56 rounded-2xl bg-white dark:bg-night-card border border-emerald-500/20 shadow-soft-lg py-2 z-50 overflow-hidden"
+                      className="absolute right-0 mt-2 w-56 rounded-2xl bg-white dark:bg-night-card border border-sage/40 dark:border-forest/30 shadow-soft-lg py-2 z-50 overflow-hidden"
                     >
-                      <div className="px-4 py-2 border-b border-emerald-500/10">
-                        <p className="text-xs text-emerald-950/60 dark:text-emerald-400">Signed in as</p>
-                        <p className="text-sm font-bold text-emerald-950 dark:text-emerald-100 truncate">
+                      <div className="px-4 py-2 border-b border-sage/20">
+                        <p className="text-xs text-charcoal/60 dark:text-cream/60">Signed in as</p>
+                        <p className="text-sm font-bold text-charcoal dark:text-cream truncate">
                           {user.email}
                         </p>
                       </div>
@@ -196,33 +196,33 @@ export function Navbar() {
                         <Link
                           href="/dashboard"
                           onClick={() => setUserDropdownOpen(false)}
-                          className="flex items-center gap-2.5 px-4 py-2 text-sm text-emerald-950 dark:text-emerald-200 hover:bg-emerald-50 dark:hover:bg-night-hover transition-colors font-medium"
+                          className="flex items-center gap-2.5 px-4 py-2 text-sm text-charcoal dark:text-cream hover:bg-cream dark:hover:bg-night-hover transition-colors font-medium"
                         >
-                          <LayoutDashboard className="w-4 h-4 text-emerald-600" />
+                          <LayoutDashboard className="w-4 h-4 text-forest dark:text-limeaccent" />
                           Dashboard
                         </Link>
                         <Link
                           href="/profile"
                           onClick={() => setUserDropdownOpen(false)}
-                          className="flex items-center gap-2.5 px-4 py-2 text-sm text-emerald-950 dark:text-emerald-200 hover:bg-emerald-50 dark:hover:bg-night-hover transition-colors font-medium"
+                          className="flex items-center gap-2.5 px-4 py-2 text-sm text-charcoal dark:text-cream hover:bg-cream dark:hover:bg-night-hover transition-colors font-medium"
                         >
-                          <User className="w-4 h-4 text-emerald-600" />
+                          <User className="w-4 h-4 text-forest dark:text-limeaccent" />
                           My Profile
                         </Link>
                         <Link
                           href="/history"
                           onClick={() => setUserDropdownOpen(false)}
-                          className="flex items-center gap-2.5 px-4 py-2 text-sm text-emerald-950 dark:text-emerald-200 hover:bg-emerald-50 dark:hover:bg-night-hover transition-colors font-medium"
+                          className="flex items-center gap-2.5 px-4 py-2 text-sm text-charcoal dark:text-cream hover:bg-cream dark:hover:bg-night-hover transition-colors font-medium"
                         >
-                          <History className="w-4 h-4 text-emerald-600" />
+                          <History className="w-4 h-4 text-forest dark:text-limeaccent" />
                           Activity History
                         </Link>
                         <Link
                           href="/saved-ideas"
                           onClick={() => setUserDropdownOpen(false)}
-                          className="flex items-center gap-2.5 px-4 py-2 text-sm text-emerald-950 dark:text-emerald-200 hover:bg-emerald-50 dark:hover:bg-night-hover transition-colors font-medium"
+                          className="flex items-center gap-2.5 px-4 py-2 text-sm text-charcoal dark:text-cream hover:bg-cream dark:hover:bg-night-hover transition-colors font-medium"
                         >
-                          <Bookmark className="w-4 h-4 text-emerald-600" />
+                          <Bookmark className="w-4 h-4 text-forest dark:text-limeaccent" />
                           Saved Ideas
                         </Link>
 
@@ -230,21 +230,21 @@ export function Navbar() {
                           <Link
                             href="/admin"
                             onClick={() => setUserDropdownOpen(false)}
-                            className="flex items-center gap-2.5 px-4 py-2 text-sm text-amber-700 dark:text-amber-300 hover:bg-amber-50 dark:hover:bg-night-hover transition-colors font-semibold border-t border-emerald-500/10 mt-1"
+                            className="flex items-center gap-2.5 px-4 py-2 text-sm text-terracotta hover:bg-cream dark:hover:bg-night-hover transition-colors font-semibold border-t border-sage/20 mt-1"
                           >
-                            <ShieldCheck className="w-4 h-4 text-amber-600" />
+                            <ShieldCheck className="w-4 h-4 text-terracotta" />
                             Admin Console
                           </Link>
                         )}
                       </div>
 
-                      <div className="border-t border-emerald-500/10 pt-1">
+                      <div className="border-t border-sage/20 pt-1">
                         <button
                           onClick={() => {
                             setUserDropdownOpen(false);
                             logout();
                           }}
-                          className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-colors font-medium text-left"
+                          className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-terracotta hover:bg-terracotta/10 transition-colors font-medium text-left"
                         >
                           <LogOut className="w-4 h-4" />
                           Log Out
@@ -259,23 +259,23 @@ export function Navbar() {
             <div className="flex items-center gap-2">
               <Link
                 href="/login"
-                className="px-4 py-2 rounded-xl text-sm font-semibold text-emerald-800 dark:text-emerald-200 hover:bg-emerald-500/10 transition-colors"
+                className="px-4 py-2 rounded-xl text-sm font-semibold text-charcoal dark:text-cream hover:text-forest dark:hover:text-limeaccent hover:bg-forest/5 transition-colors"
               >
                 Sign In
               </Link>
               <Link
                 href="/register"
-                className="px-4 py-2 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-emerald-700 to-green-600 hover:from-emerald-800 hover:to-green-700 shadow-sm transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+                className="px-4 py-2 rounded-xl text-sm font-bold text-white bg-forest hover:bg-forest-800 transition-colors shadow-soft"
               >
                 Join Free
               </Link>
             </div>
           )}
 
-          {/* Mobile Menu Trigger */}
+          {/* Mobile Menu Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="lg:hidden p-2 rounded-xl border border-emerald-500/20 text-emerald-950 dark:text-emerald-100 hover:bg-emerald-50 dark:hover:bg-night-hover transition-colors"
+            className="lg:hidden p-2.5 rounded-xl border border-sage/40 text-charcoal dark:text-cream hover:bg-cream transition-colors"
             aria-label="Toggle mobile menu"
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -283,60 +283,35 @@ export function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Menu Overlay */}
+      {/* Mobile Menu Drawer */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="lg:hidden border-t border-emerald-500/15 bg-white/95 dark:bg-night-card/95 backdrop-blur-md px-4 py-4 space-y-1.5"
+            className="lg:hidden border-b border-sage/30 bg-cream/95 dark:bg-night-card/95 backdrop-blur-xl px-4 pt-2 pb-6 space-y-3"
           >
-            {navLinks.map((item) => {
-              const Icon = item.icon;
-              const active = isActive(item.href);
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${
-                    active
-                      ? "bg-emerald-500/15 text-emerald-800 dark:text-emerald-200"
-                      : "text-emerald-950 dark:text-emerald-200 hover:bg-emerald-50 dark:hover:bg-night-hover"
-                  }`}
-                >
-                  <Icon className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-                  {item.label}
-                </Link>
-              );
-            })}
-
-            {user?.role === "ADMIN" && (
-              <Link
-                href="/admin"
-                className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-amber-700 dark:text-amber-300 bg-amber-500/10"
-              >
-                <ShieldCheck className="w-5 h-5 text-amber-600" />
-                Admin Console
-              </Link>
-            )}
-
-            {!user && (
-              <div className="pt-3 border-t border-emerald-500/10 grid grid-cols-2 gap-2">
-                <Link
-                  href="/login"
-                  className="text-center py-2.5 rounded-xl border border-emerald-500/30 text-emerald-800 dark:text-emerald-200 text-sm font-semibold"
-                >
-                  Sign In
-                </Link>
-                <Link
-                  href="/register"
-                  className="text-center py-2.5 rounded-xl bg-emerald-700 text-white text-sm font-bold shadow-sm"
-                >
-                  Join Free
-                </Link>
-              </div>
-            )}
+            <div className="space-y-1">
+              {navLinks.map((item) => {
+                const Icon = item.icon;
+                const active = isActive(item.href);
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
+                      active
+                        ? "bg-forest/15 text-forest dark:text-limeaccent font-bold"
+                        : "text-charcoal/80 dark:text-cream/80 hover:bg-cream hover:text-forest"
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    <span>{item.label}</span>
+                  </Link>
+                );
+              })}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

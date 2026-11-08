@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { useAuth, useToast } from "@/components/Providers";
 import {
@@ -12,32 +11,34 @@ import {
   AlertTriangle,
   CheckCircle2,
   Bookmark,
-  Share2,
   Clock,
   DollarSign,
   ShieldAlert,
   ArrowRight,
   Info,
   Check,
-  Award,
-  Layers,
-  MapPin,
-  RefreshCw,
+  Recycle,
+  Wrench,
   HelpCircle,
   TrendingUp,
+  RefreshCw,
+  Compass,
+  Layers,
+  FileCheck,
+  AlertOctagon,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-// Sample items with pre-encoded base64 / demonstration triggers
+// Sample items with pre-encoded demonstration triggers
 const QUICK_SAMPLES = [
   {
     name: "PET Plastic Bottle",
     category: "plastic",
     icon: "🍾",
-    description: "Standard 500ml or 1L clear beverage container with cap",
+    description: "500ml clear beverage container with cap",
   },
   {
-    name: "Cardboard Shipping Box",
+    name: "Cardboard Box",
     category: "cardboard",
     icon: "📦",
     description: "Corrugated delivery packaging box",
@@ -60,6 +61,12 @@ const QUICK_SAMPLES = [
     icon: "👖",
     description: "Cotton denim fabric with tears or fraying",
   },
+  {
+    name: "Ambiguous / Blurry Item",
+    category: "unknown",
+    icon: "❓",
+    description: "Unidentified mixed discard to test safety guidance",
+  },
 ];
 
 export default function ScannerPage() {
@@ -72,7 +79,6 @@ export default function ScannerPage() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [mimeType, setMimeType] = useState<string>("image/jpeg");
   const [imageName, setImageName] = useState<string>("");
-  const [userCity, setUserCity] = useState<string>("");
   const [analyzing, setAnalyzing] = useState<boolean>(false);
   const [optimizingImage, setOptimizingImage] = useState<boolean>(false);
   const [analysisProgressMessage, setAnalysisProgressMessage] = useState<string>("Analyzing waste item...");
@@ -117,8 +123,6 @@ export default function ScannerPage() {
       const rawDataUrl = reader.result as string;
       const img = new window.Image();
       img.onload = () => {
-        // Downscale oversized images to max dimension 1024px
-        // Preserves sharp visual indicators (resin codes, seams, textures) while shrinking payload by >95%
         const maxDimension = 1024;
         let { width, height } = img;
         if (width > maxDimension || height > maxDimension) {
@@ -138,7 +142,6 @@ export default function ScannerPage() {
           const ctx = canvas.getContext("2d");
           if (ctx) {
             ctx.drawImage(img, 0, 0, width, height);
-            // Export as standard JPEG at 0.82 quality to strip EXIF and dramatically reduce transport overhead
             const optimizedDataUrl = canvas.toDataURL("image/jpeg", 0.82);
             setSelectedImage(optimizedDataUrl);
             setMimeType("image/jpeg");
@@ -175,7 +178,7 @@ export default function ScannerPage() {
     reader.readAsDataURL(file);
   };
 
-  // Quick sample selection for fast testing: renders an authentic raster PNG via canvas
+  // Quick sample selection for instant testing
   const handleSelectSample = (sample: typeof QUICK_SAMPLES[0]) => {
     const sampleFileName = `${sample.category}_${sample.name.toLowerCase().replace(/[^a-z0-9]/g, "_")}.png`;
     setImageName(sampleFileName);
@@ -186,30 +189,26 @@ export default function ScannerPage() {
       canvas.height = 600;
       const ctx = canvas.getContext("2d");
       if (ctx) {
-        // Nature background gradient
         const grad = ctx.createLinearGradient(0, 0, 600, 600);
-        grad.addColorStop(0, "#064e3b");
-        grad.addColorStop(1, "#022c22");
+        grad.addColorStop(0, "#174B35");
+        grad.addColorStop(1, "#202A24");
         ctx.fillStyle = grad;
         ctx.fillRect(0, 0, 600, 600);
 
-        // Halo
         ctx.beginPath();
         ctx.arc(300, 300, 190, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(34, 197, 94, 0.12)";
+        ctx.fillStyle = "rgba(196, 220, 120, 0.15)";
         ctx.fill();
 
-        // Icon
         ctx.font = "110px sans-serif";
         ctx.textAlign = "center";
         ctx.fillText(sample.icon, 300, 270);
 
-        // Title & Description
-        ctx.fillStyle = "#86efac";
+        ctx.fillStyle = "#C4DC78";
         ctx.font = "bold 32px sans-serif";
         ctx.fillText(sample.name, 300, 370);
 
-        ctx.fillStyle = "#e2f5ec";
+        ctx.fillStyle = "#F5F3EA";
         ctx.font = "18px sans-serif";
         ctx.fillText(sample.description, 300, 415);
 
@@ -220,7 +219,7 @@ export default function ScannerPage() {
         throw new Error("Canvas context unavailable");
       }
     } catch {
-      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="0 0 600 600"><rect width="600" height="600" fill="#14532D"/><text x="300" y="300" font-size="100" text-anchor="middle" fill="#FFFFFF">${sample.icon}</text><text x="300" y="400" font-size="28" font-weight="bold" text-anchor="middle" fill="#86EFAC">${sample.name}</text></svg>`;
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="0 0 600 600"><rect width="600" height="600" fill="#174B35"/><text x="300" y="300" font-size="100" text-anchor="middle" fill="#FFFFFF">${sample.icon}</text><text x="300" y="400" font-size="28" font-weight="bold" text-anchor="middle" fill="#C4DC78">${sample.name}</text></svg>`;
       setSelectedImage(`data:image/svg+xml;base64,${btoa(svg)}`);
       setMimeType("image/svg+xml");
     }
@@ -230,7 +229,6 @@ export default function ScannerPage() {
     showToast(`Loaded sample: ${sample.name}. Click Analyze below!`, "info");
   };
 
-  // Reset or remove photo
   const handleRemoveImage = () => {
     setSelectedImage(null);
     setImageName("");
@@ -249,17 +247,16 @@ export default function ScannerPage() {
     setAnalysisError(null);
     setAnalysisProgressMessage("Preparing photo & connecting to AI vision...");
 
-    // Stepped honest loading feedback to keep the user informed if network/AI is busy
     const progressTimer1 = setTimeout(() => {
-      setAnalysisProgressMessage("Analyzing waste material composition via AI...");
+      setAnalysisProgressMessage("Analyzing material composition & resin classification...");
     }, 3500);
 
     const progressTimer2 = setTimeout(() => {
-      setAnalysisProgressMessage("Inspecting material purity and generating transformation blueprints...");
+      setAnalysisProgressMessage("Compiling Smart Waste Disposal Guide & DIY blueprints...");
     }, 9000);
 
     const progressTimer3 = setTimeout(() => {
-      setAnalysisProgressMessage("Finalizing environmental impact and localized guidelines...");
+      setAnalysisProgressMessage("Calculating lifecycle environmental benefits & trade-offs...");
     }, 17000);
 
     const controller = new AbortController();
@@ -273,7 +270,6 @@ export default function ScannerPage() {
         body: JSON.stringify({
           imageBase64: selectedImage,
           mimeType,
-          userCity: userCity.trim() || undefined,
           imageName: imageName || undefined,
         }),
       });
@@ -348,7 +344,6 @@ export default function ScannerPage() {
     }
   };
 
-  // Toggle saving idea
   const handleToggleSaveIdea = async (optionId: string) => {
     if (!user) {
       showToast("Please sign in to save transformation ideas to your profile.", "info");
@@ -382,7 +377,6 @@ export default function ScannerPage() {
     }
   };
 
-  // Open completion modal
   const handleOpenCompletionModal = (option: any) => {
     if (!user) {
       showToast("Please sign in to submit completed projects and earn eco-points.", "info");
@@ -395,7 +389,6 @@ export default function ScannerPage() {
     setCompletionModalOpen(true);
   };
 
-  // Handle completion evidence upload
   const handleEvidenceFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -411,7 +404,6 @@ export default function ScannerPage() {
     reader.readAsDataURL(file);
   };
 
-  // Submit project completion
   const handleSubmitCompletion = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!evidenceFile || !selectedOptionForCompletion?.id) {
@@ -422,7 +414,6 @@ export default function ScannerPage() {
     setSubmittingCompletion(true);
 
     try {
-      // 1. Upload photo to server
       const formData = new FormData();
       formData.append("file", evidenceFile);
 
@@ -438,7 +429,6 @@ export default function ScannerPage() {
         return;
       }
 
-      // 2. Submit project record
       const projectRes = await fetch("/api/waste/submissions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -451,60 +441,88 @@ export default function ScannerPage() {
 
       const projectData = await projectRes.json();
       if (!projectRes.ok || !projectData.success) {
-        showToast(projectData.error || "Failed to submit project.", "error");
+        showToast(projectData.error || "Failed to submit project completion", "error");
         setSubmittingCompletion(false);
         return;
       }
 
-      showToast("Project evidence submitted! Status: Pending Moderator Review.", "success");
+      showToast("Project submitted! +40 points awarded to your profile 🌱", "success");
       setCompletionModalOpen(false);
     } catch {
-      showToast("Network error submitting project completion.", "error");
+      showToast("Network error submitting project. Please try again.", "error");
     } finally {
       setSubmittingCompletion(false);
     }
   };
 
-  const currentOption = analysisResult?.transformationOptions?.[selectedOptionIndex];
+  const currentOption = analysisResult?.transformationOptions?.[selectedOptionIndex] || null;
+
+  // Recovery status styling and icons
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "Reusable":
+        return {
+          bg: "bg-forest text-cream border-forest",
+          icon: <Sparkles className="w-4 h-4 text-limeaccent" />,
+          label: "Reusable",
+        };
+      case "Repairable":
+        return {
+          bg: "bg-forest-800 text-cream border-forest-600",
+          icon: <Wrench className="w-4 h-4 text-limeaccent" />,
+          label: "Repairable",
+        };
+      case "Recyclable":
+        return {
+          bg: "bg-forest-700 text-cream border-forest-500",
+          icon: <Recycle className="w-4 h-4 text-limeaccent" />,
+          label: "Recyclable",
+        };
+      case "Special Disposal Required":
+        return {
+          bg: "bg-terracotta text-white border-terracotta-600",
+          icon: <AlertOctagon className="w-4 h-4 text-white" />,
+          label: "Special Disposal Required",
+        };
+      case "No Safe Recovery Option Identified":
+      default:
+        return {
+          bg: "bg-charcoal text-cream border-charcoal-500",
+          icon: <HelpCircle className="w-4 h-4 text-terracotta-300" />,
+          label: "No Safe Recovery Option Identified",
+        };
+    }
+  };
+
+  const isSpecialOrUnknown =
+    analysisResult?.recoveryStatus === "Special Disposal Required" ||
+    analysisResult?.recoveryStatus === "No Safe Recovery Option Identified" ||
+    analysisResult?.materialCategory === "unknown" ||
+    !analysisResult?.isImageClear;
 
   return (
-    <div className="w-full min-h-[calc(100vh-80px)] py-10 px-4 sm:px-6 lg:px-8 bg-nature-gradient dark:bg-night flex flex-col items-center">
-      <div className="max-w-5xl w-full space-y-10">
-        {/* Header Banner */}
+    <div className="w-full min-h-[calc(100vh-80px)] py-10 px-4 sm:px-6 lg:px-8 bg-cream dark:bg-night text-charcoal dark:text-cream flex justify-center transition-colors">
+      <div className="max-w-5xl w-full space-y-8">
+        {/* ======================================================== */}
+        {/* HEADER SECTION */}
+        {/* ======================================================== */}
         <div className="text-center space-y-3">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/25 text-emerald-800 dark:text-emerald-300 text-xs font-bold uppercase tracking-wider">
-            <Sparkles className="w-4 h-4" />
-            <span>AI Waste-To-Value Scanner</span>
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-forest/10 dark:bg-forest/20 border border-forest/20 text-forest dark:text-limeaccent text-xs font-bold uppercase tracking-wider">
+            <Sparkles className="w-3.5 h-3.5 text-forest dark:text-limeaccent" />
+            <span>AI Waste-to-Value Diagnostics</span>
           </div>
-          <h1 className="text-3xl sm:text-5xl font-black text-emerald-950 dark:text-emerald-50 tracking-tight">
-            Turn Any Discard Into Worth
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-charcoal dark:text-cream tracking-tight">
+            Waste Scanner & Circular Guide
           </h1>
-          <p className="text-sm sm:text-base text-emerald-950/70 dark:text-emerald-300/80 max-w-2xl mx-auto">
-            Upload or snap a photo of any waste item. Our AI analyzes material purity, safety guidelines, and generates at least 3 distinct practical transformation options.
+          <p className="text-sm sm:text-base text-charcoal/70 dark:text-cream/70 max-w-2xl mx-auto font-normal">
+            Capture or upload any household discard. Get instant AI material identification, practical reuse and repair options, and the verified Smart Waste Disposal Guide.
           </p>
         </div>
-
-        {/* Scanner Engine Notice Banner */}
-        {providerName && (
-          <div className="p-4 rounded-2xl bg-white/70 dark:bg-night-card/70 border border-emerald-500/20 shadow-soft flex items-center justify-between text-xs">
-            <div className="flex items-center gap-2 text-emerald-900 dark:text-emerald-200">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span>
-                Active Provider: <strong className="font-bold">{providerName}</strong>
-              </span>
-            </div>
-            {isMockEngine && (
-              <span className="px-2.5 py-0.5 rounded-md bg-amber-500/15 text-amber-800 dark:text-amber-300 font-semibold">
-                Educational Sample Engine (Add GEMINI_API_KEY in .env for live vision)
-              </span>
-            )}
-          </div>
-        )}
 
         {/* ======================================================== */}
         {/* IMAGE UPLOADER & CAMERA SECTION */}
         {/* ======================================================== */}
-        <div className="p-6 sm:p-8 rounded-3xl bg-white/95 dark:bg-night-card/95 border border-emerald-500/20 shadow-soft-lg space-y-6">
+        <div className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-night-card border border-sage/40 dark:border-forest/30 shadow-soft-md space-y-6">
           {!selectedImage ? (
             <div className="space-y-6">
               {/* Dropzone Area */}
@@ -512,22 +530,22 @@ export default function ScannerPage() {
                 onClick={() => {
                   if (!analyzing && !optimizingImage) fileInputRef.current?.click();
                 }}
-                className={`border-2 border-dashed border-emerald-500/35 hover:border-emerald-500 rounded-3xl p-8 sm:p-12 text-center transition-all group flex flex-col items-center justify-center space-y-4 ${
+                className={`border-2 border-dashed border-sage hover:border-forest rounded-3xl p-8 sm:p-12 text-center transition-all group flex flex-col items-center justify-center space-y-4 ${
                   analyzing || optimizingImage
                     ? "opacity-60 cursor-not-allowed"
-                    : "cursor-pointer hover:bg-emerald-500/5"
+                    : "cursor-pointer hover:bg-cream/50 dark:hover:bg-night-hover/50"
                 }`}
               >
-                <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <div className="w-16 h-16 rounded-2xl bg-forest/10 dark:bg-forest/20 text-forest dark:text-limeaccent flex items-center justify-center group-hover:scale-105 transition-transform">
                   <UploadCloud className="w-8 h-8" />
                 </div>
                 <div className="space-y-1">
-                  <p className="text-base font-bold text-emerald-950 dark:text-emerald-100">
+                  <p className="text-base font-bold text-charcoal dark:text-cream">
                     {optimizingImage
                       ? "Optimizing photo for fast AI inspection..."
                       : "Click to browse or drag and drop your waste photo"}
                   </p>
-                  <p className="text-xs text-emerald-900/60 dark:text-emerald-400">
+                  <p className="text-xs text-charcoal/60 dark:text-cream/60">
                     Supports high-resolution JPEG, PNG, WebP up to 15MB (automatically optimized)
                   </p>
                 </div>
@@ -546,13 +564,12 @@ export default function ScannerPage() {
                 <button
                   onClick={() => fileInputRef.current?.click()}
                   disabled={analyzing || optimizingImage}
-                  className="w-full sm:w-auto px-6 py-3 rounded-xl font-bold text-sm text-white bg-emerald-700 hover:bg-emerald-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-soft flex items-center justify-center gap-2"
+                  className="w-full sm:w-auto px-6 py-3.5 rounded-2xl font-bold text-sm text-white bg-forest hover:bg-forest-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-soft flex items-center justify-center gap-2"
                 >
-                  <UploadCloud className="w-4 h-4" />
+                  <UploadCloud className="w-4 h-4 text-limeaccent" />
                   <span>Choose Photo File</span>
                 </button>
 
-                {/* Mobile camera direct trigger */}
                 <input
                   ref={cameraInputRef}
                   type="file"
@@ -565,16 +582,16 @@ export default function ScannerPage() {
                 <button
                   onClick={() => cameraInputRef.current?.click()}
                   disabled={analyzing || optimizingImage}
-                  className="w-full sm:w-auto px-6 py-3 rounded-xl font-bold text-sm text-emerald-900 dark:text-emerald-100 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/25 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                  className="w-full sm:w-auto px-6 py-3.5 rounded-2xl font-bold text-sm text-forest dark:text-cream bg-sage/20 hover:bg-sage/35 border border-sage/40 dark:border-forest/40 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
                 >
-                  <Camera className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  <Camera className="w-4 h-4 text-forest dark:text-limeaccent" />
                   <span>Take Live Photo (Mobile)</span>
                 </button>
               </div>
 
               {/* Quick Sample Selector */}
-              <div className="pt-4 border-t border-emerald-500/10">
-                <p className="text-xs font-bold uppercase tracking-wider text-emerald-900/70 dark:text-emerald-400 mb-3 text-center sm:text-left">
+              <div className="pt-4 border-t border-sage/20 dark:border-forest/20">
+                <p className="text-xs font-bold uppercase tracking-wider text-charcoal/70 dark:text-cream/70 mb-3 text-center sm:text-left">
                   Or Test Instantly With A Common Discard:
                 </p>
                 <div className="flex flex-wrap items-center gap-2">
@@ -583,7 +600,7 @@ export default function ScannerPage() {
                       key={idx}
                       onClick={() => handleSelectSample(s)}
                       disabled={analyzing || optimizingImage}
-                      className="px-3 py-1.5 rounded-xl border border-emerald-500/20 bg-emerald-50/50 dark:bg-night-hover/60 hover:bg-emerald-100/60 dark:hover:bg-night-border text-xs font-semibold text-emerald-900 dark:text-emerald-200 disabled:opacity-50 transition-colors flex items-center gap-1.5"
+                      className="px-3.5 py-2 rounded-xl border border-sage/40 dark:border-forest/30 bg-cream/60 dark:bg-night-hover hover:bg-cream dark:hover:bg-night-border text-xs font-semibold text-charcoal dark:text-cream disabled:opacity-50 transition-colors flex items-center gap-2"
                     >
                       <span>{s.icon}</span>
                       <span>{s.name}</span>
@@ -595,7 +612,7 @@ export default function ScannerPage() {
           ) : (
             /* Selected Image Preview & Control */
             <div className="space-y-6">
-              <div className="relative w-full max-w-md mx-auto aspect-square rounded-3xl overflow-hidden border-2 border-emerald-500/30 shadow-soft-lg bg-emerald-950/10">
+              <div className="relative w-full max-w-md mx-auto aspect-square rounded-3xl overflow-hidden border-2 border-sage/50 shadow-soft-md bg-charcoal/5">
                 <img
                   src={selectedImage}
                   alt="Selected waste item"
@@ -612,39 +629,19 @@ export default function ScannerPage() {
                 )}
               </div>
 
-              {/* Optional City Input for localized recycling rules */}
-              <div className="max-w-md mx-auto space-y-2">
-                <label className="block text-xs font-bold uppercase tracking-wider text-emerald-900 dark:text-emerald-300">
-                  Your City or Region (Optional for local recycling laws):
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-emerald-700/60 dark:text-emerald-400/60">
-                    <MapPin className="w-4 h-4" />
-                  </div>
-                  <input
-                    type="text"
-                    value={userCity}
-                    onChange={(e) => setUserCity(e.target.value)}
-                    disabled={analyzing}
-                    placeholder="e.g. Seattle, Mumbai, London, Toronto"
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-emerald-500/25 dark:border-emerald-500/30 bg-white/70 dark:bg-night-hover/70 text-emerald-950 dark:text-white placeholder:text-emerald-900/40 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-60"
-                  />
-                </div>
-              </div>
-
               {/* Action Buttons: Remove & Submit */}
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
                 <button
                   onClick={handleRemoveImage}
                   disabled={analyzing}
-                  className="w-full sm:w-auto px-5 py-3 rounded-xl border border-emerald-500/20 text-emerald-800 dark:text-emerald-200 text-sm font-semibold hover:bg-emerald-50 dark:hover:bg-night-hover disabled:opacity-50 transition-colors"
+                  className="w-full sm:w-auto px-5 py-3 rounded-xl border border-sage/40 text-charcoal dark:text-cream text-sm font-semibold hover:bg-cream dark:hover:bg-night-hover disabled:opacity-50 transition-colors"
                 >
                   Choose Different Item
                 </button>
                 <button
                   onClick={handleAnalyze}
                   disabled={analyzing || optimizingImage}
-                  className="w-full sm:w-auto px-8 py-3.5 rounded-xl font-bold text-white bg-gradient-to-r from-emerald-700 to-green-600 hover:from-emerald-800 hover:to-green-700 shadow-soft-lg transition-all transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2.5 text-sm disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="w-full sm:w-auto px-8 py-3.5 rounded-2xl font-bold text-white bg-forest hover:bg-forest-800 shadow-soft-md transition-all transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2.5 text-sm disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {analyzing ? (
                     <>
@@ -653,7 +650,7 @@ export default function ScannerPage() {
                     </>
                   ) : (
                     <>
-                      <Sparkles className="w-5 h-5" />
+                      <Sparkles className="w-5 h-5 text-limeaccent" />
                       <span>Analyze Waste Item</span>
                     </>
                   )}
@@ -662,32 +659,27 @@ export default function ScannerPage() {
             </div>
           )}
 
-          {/* Analysis Error Alert with Preserved Photo and Retry Button */}
+          {/* Analysis Error Alert */}
           {analysisError && (
-            <div className="p-5 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-start gap-3">
-              <AlertTriangle className="w-5 h-5 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
+            <div className="p-5 rounded-2xl bg-terracotta/10 border border-terracotta/30 flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-terracotta shrink-0 mt-0.5" />
               <div className="space-y-2 text-xs flex-1">
-                <h4 className="font-bold text-rose-900 dark:text-rose-200 text-sm">Analysis Notice</h4>
-                <p className="text-rose-800 dark:text-rose-300 leading-relaxed">{analysisError}</p>
-                {analysisError.includes("GEMINI_API_KEY") && (
-                  <p className="text-rose-700 dark:text-rose-400 mt-1 font-medium">
-                    To enable live AI vision, configure your Gemini API key in <code className="px-1.5 py-0.5 bg-rose-500/20 rounded">.env</code>. Or, to explore with sample blueprints without a key, set <code className="px-1.5 py-0.5 bg-rose-500/20 rounded">AI_PROVIDER="mock"</code> in <code className="px-1.5 py-0.5 bg-rose-500/20 rounded">.env</code>.
-                  </p>
-                )}
+                <h4 className="font-bold text-terracotta-700 dark:text-terracotta-300 text-sm">Analysis Notice</h4>
+                <p className="text-charcoal/80 dark:text-cream/80 leading-relaxed">{analysisError}</p>
                 {selectedImage && !analyzing && (
                   <div className="pt-2 flex flex-wrap items-center gap-2">
                     <button
                       onClick={handleAnalyze}
-                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-soft transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-forest hover:bg-forest-800 text-white font-bold text-xs shadow-soft transition-all"
                     >
-                      <RefreshCw className="w-3.5 h-3.5" />
+                      <RefreshCw className="w-3.5 h-3.5 text-limeaccent" />
                       <span>Retry Analysis (Keep Photo)</span>
                     </button>
                     <button
                       onClick={handleRemoveImage}
-                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-rose-500/30 bg-white/60 dark:bg-night-hover/60 hover:bg-white text-rose-800 dark:text-rose-300 font-semibold text-xs transition-colors"
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-sage/40 bg-white dark:bg-night-hover text-charcoal dark:text-cream font-semibold text-xs"
                     >
-                      <span>Take / Upload Another Photo</span>
+                      <span>Take Another Photo</span>
                     </button>
                   </div>
                 )}
@@ -697,193 +689,364 @@ export default function ScannerPage() {
         </div>
 
         {/* ======================================================== */}
-        {/* LOADING ANIMATION */}
+        {/* LOADING STATE */}
         {/* ======================================================== */}
         {analyzing && (
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="p-10 rounded-3xl bg-white/95 dark:bg-night-card/95 border border-emerald-500/25 shadow-soft-lg text-center space-y-4"
+            className="p-10 rounded-3xl bg-white dark:bg-night-card border border-sage/30 dark:border-forest/30 shadow-soft-lg text-center space-y-4"
           >
             <div className="relative w-20 h-20 mx-auto">
-              <div className="absolute inset-0 rounded-full border-4 border-emerald-500/20" />
-              <div className="absolute inset-0 rounded-full border-4 border-emerald-500 border-t-transparent animate-spin" />
+              <div className="absolute inset-0 rounded-full border-4 border-sage/20" />
+              <div className="absolute inset-0 rounded-full border-4 border-forest border-t-transparent animate-spin" />
               <div className="absolute inset-0 flex items-center justify-center">
-                <Sparkles className="w-8 h-8 text-emerald-600 dark:text-emerald-400 animate-pulse" />
+                <Sparkles className="w-8 h-8 text-forest dark:text-limeaccent animate-pulse" />
               </div>
             </div>
             <div className="space-y-1.5">
-              <h3 className="text-xl font-black text-emerald-950 dark:text-emerald-100">
+              <h3 className="text-xl font-black text-charcoal dark:text-cream">
                 {analysisProgressMessage}
               </h3>
-              <p className="text-xs text-emerald-900/60 dark:text-emerald-400 max-w-sm mx-auto">
-                Running vision inspection for polymer codes, fiber density, safety guidelines, and calculating potential divertible mass...
+              <p className="text-xs text-charcoal/60 dark:text-cream/60 max-w-sm mx-auto">
+                Running vision inspection for polymer codes, fiber density, safety guidelines, and calculating divertible mass...
               </p>
             </div>
           </motion.div>
         )}
 
         {/* ======================================================== */}
-        {/* AI ANALYSIS RESULTS SECTION */}
+        {/* ENHANCED AI WASTE ANALYSIS RESULTS */}
         {/* ======================================================== */}
         {analysisResult && (
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 25 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.5 }}
             className="space-y-8"
           >
-            {/* 1. Identification Summary Card */}
-            <div className="p-8 rounded-3xl bg-white/95 dark:bg-night-card/95 border border-emerald-500/25 shadow-soft-lg space-y-6">
-              {/* Authenticity Mode Badge */}
-              {analysisResult.isDemoSample ? (
-                <div className="p-3.5 rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-900 dark:text-amber-200 text-xs font-semibold flex items-center gap-2.5">
-                  <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
-                  <span>
-                    <strong>Educational Demonstration Sample:</strong> This blueprint was generated using synthetic educational sample models. For verified live computer vision on your uploaded photo, configure <code className="px-1.5 py-0.5 bg-amber-500/20 rounded">GEMINI_API_KEY</code> in <code className="px-1.5 py-0.5 bg-amber-500/20 rounded">.env</code>.
-                  </span>
-                </div>
-              ) : (
-                <div className="p-3.5 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-900 dark:text-emerald-200 text-xs font-semibold flex items-center gap-2.5">
-                  <Sparkles className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                  <span>
-                    <strong>Verified Live Gemini Vision Analysis:</strong> Processed from your uploaded image using {providerName || "Google Gemini Vision Model"}.
-                  </span>
-                </div>
-              )}
+            {/* Mode Banner */}
+            {analysisResult.isDemoSample ? (
+              <div className="p-3.5 rounded-2xl bg-terracotta/10 border border-terracotta/25 text-terracotta-800 dark:text-terracotta-200 text-xs font-semibold flex items-center gap-2.5">
+                <AlertTriangle className="w-4 h-4 text-terracotta shrink-0" />
+                <span>
+                  <strong>Educational Demonstration Sample:</strong> Generated using synthetic sample blueprints. For live camera analysis of any item, configure <code className="px-1.5 py-0.5 bg-terracotta/20 rounded">GEMINI_API_KEY</code> in <code className="px-1.5 py-0.5 bg-terracotta/20 rounded">.env</code>.
+                </span>
+              </div>
+            ) : (
+              <div className="p-3.5 rounded-2xl bg-forest/10 border border-forest/25 text-forest dark:text-limeaccent text-xs font-semibold flex items-center gap-2.5">
+                <Sparkles className="w-4 h-4 text-forest dark:text-limeaccent shrink-0" />
+                <span>
+                  <strong>Verified Live Gemini AI Analysis:</strong> Inspected using {providerName || "Google Gemini Vision Model"}.
+                </span>
+              </div>
+            )}
 
-              {/* Uncertainty / Ambiguity Notice when confidence is low or image is unclear */}
-              {(!analysisResult.isImageClear || analysisResult.confidence < 0.6 || analysisResult.materialCategory === "unknown") && (
-                <div className="p-4 rounded-2xl bg-amber-500/15 border-2 border-amber-500/40 text-amber-950 dark:text-amber-200 text-xs flex items-start gap-3">
-                  <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-                  <div className="space-y-1">
-                    <h4 className="font-bold text-amber-900 dark:text-amber-100 text-sm">
-                      ⚠️ Ambiguous or Low-Confidence Classification ({Math.round(analysisResult.confidence * 100)}%)
-                    </h4>
-                    <p className="leading-relaxed">
-                      {analysisResult.unclearPromptNote || analysisResult.uncertaintyNotes || "The material composition could not be determined with high certainty from this photo."}
-                    </p>
-                    <p className="text-[11px] text-amber-800/80 dark:text-amber-300/80 pt-1">
-                      💡 <strong>Tip for higher accuracy:</strong> Take a well-lit photo focusing on the bottom, rim, or label of the item to show any recycling resin symbols (e.g. ♳ PET, ♴ HDPE) or fabric composition tags.
-                    </p>
+            {/* ---------------------------------------------------- */}
+            {/* 1. WASTE IDENTIFICATION CARD */}
+            {/* ---------------------------------------------------- */}
+            <div className="p-8 rounded-3xl bg-white dark:bg-night-card border border-sage/40 dark:border-forest/30 shadow-soft-md space-y-6">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-sage/20 dark:border-forest/20">
+                <div className="space-y-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-forest/10 text-forest dark:text-limeaccent border border-forest/20">
+                      Material: {analysisResult.materialCategory}
+                    </span>
+                    {/* Recovery Status Badge */}
+                    {(() => {
+                      const badge = getStatusBadge(analysisResult.recoveryStatus || "Recyclable");
+                      return (
+                        <span className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full border shadow-sm ${badge.bg}`}>
+                          {badge.icon}
+                          <span>Status: {badge.label}</span>
+                        </span>
+                      );
+                    })()}
                   </div>
-                </div>
-              )}
 
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-emerald-500/15">
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-500/25">
-                      Category: {analysisResult.materialCategory.toUpperCase()}
-                    </span>
-                    <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-night-hover text-emerald-700 dark:text-emerald-400">
-                      Confidence: {Math.round(analysisResult.confidence * 100)}%
-                    </span>
-                  </div>
-                  <h2 className="text-2xl sm:text-3xl font-black text-emerald-950 dark:text-emerald-100">
+                  <h2 className="text-2xl sm:text-3xl font-black text-charcoal dark:text-cream tracking-tight">
                     {analysisResult.detectedItem}
                   </h2>
                 </div>
 
-                {/* Compatibility Badges */}
-                <div className="flex flex-wrap items-center gap-1.5">
-                  {analysisResult.isReusable && (
-                    <span className="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300">
-                      ✓ Reusable
+                {/* Confidence Indicator */}
+                <div className="flex flex-col items-start md:items-end justify-center shrink-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-charcoal/70 dark:text-cream/70">AI Confidence:</span>
+                    <span className="text-sm font-black text-forest dark:text-limeaccent">
+                      {Math.round((analysisResult.confidence || 0.85) * 100)}%
                     </span>
-                  )}
-                  {analysisResult.isRepairable && (
-                    <span className="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-teal-100 dark:bg-teal-950/70 text-teal-800 dark:text-teal-300">
-                      ✓ Repairable
-                    </span>
-                  )}
-                  {analysisResult.isRecyclable && (
-                    <span className="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-blue-100 dark:bg-blue-950/70 text-blue-800 dark:text-blue-300">
-                      ✓ Recyclable
-                    </span>
-                  )}
-                  {analysisResult.isCompostable && (
-                    <span className="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-lime-100 dark:bg-lime-950/70 text-lime-800 dark:text-lime-300">
-                      ✓ Compostable
-                    </span>
-                  )}
-                  {analysisResult.isUnsuitable && (
-                    <span className="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-amber-100 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300">
-                      ⚠️ Needs Specialized Drop-off
-                    </span>
-                  )}
+                  </div>
+                  <div className="w-32 h-2 rounded-full bg-sage/20 dark:bg-forest/30 overflow-hidden mt-1">
+                    <div
+                      className="h-full bg-gradient-to-r from-forest to-limeaccent rounded-full transition-all duration-700"
+                      style={{ width: `${Math.round((analysisResult.confidence || 0.85) * 100)}%` }}
+                    />
+                  </div>
                 </div>
               </div>
 
-              {/* Physical Condition and Uncertainty Inspection Badges */}
-              {(analysisResult.itemCondition || analysisResult.uncertaintyNotes) && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                  {analysisResult.itemCondition && (
-                    <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-xs">
-                      <span className="font-bold text-emerald-950 dark:text-emerald-100 block mb-0.5">
-                        Observed Condition
-                      </span>
-                      <span className="text-emerald-900/80 dark:text-emerald-300">
-                        {analysisResult.itemCondition}
-                      </span>
-                    </div>
-                  )}
-                  {analysisResult.uncertaintyNotes && (
-                    <div className="p-3.5 rounded-2xl bg-teal-500/10 border border-teal-500/20 text-xs">
-                      <span className="font-bold text-teal-950 dark:text-teal-100 block mb-0.5">
-                        Material & Inspection Notes
-                      </span>
-                      <span className="text-teal-900/80 dark:text-teal-300">
-                        {analysisResult.uncertaintyNotes}
-                      </span>
-                    </div>
-                  )}
+              {/* Uncertainty / Image Clarity Notice (Do not classify as non-recyclable simply due to uncertainty) */}
+              {(!analysisResult.isImageClear || analysisResult.confidence < 0.6) && (
+                <div className="p-4 rounded-2xl bg-terracotta/10 border border-terracotta/30 flex items-start gap-3">
+                  <HelpCircle className="w-5 h-5 text-terracotta shrink-0 mt-0.5" />
+                  <div className="space-y-1">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-terracotta-800 dark:text-terracotta-200">
+                      Identification Uncertainty Note
+                    </h4>
+                    <p className="text-xs text-charcoal/80 dark:text-cream/80 leading-relaxed">
+                      {analysisResult.unclearPromptNote ||
+                        "Material composition could not be positively identified from this angle or lighting. This item is NOT classified as non-recyclable simply because the AI is uncertain. Please inspect physical resin codes (#1-#7) or take a closer photo."}
+                    </p>
+                  </div>
                 </div>
               )}
 
-              {/* Safety Warning if present */}
+              {/* Observed Physical Condition & Inspection Notes */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1">
+                {analysisResult.itemCondition && (
+                  <div className="p-4 rounded-2xl bg-cream/70 dark:bg-night-hover border border-sage/30 text-xs space-y-1">
+                    <span className="font-bold text-forest dark:text-limeaccent block uppercase tracking-wider text-[11px]">
+                      Observed Physical Condition
+                    </span>
+                    <span className="text-charcoal/80 dark:text-cream/80 leading-relaxed">
+                      {analysisResult.itemCondition}
+                    </span>
+                  </div>
+                )}
+                {analysisResult.uncertaintyNotes && (
+                  <div className="p-4 rounded-2xl bg-cream/70 dark:bg-night-hover border border-sage/30 text-xs space-y-1">
+                    <span className="font-bold text-forest dark:text-limeaccent block uppercase tracking-wider text-[11px]">
+                      Inspection & Purity Notes
+                    </span>
+                    <span className="text-charcoal/80 dark:text-cream/80 leading-relaxed">
+                      {analysisResult.uncertaintyNotes}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Safety Concern Alert if present */}
               {analysisResult.safetyConcerns && (
-                <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-3">
-                  <ShieldAlert className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                <div className="p-4 rounded-2xl bg-terracotta/10 border border-terracotta/25 flex items-start gap-3">
+                  <ShieldAlert className="w-5 h-5 text-terracotta shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-amber-900 dark:text-amber-200">
-                      Safety & Precaution Notes
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-terracotta-800 dark:text-terracotta-200">
+                      Safety & Precaution Advisory
                     </h4>
-                    <p className="text-xs text-amber-900/80 dark:text-amber-300 mt-0.5 leading-relaxed">
+                    <p className="text-xs text-charcoal/80 dark:text-cream/80 mt-0.5 leading-relaxed">
                       {analysisResult.safetyConcerns}
                     </p>
                   </div>
                 </div>
               )}
-
-              {/* Localized recycling caveats */}
-              {analysisResult.localRecyclingCaveats && (
-                <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/25 flex items-start gap-3 text-xs text-blue-950 dark:text-blue-200">
-                  <Info className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
-                  <div>
-                    <span className="font-bold">Regional Recycling Advice: </span>
-                    <span>{analysisResult.localRecyclingCaveats}</span>
-                  </div>
-                </div>
-              )}
             </div>
 
-            {/* ======================================================== */}
-            {/* 2. AT LEAST THREE DISTINCT TRANSFORMATION OPTIONS */}
-            {/* ======================================================== */}
+            {/* ---------------------------------------------------- */}
+            {/* 2. SMART WASTE DISPOSAL GUIDE (High Priority Section) */}
+            {/* ---------------------------------------------------- */}
+            {analysisResult.smartDisposalGuide && (
+              <div
+                className={`p-8 rounded-3xl border shadow-soft-lg space-y-6 ${
+                  isSpecialOrUnknown
+                    ? "bg-terracotta/5 dark:bg-night-card border-terracotta/40"
+                    : "bg-white dark:bg-night-card border-sage/40 dark:border-forest/30"
+                }`}
+              >
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-sage/20 dark:border-forest/20">
+                  <div className="space-y-1">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-forest text-cream text-xs font-bold uppercase tracking-wider">
+                      <Compass className="w-3.5 h-3.5 text-limeaccent" />
+                      <span>Smart Waste Disposal Guide</span>
+                    </div>
+                    <h3 className="text-2xl font-black text-charcoal dark:text-cream tracking-tight">
+                      {analysisResult.smartDisposalGuide.categoryTitle}
+                    </h3>
+                  </div>
+
+                  {isSpecialOrUnknown && (
+                    <span className="px-3.5 py-1.5 rounded-xl bg-terracotta text-white font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 self-start sm:self-auto">
+                      <AlertOctagon className="w-4 h-4" />
+                      Special Routing Required
+                    </span>
+                  )}
+                </div>
+
+                {/* Primary Guidance Statement */}
+                <div className="p-4 rounded-2xl bg-cream/70 dark:bg-night-hover border border-sage/30 space-y-1">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-forest dark:text-limeaccent block">
+                    Safe Disposal Protocol
+                  </span>
+                  <p className="text-sm font-semibold text-charcoal dark:text-cream leading-relaxed">
+                    {analysisResult.smartDisposalGuide.primaryGuidance}
+                  </p>
+                </div>
+
+                {/* Step-by-Step Safe Disposal Instructions */}
+                <div>
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-charcoal/70 dark:text-cream/70 mb-3">
+                    Category-Specific Disposal Steps:
+                  </h4>
+                  <div className="space-y-2.5">
+                    {analysisResult.smartDisposalGuide.safeDisposalSteps?.map((step: string, sIdx: number) => (
+                      <div
+                        key={sIdx}
+                        className="p-3.5 rounded-2xl bg-white dark:bg-night border border-sage/30 flex items-start gap-3 text-xs"
+                      >
+                        <span className="w-5 h-5 rounded-full bg-forest text-cream font-bold flex items-center justify-center shrink-0 mt-0.5 text-[11px]">
+                          {sIdx + 1}
+                        </span>
+                        <span className="text-charcoal/90 dark:text-cream/90 font-medium leading-relaxed">
+                          {step}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Safety & Hazard Warnings if hazardous / special */}
+                {analysisResult.smartDisposalGuide.safetyWarnings &&
+                  analysisResult.smartDisposalGuide.safetyWarnings.length > 0 && (
+                    <div className="p-4 rounded-2xl bg-terracotta/10 border border-terracotta/30 space-y-2">
+                      <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-terracotta-800 dark:text-terracotta-200">
+                        <ShieldAlert className="w-4 h-4 text-terracotta" />
+                        <span>Safety & Hazard Warnings</span>
+                      </div>
+                      <ul className="space-y-1.5 text-xs text-charcoal/80 dark:text-cream/80">
+                        {analysisResult.smartDisposalGuide.safetyWarnings.map((warn: string, wIdx: number) => (
+                          <li key={wIdx} className="flex items-start gap-1.5">
+                            <span className="text-terracotta font-bold">•</span>
+                            <span>{warn}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                {/* Residual Disposal Route & Municipal Disclaimer */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                  <div className="p-4 rounded-2xl bg-cream/70 dark:bg-night-hover border border-sage/30 space-y-1">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-forest dark:text-limeaccent block">
+                      Residual / Specialized Route
+                    </span>
+                    <p className="text-xs text-charcoal/80 dark:text-cream/80 leading-relaxed">
+                      {analysisResult.smartDisposalGuide.residualDisposalRoute ||
+                        "Standard municipal solid waste or specialized regional processing depot."}
+                    </p>
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-cream/70 dark:bg-night-hover border border-sage/30 space-y-1">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-forest dark:text-limeaccent block">
+                      Municipal Regulatory Notice
+                    </span>
+                    <p className="text-xs text-charcoal/80 dark:text-cream/80 leading-relaxed">
+                      {analysisResult.smartDisposalGuide.municipalDiscretionNote}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ---------------------------------------------------- */}
+            {/* 3. REUSE, REPAIR & RECYCLING POSSIBILITIES */}
+            {/* ---------------------------------------------------- */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Reuse Possibilities */}
+              <div className="p-6 rounded-3xl bg-white dark:bg-night-card border border-sage/40 dark:border-forest/30 shadow-soft space-y-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-xl bg-forest/10 flex items-center justify-center text-forest dark:text-limeaccent">
+                    <Sparkles className="w-4 h-4" />
+                  </div>
+                  <h4 className="text-sm font-bold uppercase tracking-wider text-charcoal dark:text-cream">
+                    Reuse Ideas
+                  </h4>
+                </div>
+                <ul className="space-y-2 text-xs text-charcoal/80 dark:text-cream/80">
+                  {(analysisResult.reusePossibilities || [
+                    "Inspect structural condition for household storage or sorting",
+                  ]).map((item: string, idx: number) => (
+                    <li key={idx} className="flex items-start gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-forest mt-1.5 shrink-0" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Repair Possibilities */}
+              <div className="p-6 rounded-3xl bg-white dark:bg-night-card border border-sage/40 dark:border-forest/30 shadow-soft space-y-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-xl bg-forest/10 flex items-center justify-center text-forest dark:text-limeaccent">
+                    <Wrench className="w-4 h-4" />
+                  </div>
+                  <h4 className="text-sm font-bold uppercase tracking-wider text-charcoal dark:text-cream">
+                    Repair Suggestions
+                  </h4>
+                </div>
+                <ul className="space-y-2 text-xs text-charcoal/80 dark:text-cream/80">
+                  {(analysisResult.repairPossibilities || [
+                    "Examine seams, fasteners, and structural integrity for restorative mending",
+                  ]).map((item: string, idx: number) => (
+                    <li key={idx} className="flex items-start gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-forest mt-1.5 shrink-0" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Recycling Guidance */}
+              <div className="p-6 rounded-3xl bg-white dark:bg-night-card border border-sage/40 dark:border-forest/30 shadow-soft space-y-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-xl bg-forest/10 flex items-center justify-center text-forest dark:text-limeaccent">
+                    <Recycle className="w-4 h-4" />
+                  </div>
+                  <h4 className="text-sm font-bold uppercase tracking-wider text-charcoal dark:text-cream">
+                    Recycling Guidance
+                  </h4>
+                </div>
+                <div className="pb-1">
+                  <span
+                    className={`inline-block text-[11px] font-bold px-2.5 py-0.5 rounded-md ${
+                      analysisResult.confirmedRecycling
+                        ? "bg-forest/15 text-forest dark:text-limeaccent"
+                        : "bg-terracotta/15 text-terracotta-800 dark:text-terracotta-200"
+                    }`}
+                  >
+                    {analysisResult.confirmedRecycling
+                      ? "✓ Widely Confirmed Recyclable"
+                      : "⚠️ Verify With Local Recycler"}
+                  </span>
+                </div>
+                <ul className="space-y-2 text-xs text-charcoal/80 dark:text-cream/80">
+                  {(analysisResult.recyclingPossibilities || [
+                    "Consult municipal solid waste directory for local sorting guidelines",
+                  ]).map((item: string, idx: number) => (
+                    <li key={idx} className="flex items-start gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-forest mt-1.5 shrink-0" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            {/* ---------------------------------------------------- */}
+            {/* 4. TRANSFORMATION BLUEPRINTS */}
+            {/* ---------------------------------------------------- */}
             <div className="space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
-                  <h3 className="text-2xl font-black text-emerald-950 dark:text-emerald-100 tracking-tight">
+                  <h3 className="text-2xl font-black text-charcoal dark:text-cream tracking-tight">
                     Transformation Blueprints ({analysisResult.transformationOptions?.length || 0})
                   </h3>
-                  <p className="text-xs text-emerald-900/60 dark:text-emerald-400">
-                    Switch between distinct options below (repurpose, repair, functional tools, or responsible processing).
+                  <p className="text-xs text-charcoal/60 dark:text-cream/60">
+                    Switch between distinct options below (repurpose, repair, functional tools, or responsible circular processing).
                   </p>
                 </div>
               </div>
 
-              {/* Tabs for switching between options */}
+              {/* Tabs */}
               <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
                 {analysisResult.transformationOptions?.map((opt: any, idx: number) => {
                   const isSelected = selectedOptionIndex === idx;
@@ -893,11 +1056,15 @@ export default function ScannerPage() {
                       onClick={() => setSelectedOptionIndex(idx)}
                       className={`px-5 py-3 rounded-2xl font-bold text-xs whitespace-nowrap transition-all border flex items-center gap-2 ${
                         isSelected
-                          ? "bg-emerald-700 text-white border-emerald-700 shadow-soft"
-                          : "bg-white/80 dark:bg-night-card/80 text-emerald-950/80 dark:text-emerald-200 border-emerald-500/20 hover:bg-emerald-50"
+                          ? "bg-forest text-white border-forest shadow-soft"
+                          : "bg-white dark:bg-night-card text-charcoal/80 dark:text-cream/80 border-sage/30 hover:bg-cream"
                       }`}
                     >
-                      <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${isSelected ? "bg-white text-emerald-800" : "bg-emerald-500/20 text-emerald-700"}`}>
+                      <span
+                        className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${
+                          isSelected ? "bg-white text-forest" : "bg-forest/10 text-forest dark:text-limeaccent"
+                        }`}
+                      >
                         {idx + 1}
                       </span>
                       <span>{opt.title}</span>
@@ -908,51 +1075,53 @@ export default function ScannerPage() {
 
               {/* Active Option Detail Card */}
               {currentOption && (
-                <div className="p-8 rounded-3xl bg-white/95 dark:bg-night-card/95 border border-emerald-500/25 shadow-soft-lg space-y-6">
+                <div className="p-8 rounded-3xl bg-white dark:bg-night-card border border-sage/40 dark:border-forest/30 shadow-soft-md space-y-6">
                   {/* Top Bar with actions */}
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-emerald-500/15">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-sage/20 dark:border-forest/20">
                     <div>
                       <div className="flex items-center gap-2 mb-2">
-                        <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-800 dark:text-emerald-300">
+                        <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-forest/15 text-forest dark:text-limeaccent">
                           {currentOption.difficulty} Difficulty
                         </span>
-                        <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 flex items-center gap-1">
-                          <Clock className="w-3.5 h-3.5" />
+                        <span className="text-xs font-semibold text-charcoal/70 dark:text-cream/70 flex items-center gap-1">
+                          <Clock className="w-3.5 h-3.5 text-forest dark:text-limeaccent" />
                           {currentOption.estimatedTime}
                         </span>
-                        <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 flex items-center gap-1">
-                          <DollarSign className="w-3.5 h-3.5" />
+                        <span className="text-xs font-semibold text-charcoal/70 dark:text-cream/70 flex items-center gap-1">
+                          <DollarSign className="w-3.5 h-3.5 text-forest dark:text-limeaccent" />
                           {currentOption.estimatedCost || "Free / $0"}
                         </span>
                       </div>
-                      <h4 className="text-2xl font-black text-emerald-950 dark:text-emerald-100">
+                      <h4 className="text-2xl font-black text-charcoal dark:text-cream">
                         {currentOption.title}
                       </h4>
-                      <p className="text-sm text-emerald-950/70 dark:text-emerald-300/80 mt-1">
+                      <p className="text-sm text-charcoal/70 dark:text-cream/70 mt-1">
                         {currentOption.shortExplanation}
                       </p>
                     </div>
 
                     <div className="flex items-center gap-2 shrink-0">
-                      {/* Save This Idea Button */}
                       <button
                         onClick={() => currentOption.id && handleToggleSaveIdea(currentOption.id)}
                         className={`px-4 py-2.5 rounded-xl font-bold text-xs border transition-all flex items-center gap-1.5 ${
                           savedOptionIds.has(currentOption.id)
-                            ? "bg-amber-500/20 border-amber-500/40 text-amber-800 dark:text-amber-200"
-                            : "bg-white dark:bg-night-hover border-emerald-500/25 text-emerald-800 dark:text-emerald-200 hover:bg-emerald-50"
+                            ? "bg-terracotta/20 border-terracotta/40 text-terracotta-800 dark:text-terracotta-200"
+                            : "bg-white dark:bg-night-hover border-sage/30 text-charcoal dark:text-cream hover:bg-cream"
                         }`}
                       >
-                        <Bookmark className={`w-4 h-4 ${savedOptionIds.has(currentOption.id) ? "fill-amber-500 text-amber-500" : ""}`} />
+                        <Bookmark
+                          className={`w-4 h-4 ${
+                            savedOptionIds.has(currentOption.id) ? "fill-terracotta text-terracotta" : ""
+                          }`}
+                        />
                         <span>{savedOptionIds.has(currentOption.id) ? "Saved to Ideas" : "Save This Idea"}</span>
                       </button>
 
-                      {/* I Completed This Project Action */}
                       <button
                         onClick={() => handleOpenCompletionModal(currentOption)}
-                        className="px-5 py-2.5 rounded-xl font-bold text-xs text-white bg-emerald-700 hover:bg-emerald-800 shadow-soft transition-all flex items-center gap-1.5"
+                        className="px-5 py-2.5 rounded-xl font-bold text-xs text-white bg-forest hover:bg-forest-800 shadow-soft transition-all flex items-center gap-1.5"
                       >
-                        <Check className="w-4 h-4" />
+                        <Check className="w-4 h-4 text-limeaccent" />
                         <span>I Completed This (+40 pts)</span>
                       </button>
                     </div>
@@ -960,14 +1129,14 @@ export default function ScannerPage() {
 
                   {/* Materials & Tools */}
                   <div>
-                    <h5 className="text-xs font-bold uppercase tracking-wider text-emerald-900 dark:text-emerald-300 mb-2">
+                    <h5 className="text-xs font-bold uppercase tracking-wider text-charcoal/70 dark:text-cream/70 mb-2">
                       Materials & Tools Required
                     </h5>
                     <div className="flex flex-wrap gap-2">
                       {currentOption.materialsTools?.map((m: string, i: number) => (
                         <span
                           key={i}
-                          className="px-3 py-1 rounded-xl bg-emerald-50 dark:bg-night-hover border border-emerald-500/20 text-xs font-medium text-emerald-950 dark:text-emerald-200"
+                          className="px-3 py-1 rounded-xl bg-cream/70 dark:bg-night-hover border border-sage/30 text-xs font-medium text-charcoal dark:text-cream"
                         >
                           • {m}
                         </span>
@@ -975,21 +1144,21 @@ export default function ScannerPage() {
                     </div>
                   </div>
 
-                  {/* Numbered Step-by-Step Instructions */}
+                  {/* Step-by-Step Instructions */}
                   <div>
-                    <h5 className="text-xs font-bold uppercase tracking-wider text-emerald-900 dark:text-emerald-300 mb-3">
+                    <h5 className="text-xs font-bold uppercase tracking-wider text-charcoal/70 dark:text-cream/70 mb-3">
                       Step-by-Step Transformation Guide
                     </h5>
                     <div className="space-y-3">
                       {currentOption.stepByStep?.map((stepItem: any, sIdx: number) => (
                         <div
                           key={sIdx}
-                          className="p-4 rounded-2xl bg-emerald-50/60 dark:bg-night-hover/60 border border-emerald-500/15 flex items-start gap-3.5 text-sm"
+                          className="p-4 rounded-2xl bg-cream/50 dark:bg-night-hover border border-sage/25 flex items-start gap-3.5 text-sm"
                         >
-                          <span className="w-6 h-6 rounded-full bg-emerald-700 text-white flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
+                          <span className="w-6 h-6 rounded-full bg-forest text-cream flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
                             {stepItem.step || sIdx + 1}
                           </span>
-                          <span className="text-emerald-950 dark:text-emerald-100 font-medium leading-relaxed">
+                          <span className="text-charcoal dark:text-cream font-medium leading-relaxed">
                             {stepItem.instruction}
                           </span>
                         </div>
@@ -999,38 +1168,38 @@ export default function ScannerPage() {
 
                   {/* Grid of Results, Precautions, Disadvantages, Disposal */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                    <div className="p-4 rounded-2xl bg-emerald-50/50 dark:bg-night-hover/40 border border-emerald-500/15 space-y-1">
-                      <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">
+                    <div className="p-4 rounded-2xl bg-cream/50 dark:bg-night-hover border border-sage/30 space-y-1">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-forest dark:text-limeaccent">
                         ✨ Expected Final Result
                       </span>
-                      <p className="text-xs text-emerald-950/80 dark:text-emerald-200 leading-relaxed">
+                      <p className="text-xs text-charcoal/80 dark:text-cream/80 leading-relaxed">
                         {currentOption.expectedResult}
                       </p>
                     </div>
 
-                    <div className="p-4 rounded-2xl bg-emerald-50/50 dark:bg-night-hover/40 border border-emerald-500/15 space-y-1">
-                      <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">
+                    <div className="p-4 rounded-2xl bg-cream/50 dark:bg-night-hover border border-sage/30 space-y-1">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-forest dark:text-limeaccent">
                         🌱 Environmental Benefits
                       </span>
-                      <p className="text-xs text-emerald-950/80 dark:text-emerald-200 leading-relaxed">
+                      <p className="text-xs text-charcoal/80 dark:text-cream/80 leading-relaxed">
                         {currentOption.environmentalBenefits}
                       </p>
                     </div>
 
-                    <div className="p-4 rounded-2xl bg-amber-50/50 dark:bg-amber-950/20 border border-amber-500/20 space-y-1">
-                      <span className="text-[11px] font-bold uppercase tracking-wider text-amber-900 dark:text-amber-300">
+                    <div className="p-4 rounded-2xl bg-terracotta/10 border border-terracotta/25 space-y-1">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-terracotta-800 dark:text-terracotta-200">
                         ⚠️ Limitations & Lifespan
                       </span>
-                      <p className="text-xs text-amber-950/80 dark:text-amber-200 leading-relaxed">
+                      <p className="text-xs text-charcoal/80 dark:text-cream/80 leading-relaxed">
                         {currentOption.limitations}
                       </p>
                     </div>
 
-                    <div className="p-4 rounded-2xl bg-emerald-50/50 dark:bg-night-hover/40 border border-emerald-500/15 space-y-1">
-                      <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">
+                    <div className="p-4 rounded-2xl bg-cream/50 dark:bg-night-hover border border-sage/30 space-y-1">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-forest dark:text-limeaccent">
                         ♻️ Leftover Scrap Disposal
                       </span>
-                      <p className="text-xs text-emerald-950/80 dark:text-emerald-200 leading-relaxed">
+                      <p className="text-xs text-charcoal/80 dark:text-cream/80 leading-relaxed">
                         {currentOption.disposalMethod}
                       </p>
                     </div>
@@ -1039,66 +1208,77 @@ export default function ScannerPage() {
               )}
             </div>
 
-            {/* ======================================================== */}
-            {/* 3. ENVIRONMENTAL IMPACT ANALYZER SECTION */}
-            {/* ======================================================== */}
+            {/* ---------------------------------------------------- */}
+            {/* 5. ENVIRONMENTAL IMPACT SECTION */}
+            {/* ---------------------------------------------------- */}
             {analysisResult.environmentalImpact && (
-              <div className="p-8 rounded-3xl bg-white/95 dark:bg-night-card/95 border border-emerald-500/25 shadow-soft-lg space-y-6">
+              <div className="p-8 rounded-3xl bg-white dark:bg-night-card border border-sage/40 dark:border-forest/30 shadow-soft-md space-y-6">
                 <div>
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 text-xs font-bold uppercase tracking-wider mb-2">
-                    <TrendingUp className="w-3.5 h-3.5" />
-                    <span>Environmental Impact Analyzer</span>
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-forest/10 text-forest dark:text-limeaccent text-xs font-bold uppercase tracking-wider mb-2">
+                    <TrendingUp className="w-3.5 h-3.5 text-forest dark:text-limeaccent" />
+                    <span>Environmental Impact Section</span>
                   </div>
-                  <h3 className="text-2xl font-black text-emerald-950 dark:text-emerald-100 tracking-tight">
-                    Measurable vs Qualitative Assessment
+                  <h3 className="text-2xl font-black text-charcoal dark:text-cream tracking-tight">
+                    Ecological Impact Analysis
                   </h3>
-                  <p className="text-xs text-emerald-900/60 dark:text-emerald-400 mt-1">
+                  <p className="text-xs text-charcoal/60 dark:text-cream/60 mt-1">
                     Transparent lifecycle evaluation based on UNEP & EPA solid waste documentation.
                   </p>
                 </div>
 
                 {/* Estimate & Assumptions */}
-                <div className="p-5 rounded-2xl bg-emerald-50/80 dark:bg-night-hover/80 border border-emerald-500/20 space-y-2">
+                <div className="p-5 rounded-2xl bg-cream/70 dark:bg-night-hover border border-sage/30 space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wider">
+                    <span className="text-xs font-bold text-forest dark:text-limeaccent uppercase tracking-wider">
                       Diverted Material Mass (Estimate)
                     </span>
-                    <span className="text-xs font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-800 dark:text-emerald-300">
-                      Transparent Methodology
+                    <span className="text-xs font-bold px-2.5 py-0.5 rounded bg-forest/15 text-forest dark:text-limeaccent">
+                      Verified Methodology
                     </span>
                   </div>
-                  <div className="text-xl font-black text-emerald-950 dark:text-emerald-100">
-                    {analysisResult.environmentalImpact.divertedGramsEstimate}
+                  <div className="text-xl font-black text-charcoal dark:text-cream">
+                    {analysisResult.environmentalImpact.divertedGramsEstimate || "Estimated 30 - 100g"}
                   </div>
-                  <p className="text-xs text-emerald-950/70 dark:text-emerald-300/80 italic leading-relaxed">
+                  <p className="text-xs text-charcoal/70 dark:text-cream/70 italic leading-relaxed">
                     Assumptions: {analysisResult.environmentalImpact.transparentAssumptions}
                   </p>
                 </div>
 
-                {/* Advantages vs Disadvantages */}
+                {/* Benefits vs Disadvantages */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="p-5 rounded-2xl bg-emerald-50/50 dark:bg-night-hover/50 border border-emerald-500/20 space-y-2">
-                    <h5 className="text-xs font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">
-                      Potential Advantages
+                  <div className="p-5 rounded-2xl bg-forest/5 border border-forest/20 space-y-2">
+                    <h5 className="text-xs font-bold uppercase tracking-wider text-forest dark:text-limeaccent">
+                      Environmental Benefits
                     </h5>
-                    <ul className="space-y-1.5 text-xs text-emerald-950/80 dark:text-emerald-200">
-                      {analysisResult.environmentalImpact.qualitativeAdvantages?.map((adv: string, i: number) => (
+                    <ul className="space-y-1.5 text-xs text-charcoal/80 dark:text-cream/80">
+                      {(
+                        analysisResult.environmentalBenefits ||
+                        analysisResult.environmentalImpact.qualitativeAdvantages || [
+                          "Diverts virgin polymers from landfill streams",
+                          "Reduces greenhouse gas hauling emissions",
+                        ]
+                      ).map((adv: string, i: number) => (
                         <li key={i} className="flex items-start gap-1.5">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                          <CheckCircle2 className="w-3.5 h-3.5 text-forest dark:text-limeaccent shrink-0 mt-0.5" />
                           <span>{adv}</span>
                         </li>
                       ))}
                     </ul>
                   </div>
 
-                  <div className="p-5 rounded-2xl bg-amber-50/50 dark:bg-amber-950/20 border border-amber-500/20 space-y-2">
-                    <h5 className="text-xs font-bold uppercase tracking-wider text-amber-900 dark:text-amber-300">
-                      Possible Disadvantages & Trade-offs
+                  <div className="p-5 rounded-2xl bg-terracotta/10 border border-terracotta/25 space-y-2">
+                    <h5 className="text-xs font-bold uppercase tracking-wider text-terracotta-800 dark:text-terracotta-200">
+                      Environmental Disadvantages & Limitations
                     </h5>
-                    <ul className="space-y-1.5 text-xs text-amber-950/80 dark:text-amber-200">
-                      {analysisResult.environmentalImpact.possibleDisadvantages?.map((dis: string, i: number) => (
+                    <ul className="space-y-1.5 text-xs text-charcoal/80 dark:text-cream/80">
+                      {(
+                        analysisResult.environmentalDisadvantages ||
+                        analysisResult.environmentalImpact.possibleDisadvantages || [
+                          "Material integrity degrades over extended multi-year outdoor exposure",
+                        ]
+                      ).map((dis: string, i: number) => (
                         <li key={i} className="flex items-start gap-1.5">
-                          <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
+                          <AlertTriangle className="w-3.5 h-3.5 text-terracotta shrink-0 mt-0.5" />
                           <span>{dis}</span>
                         </li>
                       ))}
@@ -1106,34 +1286,34 @@ export default function ScannerPage() {
                   </div>
                 </div>
 
-                {/* 4-Way Comparison Matrix */}
+                {/* 4-Way Route Comparison Matrix */}
                 {analysisResult.environmentalImpact.comparisonMatrix && (
                   <div className="space-y-3">
-                    <h5 className="text-xs font-bold uppercase tracking-wider text-emerald-900 dark:text-emerald-300">
+                    <h5 className="text-xs font-bold uppercase tracking-wider text-charcoal/70 dark:text-cream/70">
                       Route Comparison Matrix
                     </h5>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
-                      <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/15 space-y-1">
-                        <span className="font-bold text-emerald-800 dark:text-emerald-300">1. Reuse or Repair</span>
-                        <p className="text-emerald-950/70 dark:text-emerald-300/80">
+                      <div className="p-4 rounded-xl bg-cream/70 dark:bg-night-hover border border-sage/30 space-y-1">
+                        <span className="font-bold text-forest dark:text-limeaccent">1. Reuse or Repair</span>
+                        <p className="text-charcoal/70 dark:text-cream/70">
                           {analysisResult.environmentalImpact.comparisonMatrix.reuseOrRepair}
                         </p>
                       </div>
-                      <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/15 space-y-1">
-                        <span className="font-bold text-emerald-800 dark:text-emerald-300">2. DIY Transformation</span>
-                        <p className="text-emerald-950/70 dark:text-emerald-300/80">
+                      <div className="p-4 rounded-xl bg-cream/70 dark:bg-night-hover border border-sage/30 space-y-1">
+                        <span className="font-bold text-forest dark:text-limeaccent">2. DIY Transformation</span>
+                        <p className="text-charcoal/70 dark:text-cream/70">
                           {analysisResult.environmentalImpact.comparisonMatrix.diyTransformation}
                         </p>
                       </div>
-                      <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/15 space-y-1">
-                        <span className="font-bold text-emerald-800 dark:text-emerald-300">3. Formal Recycling</span>
-                        <p className="text-emerald-950/70 dark:text-emerald-300/80">
+                      <div className="p-4 rounded-xl bg-cream/70 dark:bg-night-hover border border-sage/30 space-y-1">
+                        <span className="font-bold text-forest dark:text-limeaccent">3. Formal Recycling</span>
+                        <p className="text-charcoal/70 dark:text-cream/70">
                           {analysisResult.environmentalImpact.comparisonMatrix.formalRecycling}
                         </p>
                       </div>
-                      <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/15 space-y-1">
-                        <span className="font-bold text-emerald-800 dark:text-emerald-300">4. Safe Disposal</span>
-                        <p className="text-emerald-950/70 dark:text-emerald-300/80">
+                      <div className="p-4 rounded-xl bg-cream/70 dark:bg-night-hover border border-sage/30 space-y-1">
+                        <span className="font-bold text-forest dark:text-limeaccent">4. Safe Disposal</span>
+                        <p className="text-charcoal/70 dark:text-cream/70">
                           {analysisResult.environmentalImpact.comparisonMatrix.safeDisposal}
                         </p>
                       </div>
@@ -1141,18 +1321,18 @@ export default function ScannerPage() {
                   </div>
                 )}
 
-                {/* Final Recommended Route */}
-                <div className="p-4 rounded-2xl bg-emerald-800 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                {/* Final Recommended Action */}
+                <div className="p-5 rounded-2xl bg-forest text-cream flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-200">
-                      EcoHack Recommendation
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-limeaccent">
+                      Final Recommended Action
                     </span>
                     <p className="text-sm font-semibold mt-0.5">
                       {analysisResult.environmentalImpact.recommendationRationale}
                     </p>
                   </div>
-                  <span className="px-3 py-1 rounded-xl bg-white text-emerald-900 font-bold text-xs uppercase tracking-wide shrink-0">
-                    Route: {analysisResult.environmentalImpact.recommendedRoute}
+                  <span className="px-3.5 py-1.5 rounded-xl bg-cream text-forest font-bold text-xs uppercase tracking-wider shrink-0">
+                    Route: {analysisResult.environmentalImpact.recommendedRoute || analysisResult.recoveryStatus}
                   </span>
                 </div>
               </div>
@@ -1165,106 +1345,91 @@ export default function ScannerPage() {
         {/* ======================================================== */}
         <AnimatePresence>
           {completionModalOpen && selectedOptionForCompletion && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-charcoal/70 backdrop-blur-sm">
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="w-full max-w-lg bg-white dark:bg-night-card rounded-3xl p-6 sm:p-8 shadow-soft-lg border border-emerald-500/25 space-y-5"
+                className="w-full max-w-lg bg-white dark:bg-night-card rounded-3xl p-6 sm:p-8 shadow-soft-lg border border-sage/30 space-y-6 max-h-[90vh] overflow-y-auto"
               >
-                <div className="flex items-center justify-between border-b border-emerald-500/15 pb-4">
+                <div className="flex items-center justify-between border-b border-sage/20 pb-4">
                   <div>
-                    <h3 className="text-lg font-black text-emerald-950 dark:text-emerald-100">
+                    <h3 className="text-xl font-black text-charcoal dark:text-cream">
                       Submit Completed Project
                     </h3>
-                    <p className="text-xs text-emerald-900/60 dark:text-emerald-400 mt-0.5">
-                      {selectedOptionForCompletion.title}
+                    <p className="text-xs text-charcoal/60 dark:text-cream/60 mt-0.5">
+                      Earn +40 eco-points and verified impact badge credit
                     </p>
                   </div>
                   <button
                     onClick={() => setCompletionModalOpen(false)}
-                    className="p-1 rounded-lg text-emerald-900/60 hover:text-emerald-900 dark:text-emerald-400 dark:hover:text-white"
+                    className="p-1 rounded-lg text-charcoal/40 hover:text-charcoal dark:text-cream/40 dark:hover:text-cream"
+                    aria-label="Close modal"
                   >
                     <X className="w-5 h-5" />
                   </button>
                 </div>
 
                 <form onSubmit={handleSubmitCompletion} className="space-y-4">
-                  {/* Photo Upload for Evidence */}
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-emerald-900 dark:text-emerald-300 mb-2">
-                      Upload Proof Photo of Completed Transformation
-                    </label>
-                    {evidencePreview ? (
-                      <div className="relative w-full aspect-video rounded-2xl overflow-hidden border border-emerald-500/30">
-                        <img
-                          src={evidencePreview}
-                          alt="Evidence preview"
-                          className="w-full h-full object-cover"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setEvidenceFile(null);
-                            setEvidencePreview(null);
-                          }}
-                          className="absolute top-2 right-2 p-1.5 rounded-full bg-black/60 text-white"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ) : (
-                      <label className="border-2 border-dashed border-emerald-500/35 hover:border-emerald-500 rounded-2xl p-6 text-center cursor-pointer block hover:bg-emerald-500/5 transition-colors">
-                        <Camera className="w-8 h-8 text-emerald-600 mx-auto mb-2" />
-                        <span className="text-xs font-semibold text-emerald-900 dark:text-emerald-200">
-                          Select photo of your finished work
-                        </span>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleEvidenceFileChange}
-                          className="hidden"
-                          required
-                        />
-                      </label>
-                    )}
+                  <div className="p-4 rounded-2xl bg-cream/70 dark:bg-night-hover text-xs space-y-1">
+                    <span className="font-bold text-forest dark:text-limeaccent block uppercase tracking-wider">
+                      Target Blueprint:
+                    </span>
+                    <span className="text-charcoal font-semibold text-sm block">
+                      {selectedOptionForCompletion.title}
+                    </span>
                   </div>
 
-                  {/* Notes input */}
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-emerald-900 dark:text-emerald-300 mb-1.5">
-                      Notes or Learnings (Optional)
+                    <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/80 dark:text-cream/80 mb-2">
+                      Upload Proof / Evidence Photo *
+                    </label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleEvidenceFileChange}
+                      required
+                      className="w-full text-xs text-charcoal/80 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-forest file:text-white hover:file:bg-forest-800"
+                    />
+                  </div>
+
+                  {evidencePreview && (
+                    <div className="relative w-full aspect-video rounded-2xl overflow-hidden border border-sage/40">
+                      <img
+                        src={evidencePreview}
+                        alt="Evidence preview"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
+
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/80 dark:text-cream/80 mb-2">
+                      Project Notes or Reflections (Optional)
                     </label>
                     <textarea
                       rows={3}
                       value={completionNotes}
                       onChange={(e) => setCompletionNotes(e.target.value)}
-                      placeholder="e.g. Added a wick from an old t-shirt, working great with my basil plant!"
-                      className="w-full p-3 rounded-xl border border-emerald-500/25 dark:border-emerald-500/30 bg-white/70 dark:bg-night-hover/70 text-emerald-950 dark:text-white placeholder:text-emerald-900/40 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      placeholder="Share how the project went, tools you substituted, or where you're using it..."
+                      className="w-full p-3.5 rounded-xl border border-sage/40 dark:border-forest/30 bg-white dark:bg-night-hover text-xs text-charcoal dark:text-cream placeholder:text-charcoal/40 focus:outline-none focus:ring-2 focus:ring-forest"
                     />
                   </div>
 
-                  <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-900 dark:text-emerald-300 flex items-center gap-2">
-                    <Award className="w-5 h-5 text-emerald-600 shrink-0" />
-                    <span>
-                      Earn <strong>+40 Eco-Points</strong> upon verification by the moderation team.
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-end gap-3 pt-2">
+                  <div className="flex items-center justify-end gap-3 pt-3 border-t border-sage/20">
                     <button
                       type="button"
                       onClick={() => setCompletionModalOpen(false)}
-                      className="px-4 py-2.5 rounded-xl border border-emerald-500/20 text-xs font-semibold text-emerald-900 dark:text-emerald-200"
+                      className="px-5 py-2.5 rounded-xl text-xs font-semibold text-charcoal/70 dark:text-cream/70 hover:bg-cream"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
                       disabled={submittingCompletion || !evidenceFile}
-                      className="px-6 py-2.5 rounded-xl font-bold text-xs text-white bg-emerald-700 hover:bg-emerald-800 disabled:opacity-50 transition-colors shadow-soft"
+                      className="px-6 py-2.5 rounded-xl font-bold text-xs text-white bg-forest hover:bg-forest-800 disabled:opacity-50 transition-colors shadow-soft"
                     >
-                      {submittingCompletion ? "Uploading..." : "Submit for Verification"}
+                      {submittingCompletion ? "Submitting..." : "Submit Completion (+40 pts)"}
                     </button>
                   </div>
                 </form>

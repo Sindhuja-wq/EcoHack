@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import type { IWasteAnalysisProvider, WasteAnalysisResult } from "./types.ts";
+import type { IWasteAnalysisProvider, WasteAnalysisResult, RecoveryStatus } from "./types.ts";
+import { buildSmartDisposalGuide } from "./smart-disposal-guide.ts";
 
 // Prioritized list of high-availability, low-latency Gemini vision models
 const VERIFIED_VISION_MODELS = [
@@ -10,8 +11,8 @@ const VERIFIED_VISION_MODELS = [
 ];
 
 // Overall and per-attempt time budgets (in milliseconds)
-const OVERALL_TIMEOUT_MS = 28000; // 28s overall budget to finish well within Vercel execution limits
-const PER_CALL_TIMEOUT_MS = 18000; // 18s max per single model call to allow rich blueprint generation
+const OVERALL_TIMEOUT_MS = 28000;
+const PER_CALL_TIMEOUT_MS = 18000;
 
 export class GeminiWasteAnalysisProvider implements IWasteAnalysisProvider {
   private apiKey: string;
@@ -72,65 +73,102 @@ export class GeminiWasteAnalysisProvider implements IWasteAnalysisProvider {
 
     const genAI = new GoogleGenerativeAI(this.apiKey);
 
-    const locationContext = userCity
-      ? `The user is located in or near '${userCity}'. Provide specific municipal waste context if known, or emphasize checking local guidelines.`
-      : "No user city specified. Emphasize checking regional municipal waste rules rather than assuming uniform curbside recycling.";
-
     const imageContext = imageName
       ? `User photo file name hint: '${imageName}'. Use this only as supplementary context; prioritize genuine visual analysis of the actual photo pixels.`
       : "";
 
     const prompt = `
-You are EcoHack's AI Waste-to-Value Assistant and Materials Engineer.
+You are EcoHack's AI Waste-to-Value Assistant and Circular Materials Engineer.
 Carefully examine the actual image provided. Analyze the visual shape, color, surface texture, transparency, labels, markings, and physical condition of the item.
 ${imageContext}
 
 CRITICAL INSTRUCTIONS:
-1. Identify the specific object and its primary material from the photo.
-   Material category MUST be exactly one of:
-   ["plastic", "paper", "cardboard", "glass", "metal", "fabric", "electronics", "organic", "mixed", "unknown"]
-2. Item Condition & Uncertainty:
-   - Identify "itemCondition": Describe the physical state visible in the image (e.g. "Clean and intact", "Crushed/creased", "Rinsed with label attached", "Food-soiled organic scraps", "Worn/frayed textile").
-   - Identify "uncertaintyNotes": Note any ambiguity or limits of visual inspection (e.g. "Resin identification code not visible; PET inferred from bottle geometry and clarity", or "Specific fabric blend unconfirmed; 100% cotton assumed based on weave"). If uncertain or ambiguous, be honest rather than fabricating.
-   - If the image is blurry, obscured, dark, or does not depict a recognizable item, set isImageClear=false, confidence < 0.4, and provide an unclearPromptNote explaining what is needed.
-3. NEVER make false promises about local recycling. Provide localRecyclingCaveats acknowledging that municipal acceptance varies.
-4. You MUST generate at least THREE (3) DISTINCT, practical, and safe transformation options tailored specifically to this item and material.
-   Do not provide repetitive or generic advice! Diversify across:
-   - Option 1: Functional Household Repurposing (e.g. self-watering planter, seed starter, drawer organizer, storage canister, rag)
-   - Option 2: Practical DIY Tool / Upcycling Project (e.g. cord organizer, garden weed barrier, produce bag, compost accelerator)
-   - Option 3: Certified Repair, Restoration, or Circular Processing / Drop-off
-5. For each transformation option:
-   - Title must be specific to the item (e.g., "Sub-Irrigation Self-Watering Planter" for plastic bottles, "Garden Sheet Mulch Barrier" for cardboard, "No-Sew Braided Produce Bag" for T-shirts, "Airtight Pantry Dry-Goods Canister" for glass jars, "Nutrient-Rich Compost Booster" for vegetable scraps).
-   - Provide realistic tools, difficulty, estimated time, and numbered step-by-step instructions.
-   - Provide clear safety precautions and end-of-life disposal instructions.
-6. For Environmental Impact:
-   - Provide transparent assumptions, qualitative advantages, possible disadvantages, and a comparison matrix across: (1) Reuse/Repair, (2) DIY Transformation, (3) Formal Recycling, (4) Safe Disposal.
-   - Recommend the best overall route based on item condition.
-7. Keep descriptions, instructions, and comparison text clear, practical, and concise (1-2 sentences max per step or section; avoid unnecessary filler).
+1. Waste Identification:
+   - Identify the specific object and its primary material from the photo.
+   - Material category MUST be exactly one of:
+     ["plastic", "paper", "cardboard", "glass", "metal", "fabric", "electronics", "organic", "mixed", "unknown"]
+   - Item Condition: Describe the physical state visible (e.g. "Clean and intact", "Crushed/creased", "Rinsed with label attached", "Food-soiled organic scraps", "Worn/frayed textile").
+   - Uncertainty Notes: Note any ambiguity or limits of visual inspection. If the image is blurry, obscured, dark, or does not depict a recognizable item, set isImageClear=false, confidence < 0.45, and provide an unclearPromptNote asking for a clearer photo or more details.
+   - DO NOT automatically classify an item as non-recyclable simply because identification is uncertain.
 
-${locationContext}
+2. Waste Recovery Status:
+   Assign "recoveryStatus" from exactly:
+   - "Reusable" (if item can be repurposed or reused directly)
+   - "Repairable" (if item has fixable defects or tears)
+   - "Recyclable" (if material is widely accepted in curbside recycling)
+   - "Special Disposal Required" (if item requires hazardous waste, battery, biomedical, or e-waste processing)
+   - "No Safe Recovery Option Identified" (if item is contaminated, ambiguous, or no safe circular option exists)
+
+3. Key Analysis Elements:
+   Provide:
+   - reusePossibilities: Array of 2-3 specific reuse ideas
+   - repairPossibilities: Array of 1-2 practical repair suggestions (or state if not applicable)
+   - recyclingPossibilities: Array of 1-2 recycling routes (clearly note if verification is needed)
+   - environmentalBenefits: Array of 2-3 ecological benefits of proper diversion
+   - environmentalDisadvantages: Array of 1-2 drawbacks, limitations, or hazards
+   - confirmedRecycling: boolean (true if globally accepted curbside, false if requires verification)
+
+4. Smart Waste Disposal Guide:
+   Provide safe, category-specific instructions when reuse, repair, and recycling are not practical:
+   - For Food waste: explain suitable composting options and municipal organic collection.
+   - For Plastic: explain acceptance depends on plastic resin type and local recycling rules; recommend clean separation.
+   - For Paper: recommend keeping paper dry and separating food-contaminated sections.
+   - For Glass: explain suitable glass collection and safe handling of broken glass (wrap broken shards).
+   - For Batteries: recommend authorized battery collection; NEVER recommend putting batteries in household trash or recycling (fire risk).
+   - For Electronic waste: recommend authorized e-waste collection; NEVER recommend dismantling without expertise.
+   - For Medical waste: explain appropriate biomedical routes; NEVER ordinary household trash.
+   - For Chemical waste / Paint: recommend authorized hazardous waste drop-off; NEVER pour into drains or soil.
+   - For Unknown / Hazardous waste: provide conservative safety instructions, do NOT invent disposal methods, recommend contacting authorized municipal services.
+   - DO NOT invent local collection center names, addresses, or phone numbers. Explain that local municipal rules may vary.
+
+5. Transformation Options:
+   Generate at least THREE (3) DISTINCT, practical, and safe transformation options tailored specifically to this item:
+   - Option 1: Functional Household Repurposing
+   - Option 2: Practical DIY Tool / Upcycling Project
+   - Option 3: Certified Repair, Restoration, or Circular Processing / Drop-off
+   Each option must have: title, shortExplanation, difficulty ("Easy"|"Medium"|"Advanced"), estimatedTime, materialsTools, estimatedCost, stepByStep (array of {step, instruction}), safetyPrecautions, expectedResult, environmentalBenefits, limitations, disposalMethod.
+
+6. Environmental Impact:
+   Provide summary, divertedGramsEstimate, transparentAssumptions, qualitativeAdvantages, possibleDisadvantages, comparisonMatrix (reuseOrRepair, diyTransformation, formalRecycling, safeDisposal), recommendedRoute, and recommendationRationale.
 
 Return ONLY valid JSON matching this exact structure:
 {
-  "detectedItem": "Detailed, specific item name",
+  "detectedItem": "Detailed item name",
   "materialCategory": "plastic",
   "confidence": 0.92,
   "isImageClear": true,
   "unclearPromptNote": "",
   "itemCondition": "Clean, transparent, intact container with cap attached",
   "uncertaintyNotes": "Visible geometry indicates PET #1; resin stamp not directly visible",
+  "recoveryStatus": "Reusable",
+  "confirmedRecycling": true,
   "isReusable": true,
   "isRepairable": false,
   "isRecyclable": true,
   "isCompostable": false,
   "isUnsuitable": false,
   "safetyConcerns": "Specific safety and cleaning precautions",
+  "reusePossibilities": ["Idea 1", "Idea 2"],
+  "repairPossibilities": ["Suggestion 1"],
+  "recyclingPossibilities": ["Route 1"],
+  "environmentalBenefits": ["Benefit 1", "Benefit 2"],
+  "environmentalDisadvantages": ["Limitation 1"],
+  "smartDisposalGuide": {
+    "categoryTitle": "Rigid & Flexible Polymers",
+    "recoveryStatus": "Recyclable",
+    "primaryGuidance": "Check the resin identification code (#1 through #7)...",
+    "safeDisposalSteps": ["Step 1", "Step 2"],
+    "safetyWarnings": ["Warning 1"],
+    "municipalDiscretionNote": "Municipal sorting capabilities vary by region. Check with your local waste authority.",
+    "residualDisposalRoute": "Municipal managed residual waste.",
+    "requiresSpecialHandling": false
+  },
   "environmentalImpact": {
     "summary": "Impact summary",
     "divertedGramsEstimate": "Approx. 25-40g",
     "transparentAssumptions": "Explicit methodology and assumptions",
-    "qualitativeAdvantages": ["Advantage 1", "Advantage 2", "Advantage 3"],
-    "possibleDisadvantages": ["Limitation or disadvantage 1", "Disadvantage 2"],
+    "qualitativeAdvantages": ["Advantage 1", "Advantage 2"],
+    "possibleDisadvantages": ["Disadvantage 1"],
     "comparisonMatrix": {
       "reuseOrRepair": "Analysis of reuse or repair",
       "diyTransformation": "Analysis of DIY transformation",
@@ -140,7 +178,7 @@ Return ONLY valid JSON matching this exact structure:
     "recommendedRoute": "diy_transformation",
     "recommendationRationale": "Clear rationale for this recommendation"
   },
-  "localRecyclingCaveats": "Caveats regarding local municipal facility acceptance",
+  "localRecyclingCaveats": "General recycling caveats; municipal acceptance rules vary.",
   "transformationOptions": [
     {
       "title": "Specific Transformation Title 1",
@@ -151,8 +189,7 @@ Return ONLY valid JSON matching this exact structure:
       "estimatedCost": "$0 - $2",
       "stepByStep": [
         { "step": 1, "instruction": "Step 1 details" },
-        { "step": 2, "instruction": "Step 2 details" },
-        { "step": 3, "instruction": "Step 3 details" }
+        { "step": 2, "instruction": "Step 2 details" }
       ],
       "safetyPrecautions": "Precautions to take",
       "expectedResult": "Description of final result",
@@ -210,7 +247,6 @@ Return ONLY valid JSON matching this exact structure:
     let lastError: any = null;
 
     for (const modelToTry of modelsToTry) {
-      // Calculate remaining overall time budget
       const elapsedTotal = Date.now() - overallStartTime;
       const remainingTotal = OVERALL_TIMEOUT_MS - elapsedTotal;
 
@@ -263,8 +299,6 @@ Return ONLY valid JSON matching this exact structure:
           const hasAlternative = currentIndex >= 0 && currentIndex < modelsToTry.length - 1;
           const remainingAfterErr = OVERALL_TIMEOUT_MS - (Date.now() - overallStartTime);
 
-          // If another candidate model is available, proceed immediately to the next candidate
-          // Only retry the same model if it is the last candidate and sufficient time budget remains
           if (isDemandSpike && !hasAlternative && remainingAfterErr > 12000) {
             console.warn(`Transient 503 on final candidate [${modelToTry}]. Waiting 600ms before single retry...`);
             await new Promise((resolve) => setTimeout(resolve, 600));
@@ -286,6 +320,40 @@ Return ONLY valid JSON matching this exact structure:
         const parsed = JSON.parse(cleanedJson) as WasteAnalysisResult;
         parsed.isDemoSample = false;
         parsed.providerUsed = `Google Gemini (${modelToTry})`;
+
+        // Post-process to guarantee verified Smart Waste Disposal Guide integrity
+        const guaranteedGuide = buildSmartDisposalGuide(
+          parsed.materialCategory || "unknown",
+          parsed.detectedItem || "Waste item",
+          {
+            isReusable: parsed.isReusable,
+            isRepairable: parsed.isRepairable,
+            isRecyclable: parsed.isRecyclable,
+            isCompostable: parsed.isCompostable,
+            isImageClear: parsed.isImageClear,
+            confidence: parsed.confidence,
+          }
+        );
+
+        parsed.smartDisposalGuide = parsed.smartDisposalGuide || guaranteedGuide;
+        parsed.recoveryStatus = (parsed.recoveryStatus as RecoveryStatus) || guaranteedGuide.recoveryStatus;
+        parsed.reusePossibilities = parsed.reusePossibilities || [
+          "Evaluate item condition for clean domestic repurposing",
+        ];
+        parsed.repairPossibilities = parsed.repairPossibilities || [
+          "Check structural seams or connections for repair feasibility",
+        ];
+        parsed.recyclingPossibilities = parsed.recyclingPossibilities || [
+          "Check local municipal curbside dry recycling rules",
+        ];
+        parsed.environmentalBenefits = parsed.environmentalBenefits || [
+          "Reduces municipal landfill volume and raw material extraction demand",
+        ];
+        parsed.environmentalDisadvantages = parsed.environmentalDisadvantages || [
+          "End-of-life disposal depends on local facility capabilities",
+        ];
+        parsed.confirmedRecycling = parsed.confirmedRecycling ?? Boolean(parsed.isRecyclable);
+
         return parsed;
       } catch (err: any) {
         lastError = err;
@@ -294,7 +362,6 @@ Return ONLY valid JSON matching this exact structure:
 
         console.warn(`Model [${modelToTry}] attempt note: ${msg}`);
 
-        // Immediate fatal errors: DO NOT try other models if credentials/API key are invalid
         if (
           lower.includes("api_key_invalid") ||
           lower.includes("api key not valid") ||
@@ -307,7 +374,6 @@ Return ONLY valid JSON matching this exact structure:
           );
         }
 
-        // For Quota exceeded (429), log clearly and move to next model without retrying the same model
         if (lower.includes("quota exceeded") || lower.includes("resource_exhausted") || err.status === 429) {
           console.warn(`Quota reached on ${modelToTry}. Continuing to alternative model...`);
         }
@@ -320,4 +386,3 @@ Return ONLY valid JSON matching this exact structure:
     );
   }
 }
-
