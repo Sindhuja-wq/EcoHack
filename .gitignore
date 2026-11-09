@@ -57,3 +57,6 @@ next-env.d.ts
 *.sublime-project
 *.sublime-workspace
 .neon
+
+.vercel
+.env*

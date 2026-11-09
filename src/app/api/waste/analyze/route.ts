@@ -3,6 +3,7 @@ import { z } from "zod";
 import { getWasteAnalysisProvider } from "@/lib/ai";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
+import { checkRateLimit } from "@/lib/ratelimit";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -18,34 +19,25 @@ const AnalyzeRequestSchema = z.object({
   imageName: z.string().max(255).optional(),
 });
 
-// Simple in-memory rate-limiter: max 10 analysis calls per IP per minute
-const rateLimitMap = new Map<string, { count: number; expiresAt: number }>();
-
-function checkRateLimit(ip: string): boolean {
-  const now = Date.now();
-  const record = rateLimitMap.get(ip);
-  if (!record || record.expiresAt < now) {
-    rateLimitMap.set(ip, { count: 1, expiresAt: now + 60 * 1000 });
-    return true;
-  }
-  if (record.count >= 15) {
-    return false;
-  }
-  record.count += 1;
-  return true;
-}
-
 export async function POST(request: Request) {
   try {
-    // Basic IP rate limiting
-    const ip = request.headers.get("x-forwarded-for") || "local";
-    if (!checkRateLimit(ip)) {
+    // 15 requests per minute per IP rate limiting with header injection prevention
+    const rateLimit = checkRateLimit(request);
+    if (!rateLimit.success) {
       return NextResponse.json(
         {
           error:
             "Too many scan requests. Please wait a minute before analyzing another item.",
         },
-        { status: 429 }
+        {
+          status: 429,
+          headers: {
+            "Retry-After": "60",
+            "X-RateLimit-Limit": String(rateLimit.limit),
+            "X-RateLimit-Remaining": String(rateLimit.remaining),
+            "X-RateLimit-Reset": String(rateLimit.reset),
+          },
+        }
       );
     }
 
