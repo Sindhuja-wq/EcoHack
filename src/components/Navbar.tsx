@@ -63,25 +63,22 @@ export function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full backdrop-blur-md bg-cream/90 dark:bg-night-card/90 border-b border-sage/30 dark:border-forest/30 transition-colors">
+    <header className="sticky top-0 z-40 w-full backdrop-blur-md bg-cream/90 dark:bg-night-card/90 border-b border-sage/30 dark:border-night-border transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         {/* Brand Logo */}
         <Link href="/" className="flex items-center gap-3 group focus:outline-none">
           <div className="w-11 h-11 rounded-2xl bg-forest p-0.5 shadow-soft transition-transform group-hover:scale-105 flex items-center justify-center">
             <div className="w-full h-full bg-cream dark:bg-night rounded-[14px] flex items-center justify-center">
-              <Leaf className="w-6 h-6 text-forest dark:text-limeaccent group-hover:rotate-12 transition-transform duration-300" />
+              <Leaf className="w-6 h-6 text-forest dark:text-emeraldaccent group-hover:rotate-12 transition-transform duration-300" />
             </div>
           </div>
           <div>
-            <div className="flex items-center gap-1.5">
-              <span className="font-extrabold text-2xl tracking-tight text-forest dark:text-cream">
+            <div className="flex items-center">
+              <span className="font-heading font-extrabold text-2xl tracking-tight text-forest dark:text-darktext">
                 EcoHack
               </span>
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-limeaccent text-forest border border-limeaccent/40">
-                AI
-              </span>
             </div>
-            <p className="text-[11px] font-medium text-charcoal/70 dark:text-cream/70 hidden sm:block tracking-wide">
+            <p className="text-[11px] font-medium text-charcoal/70 dark:text-darktext-muted hidden sm:block tracking-wide">
               Turn Waste Into Worth
             </p>
           </div>
@@ -98,16 +95,16 @@ export function Navbar() {
                 href={item.href}
                 className={`relative px-3.5 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all ${
                   active
-                    ? "text-forest dark:text-limeaccent bg-forest/10 dark:bg-forest/20"
-                    : "text-charcoal/70 dark:text-cream/70 hover:text-forest dark:hover:text-cream hover:bg-forest/5"
+                    ? "text-forest dark:text-emeraldaccent bg-forest/10 dark:bg-forest/20"
+                    : "text-charcoal/70 dark:text-darktext-muted hover:text-forest dark:hover:text-darktext hover:bg-forest/5"
                 }`}
               >
-                <Icon className={`w-4 h-4 ${active ? "text-forest dark:text-limeaccent" : ""}`} />
+                <Icon className={`w-4 h-4 ${active ? "text-forest dark:text-emeraldaccent" : ""}`} />
                 <span>{item.label}</span>
                 {active && (
                   <motion.div
                     layoutId="activeNavIndicator"
-                    className="absolute bottom-0 left-3 right-3 h-0.5 bg-forest dark:bg-limeaccent rounded-full"
+                    className="absolute bottom-0 left-3 right-3 h-0.5 bg-forest dark:bg-emeraldaccent rounded-full"
                     transition={{ type: "spring", stiffness: 380, damping: 30 }}
                   />
                 )}
@@ -136,9 +133,9 @@ export function Navbar() {
           <button
             onClick={toggleTheme}
             aria-label="Toggle theme"
-            className="p-2.5 rounded-xl border border-sage/40 dark:border-forest/40 bg-white/70 dark:bg-night-hover/80 text-charcoal dark:text-cream hover:bg-cream dark:hover:bg-night-border transition-colors focus:outline-none"
+            className="p-2.5 rounded-xl border border-sage/40 dark:border-night-border bg-white/70 dark:bg-night-card text-charcoal dark:text-darktext hover:bg-cream dark:hover:bg-night-hover transition-colors focus:outline-none"
           >
-            {isDark ? <Sun className="w-4 h-4 text-limeaccent" /> : <Moon className="w-4 h-4 text-forest" />}
+            {isDark ? <Sun className="w-4 h-4 text-emeraldaccent" /> : <Moon className="w-4 h-4 text-forest" />}
           </button>
 
           {/* User state */}
@@ -148,9 +145,9 @@ export function Navbar() {
               <div className="hidden sm:flex items-center gap-2">
                 <div
                   title="Total Eco-Points"
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-forest/10 dark:bg-forest/20 text-forest dark:text-limeaccent border border-forest/25 text-xs font-bold"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-forest/10 dark:bg-forest/20 text-forest dark:text-emeraldaccent border border-forest/25 text-xs font-bold"
                 >
-                  <Sparkles className="w-3.5 h-3.5 text-forest dark:text-limeaccent" />
+                  <Sparkles className="w-3.5 h-3.5 text-forest dark:text-emeraldaccent" />
                   <span>{user.points} pts</span>
                 </div>
 
@@ -167,12 +164,12 @@ export function Navbar() {
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                  className="flex items-center gap-2 p-1.5 pl-2.5 rounded-2xl border border-sage/40 hover:border-forest bg-white dark:bg-night-hover text-sm font-semibold transition-all focus:outline-none"
+                  className="flex items-center gap-2 p-1.5 pl-2.5 rounded-2xl border border-sage/40 dark:border-night-border hover:border-forest bg-white dark:bg-night-hover text-sm font-semibold transition-all focus:outline-none"
                 >
-                  <span className="hidden md:inline max-w-[120px] truncate text-charcoal dark:text-cream">
+                  <span className="hidden md:inline max-w-[120px] truncate text-charcoal dark:text-darktext">
                     {user.name.split(" ")[0]}
                   </span>
-                  <div className="w-8 h-8 rounded-xl bg-forest text-limeaccent flex items-center justify-center font-bold text-xs uppercase shadow-sm">
+                  <div className="w-8 h-8 rounded-xl bg-forest dark:bg-emeraldaccent text-white dark:text-night flex items-center justify-center font-bold text-xs uppercase shadow-sm">
                     {user.name.slice(0, 2)}
                   </div>
                 </button>
@@ -183,7 +180,7 @@ export function Navbar() {
                       initial={{ opacity: 0, y: 10, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      className="absolute right-0 mt-2 w-56 rounded-2xl bg-white dark:bg-night-card border border-sage/40 dark:border-forest/30 shadow-soft-lg py-2 z-50 overflow-hidden"
+                      className="absolute right-0 mt-2 w-56 rounded-2xl bg-white dark:bg-night-card border border-sage/40 dark:border-night-border shadow-dark-card py-2 z-50 overflow-hidden"
                     >
                       <div className="px-4 py-2 border-b border-sage/20">
                         <p className="text-xs text-charcoal/60 dark:text-cream/60">Signed in as</p>
@@ -290,7 +287,7 @@ export function Navbar() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="lg:hidden border-b border-sage/30 bg-cream/95 dark:bg-night-card/95 backdrop-blur-xl px-4 pt-2 pb-6 space-y-3"
+            className="lg:hidden border-b border-sage/30 dark:border-night-border bg-cream/95 dark:bg-night-card/95 backdrop-blur-xl px-4 pt-2 pb-6 space-y-3"
           >
             <div className="space-y-1">
               {navLinks.map((item) => {

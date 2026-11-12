@@ -1,8 +1,21 @@
 import type { Metadata, Viewport } from "next";
+import { Inter, Sora } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-inter",
+});
+
+const sora = Sora({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-sora",
+});
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -11,15 +24,14 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "EcoHack – Turn Waste Into Worth | AI-Powered Waste-to-Value Assistant",
+  title: "EcoHack – Turn Waste Into Worth | Sustainability Platform",
   description:
-    "Discover the hidden potential in everyday discards. Upload any waste item to get instant AI-powered repurposing, upcycling, repair, and verified recycling solutions.",
+    "Discover the hidden potential in everyday discards. Upload any waste item to get instant repurposing, upcycling, repair, and verified recycling solutions.",
   keywords: [
     "EcoHack",
     "Waste to Value",
-    "AI Recycling",
+    "Sustainability Platform",
     "Upcycling",
-    "Sustainability Assistant",
     "Zero Waste",
     "Circular Economy",
     "Daily Eco Challenges",
@@ -33,16 +45,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap"
-        />
-      </head>
-      <body className="min-h-screen flex flex-col font-sans selection:bg-forest/20 selection:text-forest dark:selection:text-limeaccent bg-cream dark:bg-night text-charcoal dark:text-cream transition-colors">
+    <html lang="en" className={`${inter.variable} ${sora.variable}`} suppressHydrationWarning>
+      <body className="min-h-screen flex flex-col font-sans selection:bg-forest/20 selection:text-forest dark:selection:text-emeraldaccent bg-cream dark:bg-night text-charcoal dark:text-darktext transition-colors">
         <Providers>
           <Navbar />
           <main className="flex-1 w-full flex flex-col">{children}</main>

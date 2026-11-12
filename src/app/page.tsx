@@ -232,9 +232,9 @@ export default function LandingPage() {
             className="lg:col-span-7 space-y-8 text-center lg:text-left"
           >
             {/* Tag chip */}
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/90 dark:bg-night-card border border-sage/40 dark:border-forest/40 shadow-soft text-forest dark:text-limeaccent text-xs font-bold tracking-wide uppercase">
-              <span className="w-2 h-2 rounded-full bg-limeaccent animate-pulse" />
-              <span>Next-Gen Circular Economy Assistant</span>
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/90 dark:bg-night-card border border-sage/40 dark:border-night-border shadow-soft text-forest dark:text-emeraldaccent text-xs font-bold tracking-wide uppercase">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span>Sustainability &amp; Waste-to-Value Platform</span>
             </div>
 
             {/* Main Hero Heading */}

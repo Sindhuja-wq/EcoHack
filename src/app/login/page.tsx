@@ -71,9 +71,9 @@ function LoginFormContent() {
           transition={{ duration: 0.8 }}
           className="flex flex-col items-center text-center lg:items-start lg:text-left space-y-6"
         >
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-forest/10 border border-forest/20 text-forest dark:text-limeaccent text-xs font-bold uppercase tracking-wider">
-            <Sparkles className="w-3.5 h-3.5 text-forest dark:text-limeaccent" />
-            <span>AI-Driven Circular Economy</span>
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-forest/10 dark:bg-emeraldaccent/15 border border-forest/20 dark:border-emeraldaccent/30 text-forest dark:text-emeraldaccent text-xs font-bold uppercase tracking-wider">
+            <Sparkles className="w-3.5 h-3.5 text-forest dark:text-emeraldaccent" />
+            <span>Waste-to-Value Platform</span>
           </div>
 
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-charcoal dark:text-cream leading-tight">
