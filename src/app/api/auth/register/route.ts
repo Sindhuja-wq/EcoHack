@@ -3,6 +3,9 @@ import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { signSessionToken, setSessionCookie } from "@/lib/auth";
+import { getClientIp, checkRegistrationRateLimit } from "@/lib/ratelimit";
+
+export const dynamic = "force-dynamic";
 
 const RegisterSchema = z
   .object({
@@ -18,6 +21,32 @@ const RegisterSchema = z
 
 export async function POST(request: Request) {
   try {
+    const clientIp = getClientIp(request);
+
+    // 1. Enforce per-IP registration rate limiting (5 attempts / 60 seconds)
+    // Prevents automated bot account spam while allowing genuine human users to register or retry
+    const regRateLimit = checkRegistrationRateLimit(clientIp);
+    if (!regRateLimit.success) {
+      const nowSeconds = Math.floor(Date.now() / 1000);
+      const retryAfterSeconds = Math.max(1, regRateLimit.reset - nowSeconds);
+
+      return NextResponse.json(
+        {
+          error:
+            "Too many registration attempts from this network. Please wait a minute before trying again.",
+        },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(retryAfterSeconds),
+            "X-RateLimit-Limit": String(regRateLimit.limit),
+            "X-RateLimit-Remaining": String(regRateLimit.remaining),
+            "X-RateLimit-Reset": String(regRateLimit.reset),
+          },
+        }
+      );
+    }
+
     const body = await request.json();
     const parsed = RegisterSchema.safeParse(body);
 
@@ -31,7 +60,7 @@ export async function POST(request: Request) {
     const { name, email, password } = parsed.data;
     const normalizedEmail = email.toLowerCase().trim();
 
-    // Prevent duplicate email registrations
+    // 2. Prevent duplicate email registrations
     const existingUser = await prisma.user.findUnique({
       where: { email: normalizedEmail },
     });
@@ -43,11 +72,11 @@ export async function POST(request: Request) {
       );
     }
 
-    // Secure password hashing
+    // 3. Secure password hashing
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
 
-    // Create user in database
+    // 4. Create user in database
     const user = await prisma.user.create({
       data: {
         name: name.trim(),
@@ -69,7 +98,7 @@ export async function POST(request: Request) {
       },
     });
 
-    // Award welcome badge "Green Starter" if available
+    // 5. Award welcome badge "Green Starter" if available
     const welcomeBadge = await prisma.badge.findUnique({
       where: { code: "green-starter" },
     });
@@ -82,7 +111,7 @@ export async function POST(request: Request) {
       });
     }
 
-    // Create and set persistent session token
+    // 6. Create and set persistent session token
     const token = await signSessionToken(
       {
         userId: user.id,

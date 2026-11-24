@@ -4,6 +4,13 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { signSessionToken, setSessionCookie } from "@/lib/auth";
 import { updateDailyStreak } from "@/lib/gamification";
+import {
+  getClientIp,
+  checkTargetedLoginRateLimit,
+  checkGlobalLoginRateLimit,
+} from "@/lib/ratelimit";
+
+export const dynamic = "force-dynamic";
 
 const LoginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -13,6 +20,32 @@ const LoginSchema = z.object({
 
 export async function POST(request: Request) {
   try {
+    const clientIp = getClientIp(request);
+
+    // 1. Enforce global IP rate limit (15 attempts / 60 seconds across all accounts)
+    // Prevents password spraying attacks from a single IP address
+    const globalRateLimit = checkGlobalLoginRateLimit(clientIp);
+    if (!globalRateLimit.success) {
+      const nowSeconds = Math.floor(Date.now() / 1000);
+      const retryAfterSeconds = Math.max(1, globalRateLimit.reset - nowSeconds);
+
+      return NextResponse.json(
+        {
+          error:
+            "Too many login attempts from this network. Please wait before trying again.",
+        },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(retryAfterSeconds),
+            "X-RateLimit-Limit": String(globalRateLimit.limit),
+            "X-RateLimit-Remaining": String(globalRateLimit.remaining),
+            "X-RateLimit-Reset": String(globalRateLimit.reset),
+          },
+        }
+      );
+    }
+
     const body = await request.json();
     const parsed = LoginSchema.safeParse(body);
 
@@ -26,7 +59,31 @@ export async function POST(request: Request) {
     const { email, password, rememberMe } = parsed.data;
     const normalizedEmail = email.toLowerCase().trim();
 
-    // Look up user by email
+    // 2. Enforce targeted IP + Account rate limit (5 attempts / 60 seconds)
+    // Prevents brute-forcing a specific account without locking out innocent users from other IPs
+    const targetRateLimit = checkTargetedLoginRateLimit(clientIp, normalizedEmail);
+    if (!targetRateLimit.success) {
+      const nowSeconds = Math.floor(Date.now() / 1000);
+      const retryAfterSeconds = Math.max(1, targetRateLimit.reset - nowSeconds);
+
+      return NextResponse.json(
+        {
+          error:
+            "Too many login attempts for this account. Please wait before trying again.",
+        },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(retryAfterSeconds),
+            "X-RateLimit-Limit": String(targetRateLimit.limit),
+            "X-RateLimit-Remaining": String(targetRateLimit.remaining),
+            "X-RateLimit-Reset": String(targetRateLimit.reset),
+          },
+        }
+      );
+    }
+
+    // 3. Look up user by email
     const user = await prisma.user.findUnique({
       where: { email: normalizedEmail },
     });
@@ -39,7 +96,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // Verify bcrypt password hash
+    // 4. Verify bcrypt password hash
     const passwordMatch = await bcrypt.compare(password, user.passwordHash);
     if (!passwordMatch) {
       return NextResponse.json(
@@ -48,10 +105,10 @@ export async function POST(request: Request) {
       );
     }
 
-    // Update streak for daily activity
+    // 5. Update streak for daily activity
     const newStreak = await updateDailyStreak(user.id);
 
-    // Create session token
+    // 6. Create session token
     const token = await signSessionToken(
       {
         userId: user.id,

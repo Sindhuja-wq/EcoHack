@@ -112,43 +112,83 @@ export async function POST(request: Request) {
       }
 
       if (action === "APPROVE") {
-        // Award points atomically
-        const pointsResult = await awardPoints(
-          submission.userId,
-          submission.challenge.pointsReward,
-          "CHALLENGE_COMPLETION",
-          submission.id,
-          `Completed daily challenge: ${submission.challenge.title}`
-        );
+        try {
+          const result = await prisma.$transaction(async (tx) => {
+            // Conditional transition from PENDING ensures exactly one moderator succeeds
+            const updateResult = await tx.challengeSubmission.updateMany({
+              where: {
+                id: submissionId,
+                status: "PENDING",
+              },
+              data: {
+                status: "APPROVED",
+                reviewerFeedback: feedback || "Verified and approved by moderator.",
+                reviewerId: adminUser.id,
+                reviewedAt: new Date(),
+              },
+            });
 
-        // Update submission status
-        const updated = await prisma.challengeSubmission.update({
-          where: { id: submissionId },
-          data: {
-            status: "APPROVED",
-            reviewerFeedback: feedback || "Verified and approved by moderator.",
-            reviewerId: adminUser.id,
-            reviewedAt: new Date(),
-          },
-        });
+            if (updateResult.count === 0) {
+              throw new Error("ALREADY_REVIEWED");
+            }
 
-        return NextResponse.json({
-          success: true,
-          message: `Submission approved! Awarded ${submission.challenge.pointsReward} eco-points to ${submission.user.name}.`,
-          submission: updated,
-          pointsAwarded: submission.challenge.pointsReward,
-          newBadges: pointsResult.newBadges,
-        });
+            // Award points atomically within the same transaction
+            const pointsResult = await awardPoints(
+              submission.userId,
+              submission.challenge.pointsReward,
+              "CHALLENGE_COMPLETION",
+              submission.id,
+              `Completed daily challenge: ${submission.challenge.title}`,
+              tx
+            );
+
+            const updated = await tx.challengeSubmission.findUnique({
+              where: { id: submissionId },
+            });
+
+            return { pointsResult, updated };
+          });
+
+          return NextResponse.json({
+            success: true,
+            message: `Submission approved! Awarded ${submission.challenge.pointsReward} eco-points to ${submission.user.name}.`,
+            submission: result.updated,
+            pointsAwarded: submission.challenge.pointsReward,
+            newBadges: result.pointsResult.newBadges,
+          });
+        } catch (err: any) {
+          if (err.message === "ALREADY_REVIEWED") {
+            return NextResponse.json(
+              { error: "This submission has already been reviewed by another moderator." },
+              { status: 400 }
+            );
+          }
+          throw err;
+        }
       } else {
-        // Rejection
-        const updated = await prisma.challengeSubmission.update({
-          where: { id: submissionId },
+        // Rejection with conditional transition
+        const updateResult = await prisma.challengeSubmission.updateMany({
+          where: {
+            id: submissionId,
+            status: "PENDING",
+          },
           data: {
             status: "REJECTED",
             reviewerFeedback: feedback || "Evidence did not meet completion guidelines.",
             reviewerId: adminUser.id,
             reviewedAt: new Date(),
           },
+        });
+
+        if (updateResult.count === 0) {
+          return NextResponse.json(
+            { error: "This submission has already been reviewed by another moderator." },
+            { status: 400 }
+          );
+        }
+
+        const updated = await prisma.challengeSubmission.findUnique({
+          where: { id: submissionId },
         });
 
         return NextResponse.json({
@@ -176,40 +216,83 @@ export async function POST(request: Request) {
       }
 
       if (action === "APPROVE") {
-        const pointsResult = await awardPoints(
-          projectSub.userId,
-          projectSub.pointsAwarded || 40,
-          "TRANSFORMATION_COMPLETION",
-          projectSub.id,
-          `Completed waste transformation: ${projectSub.transformationOption.title}`
-        );
+        try {
+          const result = await prisma.$transaction(async (tx) => {
+            // Conditional transition from PENDING ensures exactly one moderator succeeds
+            const updateResult = await tx.recyclingProjectSubmission.updateMany({
+              where: {
+                id: submissionId,
+                status: "PENDING",
+              },
+              data: {
+                status: "APPROVED",
+                reviewerFeedback: feedback || "Verified and approved by moderator.",
+                reviewerId: adminUser.id,
+                reviewedAt: new Date(),
+              },
+            });
 
-        const updated = await prisma.recyclingProjectSubmission.update({
-          where: { id: submissionId },
-          data: {
-            status: "APPROVED",
-            reviewerFeedback: feedback || "Verified and approved by moderator.",
-            reviewerId: adminUser.id,
-            reviewedAt: new Date(),
-          },
-        });
+            if (updateResult.count === 0) {
+              throw new Error("ALREADY_REVIEWED");
+            }
 
-        return NextResponse.json({
-          success: true,
-          message: `Project approved! Awarded ${projectSub.pointsAwarded || 40} eco-points to ${projectSub.user.name}.`,
-          submission: updated,
-          pointsAwarded: projectSub.pointsAwarded || 40,
-          newBadges: pointsResult.newBadges,
-        });
+            // Award points atomically within the same transaction
+            const pointsResult = await awardPoints(
+              projectSub.userId,
+              projectSub.pointsAwarded || 40,
+              "TRANSFORMATION_COMPLETION",
+              projectSub.id,
+              `Completed waste transformation: ${projectSub.transformationOption.title}`,
+              tx
+            );
+
+            const updated = await tx.recyclingProjectSubmission.findUnique({
+              where: { id: submissionId },
+            });
+
+            return { pointsResult, updated };
+          });
+
+          return NextResponse.json({
+            success: true,
+            message: `Project approved! Awarded ${projectSub.pointsAwarded || 40} eco-points to ${projectSub.user.name}.`,
+            submission: result.updated,
+            pointsAwarded: projectSub.pointsAwarded || 40,
+            newBadges: result.pointsResult.newBadges,
+          });
+        } catch (err: any) {
+          if (err.message === "ALREADY_REVIEWED") {
+            return NextResponse.json(
+              { error: "This submission has already been reviewed by another moderator." },
+              { status: 400 }
+            );
+          }
+          throw err;
+        }
       } else {
-        const updated = await prisma.recyclingProjectSubmission.update({
-          where: { id: submissionId },
+        // Rejection with conditional transition
+        const updateResult = await prisma.recyclingProjectSubmission.updateMany({
+          where: {
+            id: submissionId,
+            status: "PENDING",
+          },
           data: {
             status: "REJECTED",
             reviewerFeedback: feedback || "Evidence did not demonstrate project completion.",
             reviewerId: adminUser.id,
             reviewedAt: new Date(),
           },
+        });
+
+        if (updateResult.count === 0) {
+          return NextResponse.json(
+            { error: "This submission has already been reviewed by another moderator." },
+            { status: 400 }
+          );
+        }
+
+        const updated = await prisma.recyclingProjectSubmission.findUnique({
+          where: { id: submissionId },
         });
 
         return NextResponse.json({

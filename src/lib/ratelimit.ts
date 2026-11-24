@@ -147,3 +147,176 @@ export function checkRateLimit(request: Request): RateLimitResult {
 export function _resetMemoryStoreForTesting(): void {
   memoryStore.clear();
 }
+
+const UPLOAD_RATE_LIMIT_WINDOW_MS = 60 * 1000; // 60 seconds (1 minute window)
+const MAX_UPLOADS_PER_WINDOW = 10; // 10 uploads per window
+
+// Dedicated upload memory store to isolate upload quotas
+const uploadMemoryStore = new Map<string, RateLimitRecord>();
+
+function pruneExpiredUploadEntries(): void {
+  const now = Date.now();
+  for (const [key, record] of uploadMemoryStore.entries()) {
+    if (record.expiresAt < now) {
+      uploadMemoryStore.delete(key);
+    }
+  }
+}
+
+/**
+ * Fixed-window rate limit checker for authenticated file uploads.
+ * Enforces a maximum of 10 uploads per 60-second window per user identifier.
+ */
+export function checkUploadRateLimit(identifier: string): RateLimitResult {
+  const now = Date.now();
+
+  if (uploadMemoryStore.size > 1000) {
+    pruneExpiredUploadEntries();
+  }
+
+  const record = uploadMemoryStore.get(identifier);
+
+  // New client or expired fixed window
+  if (!record || record.expiresAt < now) {
+    const expiresAt = now + UPLOAD_RATE_LIMIT_WINDOW_MS;
+    uploadMemoryStore.set(identifier, { count: 1, expiresAt });
+    return {
+      success: true,
+      limit: MAX_UPLOADS_PER_WINDOW,
+      remaining: MAX_UPLOADS_PER_WINDOW - 1,
+      reset: Math.ceil(expiresAt / 1000),
+    };
+  }
+
+  // Fixed window limit reached
+  if (record.count >= MAX_UPLOADS_PER_WINDOW) {
+    return {
+      success: false,
+      limit: MAX_UPLOADS_PER_WINDOW,
+      remaining: 0,
+      reset: Math.ceil(record.expiresAt / 1000),
+    };
+  }
+
+  // Increment counter within current fixed window
+  record.count += 1;
+  return {
+    success: true,
+    limit: MAX_UPLOADS_PER_WINDOW,
+    remaining: Math.max(0, MAX_UPLOADS_PER_WINDOW - record.count),
+    reset: Math.ceil(record.expiresAt / 1000),
+  };
+}
+
+/**
+ * Reset upload memory store for test suite isolation
+ */
+export function _resetUploadMemoryStoreForTesting(): void {
+  uploadMemoryStore.clear();
+}
+
+const AUTH_RATE_LIMIT_WINDOW_MS = 60 * 1000; // 60 seconds (1 minute window)
+const MAX_TARGETED_LOGIN_ATTEMPTS = 5; // 5 attempts per (IP + email) pair
+const MAX_GLOBAL_LOGIN_ATTEMPTS = 15; // 15 attempts per IP across all accounts
+const MAX_REGISTRATION_ATTEMPTS = 5; // 5 registrations per IP
+
+// Dedicated auth memory store to isolate authentication rate limiting from upload & analysis quotas
+const authMemoryStore = new Map<string, RateLimitRecord>();
+
+function pruneExpiredAuthEntries(): void {
+  const now = Date.now();
+  for (const [key, record] of authMemoryStore.entries()) {
+    if (record.expiresAt < now) {
+      authMemoryStore.delete(key);
+    }
+  }
+}
+
+/**
+ * Fixed-window rate limit checker for authentication operations.
+ *
+ * @param key Unique rate limiting key (e.g. `login:target:...`, `login:ip:...`, `register:ip:...`)
+ * @param limit Maximum permitted attempts within the window
+ * @param windowMs Window duration in milliseconds (defaults to 60,000ms / 1 minute)
+ */
+export function checkAuthRateLimit(
+  key: string,
+  limit: number,
+  windowMs: number = AUTH_RATE_LIMIT_WINDOW_MS
+): RateLimitResult {
+  const now = Date.now();
+
+  if (authMemoryStore.size > 2000) {
+    pruneExpiredAuthEntries();
+  }
+
+  const record = authMemoryStore.get(key);
+
+  // New key or expired window
+  if (!record || record.expiresAt < now) {
+    const expiresAt = now + windowMs;
+    authMemoryStore.set(key, { count: 1, expiresAt });
+    return {
+      success: true,
+      limit,
+      remaining: limit - 1,
+      reset: Math.ceil(expiresAt / 1000),
+    };
+  }
+
+  // Limit reached
+  if (record.count >= limit) {
+    return {
+      success: false,
+      limit,
+      remaining: 0,
+      reset: Math.ceil(record.expiresAt / 1000),
+    };
+  }
+
+  // Increment attempt counter within current window
+  record.count += 1;
+  return {
+    success: true,
+    limit,
+    remaining: Math.max(0, limit - record.count),
+    reset: Math.ceil(record.expiresAt / 1000),
+  };
+}
+
+/**
+ * Enforces targeted login limit: max 5 attempts per 60 seconds per (IP + normalized email).
+ * Scoped by both IP and email to prevent distributed Denial-of-Service / account lockout attacks.
+ */
+export function checkTargetedLoginRateLimit(
+  clientIp: string,
+  normalizedEmail: string
+): RateLimitResult {
+  const key = `login:target:${clientIp.trim()}:${normalizedEmail.trim().toLowerCase()}`;
+  return checkAuthRateLimit(key, MAX_TARGETED_LOGIN_ATTEMPTS);
+}
+
+/**
+ * Enforces global login IP limit: max 15 attempts per 60 seconds per client IP across all emails.
+ * Prevents password spraying across multiple user accounts from a single IP.
+ */
+export function checkGlobalLoginRateLimit(clientIp: string): RateLimitResult {
+  const key = `login:ip:${clientIp.trim()}`;
+  return checkAuthRateLimit(key, MAX_GLOBAL_LOGIN_ATTEMPTS);
+}
+
+/**
+ * Enforces registration limit: max 5 account creation attempts per 60 seconds per client IP.
+ * Prevents automated account creation spam while allowing genuine users to register or retry.
+ */
+export function checkRegistrationRateLimit(clientIp: string): RateLimitResult {
+  const key = `register:ip:${clientIp.trim()}`;
+  return checkAuthRateLimit(key, MAX_REGISTRATION_ATTEMPTS);
+}
+
+/**
+ * Reset auth memory store for test suite isolation
+ */
+export function _resetAuthMemoryStoreForTesting(): void {
+  authMemoryStore.clear();
+}

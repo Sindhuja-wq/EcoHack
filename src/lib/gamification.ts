@@ -1,4 +1,5 @@
-import { prisma } from "./prisma";
+import type { Prisma } from "@prisma/client";
+import { prisma } from "./prisma.ts";
 
 export type PointSource =
   | "CHALLENGE_COMPLETION"
@@ -55,45 +56,46 @@ export function calculateLevel(points: number): {
 
 /**
  * Awards points to a user in an atomic transaction, preventing duplicate rewards.
+ * Supports optional external transaction client for multi-table atomic operations.
  */
 export async function awardPoints(
   userId: string,
   amount: number,
   source: PointSource,
   referenceId: string | null,
-  description: string
+  description: string,
+  externalTx?: Prisma.TransactionClient
 ): Promise<AwardPointsResult> {
   if (amount <= 0) {
     throw new Error("Point amount must be greater than zero.");
   }
 
-  // Prevent duplicate awards for the same source and referenceId
-  if (referenceId) {
-    const existing = await prisma.pointTransaction.findFirst({
-      where: {
-        userId,
-        source,
-        referenceId,
-      },
-    });
-
-    if (existing) {
-      const user = await prisma.user.findUnique({
-        where: { id: userId },
-        select: { points: true },
+  const executeAward = async (tx: Prisma.TransactionClient): Promise<AwardPointsResult> => {
+    // Prevent duplicate awards for the same source and referenceId INSIDE the transaction
+    if (referenceId) {
+      const existing = await tx.pointTransaction.findFirst({
+        where: {
+          userId,
+          source,
+          referenceId,
+        },
       });
-      return {
-        success: false,
-        pointsAwarded: 0,
-        totalPoints: user?.points || 0,
-        newBadges: [],
-        alreadyAwarded: true,
-      };
-    }
-  }
 
-  // Execute point transaction & update user total points atomically
-  const result = await prisma.$transaction(async (tx) => {
+      if (existing) {
+        const user = await tx.user.findUnique({
+          where: { id: userId },
+          select: { points: true },
+        });
+        return {
+          success: false,
+          pointsAwarded: 0,
+          totalPoints: user?.points || 0,
+          newBadges: [],
+          alreadyAwarded: true,
+        };
+      }
+    }
+
     // 1. Create immutable transaction entry
     await tx.pointTransaction.create({
       data: {
@@ -152,17 +154,21 @@ export async function awardPoints(
     }
 
     return {
+      success: true,
+      pointsAwarded: amount,
       totalPoints: user.points,
       newBadges: newlyAwardedBadges,
     };
-  });
-
-  return {
-    success: true,
-    pointsAwarded: amount,
-    totalPoints: result.totalPoints,
-    newBadges: result.newBadges,
   };
+
+  // If an external transaction is provided, participate in it; otherwise open an isolated transaction
+  if (externalTx) {
+    return await executeAward(externalTx);
+  }
+
+  return await prisma.$transaction(async (tx) => {
+    return await executeAward(tx);
+  });
 }
 
 /**
