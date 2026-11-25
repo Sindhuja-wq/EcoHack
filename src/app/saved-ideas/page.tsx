@@ -17,8 +17,31 @@ import {
   Camera,
   Award,
   Scan,
+  Filter,
+  Layers,
+  Image as ImageIcon,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+
+function parseArray<T = any>(val: any): T[] {
+  if (Array.isArray(val)) return val;
+  if (typeof val === "string") {
+    try {
+      const parsed = JSON.parse(val);
+      if (Array.isArray(parsed)) return parsed;
+      if (typeof parsed === "string") {
+        const doubleParsed = JSON.parse(parsed);
+        if (Array.isArray(doubleParsed)) return doubleParsed;
+      }
+    } catch {
+      return [];
+    }
+  }
+  return [];
+}
+
+const DIFFICULTY_OPTIONS = ["ALL", "Easy", "Medium", "Advanced"] as const;
+type DifficultyFilter = (typeof DIFFICULTY_OPTIONS)[number];
 
 export default function SavedIdeasPage() {
   const router = useRouter();
@@ -27,6 +50,7 @@ export default function SavedIdeasPage() {
 
   const [savedIdeas, setSavedIdeas] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [filterDifficulty, setFilterDifficulty] = useState<DifficultyFilter>("ALL");
 
   // Detail Modal state
   const [activeIdeaForDetail, setActiveIdeaForDetail] = useState<any | null>(null);
@@ -42,10 +66,14 @@ export default function SavedIdeasPage() {
   const fetchSavedIdeas = async () => {
     try {
       setLoading(true);
-      const res = await fetch("/api/profile");
+      const res = await fetch("/api/waste/save-idea");
       const data = await res.json();
-      if (data.success && data.profile) {
-        setSavedIdeas(data.profile.savedIdeas || []);
+      if (data.success && Array.isArray(data.savedIdeas)) {
+        setSavedIdeas(data.savedIdeas);
+      } else if (res.status === 401) {
+        router.push("/login?redirect=/saved-ideas");
+      } else {
+        showToast(data.error || "Could not load saved ideas", "error");
       }
     } catch {
       showToast("Could not load saved ideas", "error");
@@ -161,6 +189,26 @@ export default function SavedIdeasPage() {
     }
   };
 
+  // Filter ideas by selected difficulty
+  const filteredIdeas = savedIdeas.filter((saved) => {
+    if (filterDifficulty === "ALL") return true;
+    const diff = saved.transformationOption?.difficulty || "";
+    return diff.toLowerCase() === filterDifficulty.toLowerCase();
+  });
+
+  const counts: Record<DifficultyFilter, number> = {
+    ALL: savedIdeas.length,
+    Easy: savedIdeas.filter(
+      (s) => (s.transformationOption?.difficulty || "").toLowerCase() === "easy"
+    ).length,
+    Medium: savedIdeas.filter(
+      (s) => (s.transformationOption?.difficulty || "").toLowerCase() === "medium"
+    ).length,
+    Advanced: savedIdeas.filter(
+      (s) => (s.transformationOption?.difficulty || "").toLowerCase() === "advanced"
+    ).length,
+  };
+
   if (authLoading || loading) {
     return (
       <div className="w-full min-h-[calc(100vh-68px)] py-12 flex items-center justify-center bg-cream dark:bg-night text-sm font-semibold text-charcoal/60 dark:text-darktext-muted transition-colors">
@@ -175,7 +223,7 @@ export default function SavedIdeasPage() {
 
       <div className="max-w-7xl w-full space-y-8 relative z-10">
         <div className="text-center space-y-3">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white dark:bg-night-secondary border border-sage/40 dark:border-night-border text-forest dark:text-emeraldaccent text-xs font-semibold uppercase tracking-wider">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white dark:bg-night-secondary border border-sage/40 dark:border-night-border text-forest dark:text-emeraldaccent text-xs font-semibold uppercase tracking-wider shadow-sm">
             <Bookmark className="w-4 h-4 text-forest dark:text-emeraldaccent" />
             <span>Personal DIY Library</span>
           </div>
@@ -185,6 +233,38 @@ export default function SavedIdeasPage() {
           <p className="text-sm sm:text-base text-charcoal/70 dark:text-darktext-secondary max-w-xl mx-auto">
             Review, craft, and complete your bookmarked waste-to-value blueprints.
           </p>
+
+          {/* Difficulty Filter Chips */}
+          {savedIdeas.length > 0 && (
+            <div className="flex flex-wrap items-center justify-center gap-2 pt-3">
+              {DIFFICULTY_OPTIONS.map((diff) => {
+                const isActive = filterDifficulty === diff;
+                const count = counts[diff];
+                return (
+                  <button
+                    key={diff}
+                    onClick={() => setFilterDifficulty(diff)}
+                    className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 ${
+                      isActive
+                        ? "bg-forest dark:bg-emeraldaccent text-white dark:text-night shadow-sm"
+                        : "bg-white dark:bg-night-secondary border border-sage/40 dark:border-night-border text-charcoal/70 dark:text-darktext-secondary hover:border-forest/40 dark:hover:border-emeraldaccent/40"
+                    }`}
+                  >
+                    <span>{diff === "ALL" ? "All Blueprints" : diff}</span>
+                    <span
+                      className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
+                        isActive
+                          ? "bg-white/25 text-white dark:text-night"
+                          : "bg-cream-100 dark:bg-night-card text-charcoal/60 dark:text-darktext-muted"
+                      }`}
+                    >
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {savedIdeas.length === 0 ? (
@@ -206,25 +286,78 @@ export default function SavedIdeasPage() {
               <span>Scan Waste Item</span>
             </Link>
           </div>
+        ) : filteredIdeas.length === 0 ? (
+          <div className="p-12 rounded-3xl bg-white dark:bg-night-secondary border border-sage/40 dark:border-night-border text-center space-y-3 transition-colors">
+            <Filter className="w-10 h-10 text-charcoal/40 dark:text-darktext-muted mx-auto" />
+            <h3 className="text-lg font-bold font-heading text-charcoal dark:text-darktext">
+              No {filterDifficulty} Blueprints Found
+            </h3>
+            <p className="text-xs text-charcoal/60 dark:text-darktext-muted">
+              You haven&apos;t saved any blueprints categorized as {filterDifficulty} difficulty yet.
+            </p>
+            <button
+              onClick={() => setFilterDifficulty("ALL")}
+              className="px-4 py-2 rounded-xl bg-forest dark:bg-emeraldaccent text-white dark:text-night text-xs font-bold shadow-sm"
+            >
+              View All ({savedIdeas.length})
+            </button>
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {savedIdeas.map((saved) => {
+            {filteredIdeas.map((saved) => {
               const opt = saved.transformationOption;
               if (!opt) return null;
+
+              const wasteImage = opt.analysis?.imageUrl;
+              const detectedItem = opt.analysis?.detectedItem;
+              const materialCategory = opt.analysis?.materialCategory;
 
               return (
                 <div
                   key={saved.id}
-                  className="p-6 rounded-3xl bg-white dark:bg-night-secondary border border-sage/40 dark:border-night-border shadow-elevated flex flex-col justify-between space-y-4 hover:border-forest/40 dark:hover:border-emeraldaccent/40 transition-colors"
+                  className="p-6 rounded-3xl bg-white dark:bg-night-secondary border border-sage/40 dark:border-night-border shadow-elevated flex flex-col justify-between space-y-4 hover:border-forest/40 dark:hover:border-emeraldaccent/40 transition-colors group"
                 >
                   <div className="space-y-3">
+                    {/* Waste item preview if available */}
+                    {wasteImage ? (
+                      <div className="relative w-full h-40 rounded-2xl overflow-hidden bg-cream-100 dark:bg-night-card border border-sage/20 dark:border-night-border">
+                        <img
+                          src={wasteImage}
+                          alt={detectedItem || "Waste item"}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+                        {detectedItem && (
+                          <div className="absolute bottom-2.5 left-2.5 px-2.5 py-1 rounded-lg bg-black/60 backdrop-blur-md text-[11px] font-bold text-white flex items-center gap-1.5 shadow-sm">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emeraldaccent" />
+                            <span className="capitalize">{detectedItem}</span>
+                          </div>
+                        )}
+                        {materialCategory && (
+                          <div className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-md bg-white/90 dark:bg-night/90 backdrop-blur-md text-[10px] font-bold uppercase tracking-wider text-charcoal dark:text-darktext shadow-sm">
+                            {materialCategory}
+                          </div>
+                        )}
+                      </div>
+                    ) : detectedItem ? (
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-cream-50 dark:bg-night-card border border-sage/30 dark:border-night-border text-xs font-semibold text-charcoal/80 dark:text-darktext-secondary">
+                        <span className="text-forest dark:text-emeraldaccent font-bold">Item:</span>
+                        <span className="capitalize">{detectedItem}</span>
+                        {materialCategory && (
+                          <span className="text-[10px] uppercase tracking-wider text-charcoal/50 dark:text-darktext-muted">
+                            ({materialCategory})
+                          </span>
+                        )}
+                      </div>
+                    ) : null}
+
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-cream-50 dark:bg-night-card border border-sage/30 dark:border-night-border text-forest dark:text-emeraldaccent">
                         {opt.difficulty} Difficulty
                       </span>
                       <button
                         onClick={() => handleRemoveIdea(saved.transformationOptionId)}
-                        className="p-1 rounded-lg text-charcoal/60 dark:text-darktext-muted hover:text-terra dark:hover:text-[#E07A5F] transition-colors"
+                        className="p-1.5 rounded-lg text-charcoal/60 dark:text-darktext-muted hover:text-terra dark:hover:text-[#E07A5F] hover:bg-cream-100 dark:hover:bg-night-card transition-colors"
                         title="Remove saved blueprint"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -235,7 +368,7 @@ export default function SavedIdeasPage() {
                       {opt.title}
                     </h3>
 
-                    <p className="text-xs text-charcoal/70 dark:text-darktext-secondary line-clamp-3 leading-relaxed">
+                    <p className="text-xs text-charcoal/70 dark:text-darktext-secondary line-clamp-2 leading-relaxed">
                       {opt.shortExplanation}
                     </p>
 
@@ -301,6 +434,36 @@ export default function SavedIdeasPage() {
                   </button>
                 </div>
 
+                {/* Waste context banner if analysis details exist */}
+                {activeIdeaForDetail.transformationOption?.analysis && (
+                  <div className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-cream-50 dark:bg-night-card border border-sage/30 dark:border-night-border">
+                    {activeIdeaForDetail.transformationOption.analysis.imageUrl ? (
+                      <img
+                        src={activeIdeaForDetail.transformationOption.analysis.imageUrl}
+                        alt="Analyzed waste"
+                        className="w-14 h-14 rounded-xl object-cover shrink-0"
+                      />
+                    ) : (
+                      <div className="w-14 h-14 rounded-xl bg-forest/10 dark:bg-emeraldaccent/10 flex items-center justify-center shrink-0">
+                        <ImageIcon className="w-6 h-6 text-forest dark:text-emeraldaccent" />
+                      </div>
+                    )}
+                    <div className="min-w-0">
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-charcoal/60 dark:text-darktext-muted">
+                        Original Waste Discard
+                      </div>
+                      <div className="text-sm font-bold text-charcoal dark:text-darktext capitalize truncate">
+                        {activeIdeaForDetail.transformationOption.analysis.detectedItem || "Analyzed Material"}
+                      </div>
+                      {activeIdeaForDetail.transformationOption.analysis.materialCategory && (
+                        <div className="text-[11px] text-forest dark:text-emeraldaccent font-semibold capitalize">
+                          Category: {activeIdeaForDetail.transformationOption.analysis.materialCategory}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 <div className="space-y-4 text-xs text-charcoal/70 dark:text-darktext-secondary">
                   <div>
                     <h5 className="font-semibold uppercase tracking-wider text-charcoal/60 dark:text-darktext-muted mb-2">
@@ -316,11 +479,24 @@ export default function SavedIdeasPage() {
                       Required Materials & Tools
                     </h5>
                     <div className="flex flex-wrap gap-2">
-                      {activeIdeaForDetail.transformationOption?.materialsTools?.map((m: string, i: number) => (
-                        <span key={i} className="px-3 py-1 rounded-xl bg-cream-50 dark:bg-night-card border border-sage/30 dark:border-night-border text-charcoal dark:text-darktext">
-                          • {m}
-                        </span>
-                      ))}
+                      {parseArray<string>(
+                        activeIdeaForDetail.transformationOption?.materialsTools
+                      ).length === 0 ? (
+                        <p className="text-xs text-charcoal/50 dark:text-darktext-muted italic">
+                          Standard household tools or no specialized equipment required.
+                        </p>
+                      ) : (
+                        parseArray<string>(
+                          activeIdeaForDetail.transformationOption?.materialsTools
+                        ).map((m: string, i: number) => (
+                          <span
+                            key={i}
+                            className="px-3 py-1 rounded-xl bg-cream-50 dark:bg-night-card border border-sage/30 dark:border-night-border text-charcoal dark:text-darktext font-medium"
+                          >
+                            • {m}
+                          </span>
+                        ))
+                      )}
                     </div>
                   </div>
 
@@ -329,16 +505,38 @@ export default function SavedIdeasPage() {
                       Step-by-Step Instructions
                     </h5>
                     <div className="space-y-2.5">
-                      {activeIdeaForDetail.transformationOption?.stepByStep?.map((s: any, idx: number) => (
-                        <div key={idx} className="p-3.5 rounded-2xl bg-cream-50 dark:bg-night-card border border-sage/30 dark:border-night-border flex items-start gap-3 transition-colors">
-                          <span className="w-5 h-5 rounded-full bg-forest dark:bg-emeraldaccent text-white dark:text-night font-bold flex items-center justify-center shrink-0 mt-0.5 text-[11px]">
-                            {s.step || idx + 1}
-                          </span>
-                          <span className="text-charcoal dark:text-darktext font-medium leading-relaxed">
-                            {s.instruction}
-                          </span>
-                        </div>
-                      ))}
+                      {parseArray<any>(
+                        activeIdeaForDetail.transformationOption?.stepByStep
+                      ).length === 0 ? (
+                        <p className="text-xs text-charcoal/50 dark:text-darktext-muted italic">
+                          No sequential steps recorded for this idea.
+                        </p>
+                      ) : (
+                        parseArray<any>(
+                          activeIdeaForDetail.transformationOption?.stepByStep
+                        ).map((s: any, idx: number) => {
+                          const stepNumber =
+                            typeof s === "object" && s?.step ? s.step : idx + 1;
+                          const instructionText =
+                            typeof s === "object" && s?.instruction
+                              ? s.instruction
+                              : String(s);
+
+                          return (
+                            <div
+                              key={idx}
+                              className="p-3.5 rounded-2xl bg-cream-50 dark:bg-night-card border border-sage/30 dark:border-night-border flex items-start gap-3 transition-colors"
+                            >
+                              <span className="w-5 h-5 rounded-full bg-forest dark:bg-emeraldaccent text-white dark:text-night font-bold flex items-center justify-center shrink-0 mt-0.5 text-[11px]">
+                                {stepNumber}
+                              </span>
+                              <span className="text-charcoal dark:text-darktext font-medium leading-relaxed">
+                                {instructionText}
+                              </span>
+                            </div>
+                          );
+                        })
+                      )}
                     </div>
                   </div>
                 </div>

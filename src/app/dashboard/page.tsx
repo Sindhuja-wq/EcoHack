@@ -415,67 +415,111 @@ export default function DashboardPage() {
         </div>
 
         {/* ======================================================== */}
-        {/* 5. SAVED TRANSFORMATION IDEAS */}
+        {/* 5. SAVED TRANSFORMATION IDEAS - PREVIEW WIDGET */}
         {/* ======================================================== */}
         <div className="p-8 rounded-3xl bg-white dark:bg-night-secondary border border-sage/40 dark:border-night-border shadow-elevated space-y-5 transition-colors">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
+              <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-forest dark:text-emeraldaccent mb-1">
+                <Bookmark className="w-3.5 h-3.5" />
+                <span>Personal DIY Library Preview</span>
+              </div>
               <h3 className="text-xl font-black font-heading text-charcoal dark:text-darktext">
-                Saved Transformation Blueprints ({profile?.savedIdeas?.length || 0})
+                Bookmarked Transformation Blueprints
               </h3>
-              <p className="text-xs text-charcoal/60 dark:text-darktext-muted">
-                Upcycling blueprints you bookmarked for later crafting or home implementation.
-              </p>
             </div>
             <Link
               href="/saved-ideas"
-              className="text-xs font-bold text-forest dark:text-emeraldaccent hover:underline"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-cream-50 dark:bg-night-card border border-sage/30 dark:border-night-border text-xs font-bold text-forest dark:text-emeraldaccent hover:border-forest/40 dark:hover:border-emeraldaccent/40 transition-colors shrink-0"
             >
-              Manage Saved
+              <span>Manage All ({profile?.savedIdeas?.length || 0})</span>
+              <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
 
           {(profile?.savedIdeas || []).length === 0 ? (
-            <div className="p-10 text-center border-2 border-dashed border-sage/40 dark:border-night-border rounded-2xl space-y-3">
-              <Bookmark className="w-8 h-8 text-charcoal/60 dark:text-darktext-muted mx-auto" />
-              <p className="text-xs font-medium text-charcoal/70 dark:text-darktext-secondary">
-                You haven&apos;t saved any ideas yet. Analyze a waste item to save DIY blueprints!
-              </p>
+            <div className="p-6 rounded-2xl bg-cream-50 dark:bg-night-card border border-dashed border-sage/40 dark:border-night-border flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left transition-colors">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-white dark:bg-night-secondary border border-sage/30 dark:border-night-border flex items-center justify-center shrink-0">
+                  <Bookmark className="w-5 h-5 text-charcoal/40 dark:text-darktext-muted" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-charcoal dark:text-darktext">
+                    No blueprints bookmarked yet
+                  </h4>
+                  <p className="text-xs text-charcoal/60 dark:text-darktext-muted">
+                    Save DIY transformation guides when scanning waste to track instructions and earn completion points.
+                  </p>
+                </div>
+              </div>
               <Link
                 href="/scanner"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-forest dark:bg-emeraldaccent text-white dark:text-night font-bold text-xs shadow-glow"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-forest dark:bg-emeraldaccent text-white dark:text-night font-bold text-xs shadow-glow shrink-0"
               >
                 <Scan className="w-3.5 h-3.5" />
-                <span>Scan an Item</span>
+                <span>Scan Discard</span>
               </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {profile.savedIdeas.slice(0, 3).map((idea: any) => (
-                <div
-                  key={idea.id}
-                  className="p-5 rounded-2xl bg-cream-50 dark:bg-night-card border border-sage/30 dark:border-night-border flex flex-col justify-between space-y-3 hover:border-forest/40 dark:hover:border-emeraldaccent/40 transition-colors"
-                >
-                  <div>
-                    <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-white dark:bg-night-secondary border border-sage/30 dark:border-night-border text-forest dark:text-emeraldaccent">
-                      {idea.transformationOption?.difficulty}
-                    </span>
-                    <h4 className="font-bold font-heading text-sm text-charcoal dark:text-darktext mt-2.5">
-                      {idea.transformationOption?.title}
-                    </h4>
-                    <p className="text-xs text-charcoal/70 dark:text-darktext-secondary line-clamp-2 mt-1">
-                      {idea.transformationOption?.shortExplanation}
-                    </p>
-                  </div>
-                  <Link
-                    href="/saved-ideas"
-                    className="text-xs font-bold text-forest dark:text-emeraldaccent hover:underline flex items-center gap-1"
+            <div className="space-y-3">
+              {profile.savedIdeas.slice(0, 3).map((idea: any) => {
+                const opt = idea.transformationOption;
+                const analysis = opt?.analysis;
+                return (
+                  <div
+                    key={idea.id}
+                    className="p-4 rounded-2xl bg-cream-50 dark:bg-night-card border border-sage/30 dark:border-night-border flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-forest/40 dark:hover:border-emeraldaccent/40 transition-colors"
                   >
-                    <span>View Blueprint</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </Link>
-                </div>
-              ))}
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      {analysis?.imageUrl ? (
+                        <img
+                          src={analysis.imageUrl}
+                          alt={analysis.detectedItem || "Waste"}
+                          className="w-12 h-12 rounded-xl object-cover shrink-0 border border-sage/20 dark:border-night-border"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 rounded-xl bg-white dark:bg-night-secondary border border-sage/30 dark:border-night-border flex items-center justify-center shrink-0 text-lg">
+                          ♻️
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white dark:bg-night-secondary border border-sage/30 dark:border-night-border text-forest dark:text-emeraldaccent">
+                            {opt?.difficulty || "DIY"}
+                          </span>
+                          {analysis?.detectedItem && (
+                            <span className="text-[10px] font-medium text-charcoal/60 dark:text-darktext-muted capitalize truncate">
+                              • {analysis.detectedItem}
+                            </span>
+                          )}
+                        </div>
+                        <h4 className="font-bold font-heading text-sm text-charcoal dark:text-darktext truncate">
+                          {opt?.title || "Upcycling Project"}
+                        </h4>
+                        <p className="text-[11px] text-charcoal/60 dark:text-darktext-muted line-clamp-1">
+                          {opt?.shortExplanation || "Guided DIY blueprint"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-sage/20 dark:border-night-border">
+                      {opt?.estimatedTime && (
+                        <span className="text-xs text-charcoal/60 dark:text-darktext-muted flex items-center gap-1">
+                          <Clock className="w-3.5 h-3.5 text-forest dark:text-emeraldaccent" />
+                          {opt.estimatedTime}
+                        </span>
+                      )}
+                      <Link
+                        href="/saved-ideas"
+                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white dark:bg-night-secondary border border-sage/30 dark:border-night-border text-xs font-bold text-forest dark:text-emeraldaccent hover:border-forest/40 dark:hover:border-emeraldaccent/40 transition-colors"
+                      >
+                        <span>Open Guide</span>
+                        <ArrowRight className="w-3 h-3" />
+                      </Link>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
