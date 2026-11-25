@@ -10,11 +10,13 @@ import { motion, AnimatePresence } from "framer-motion";
 // ==========================================
 interface ThemeContextType {
   isDark: boolean;
+  mounted: boolean;
   toggleTheme: () => void;
 }
 
 const ThemeContext = createContext<ThemeContextType>({
   isDark: false,
+  mounted: false,
   toggleTheme: () => {},
 });
 
@@ -163,7 +165,7 @@ export function Providers({ children }: { children: ReactNode }) {
   };
 
   return (
-    <ThemeContext.Provider value={{ isDark, toggleTheme }}>
+    <ThemeContext.Provider value={{ isDark, mounted, toggleTheme }}>
       <AuthContext.Provider value={{ user, loading, refreshUser: fetchCurrentUser, logout }}>
         <ToastContext.Provider value={{ showToast }}>
           {children}

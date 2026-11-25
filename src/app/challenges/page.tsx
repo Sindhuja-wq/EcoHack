@@ -77,7 +77,13 @@ export default function ChallengesPage() {
     { id: "energy", label: "Energy & Circular" },
   ];
 
-  // Open submission modal
+  const difficulties = [
+    { id: "all", label: "All Levels" },
+    { id: "Easy", label: "Easy" },
+    { id: "Medium", label: "Medium" },
+    { id: "Hard", label: "Hard" },
+  ];
+
   const handleOpenSubmit = (challenge: any) => {
     if (!user) {
       showToast("Please sign in to submit challenge evidence and earn eco-points.", "info");
@@ -90,7 +96,6 @@ export default function ChallengesPage() {
     setSubmitModalOpen(true);
   };
 
-  // Handle file picker for evidence photo
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -106,7 +111,6 @@ export default function ChallengesPage() {
     reader.readAsDataURL(file);
   };
 
-  // Submit challenge evidence
   const handleSubmitEvidence = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!evidenceFile || !activeChallengeForSubmit) {
@@ -117,7 +121,6 @@ export default function ChallengesPage() {
     setSubmitting(true);
 
     try {
-      // 1. Upload photo to server
       const formData = new FormData();
       formData.append("file", evidenceFile);
 
@@ -133,7 +136,6 @@ export default function ChallengesPage() {
         return;
       }
 
-      // 2. Submit challenge record
       const subRes = await fetch("/api/submissions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -161,19 +163,34 @@ export default function ChallengesPage() {
     }
   };
 
+  const getDifficultyBadge = (diff: string) => {
+    switch (diff) {
+      case "Easy":
+        return "bg-emerald-500/15 text-forest dark:text-emeraldaccent border-emerald-500/30";
+      case "Medium":
+        return "bg-teal-500/15 text-forest-light dark:text-emeraldaccent-light border-teal-500/30";
+      case "Hard":
+      default:
+        return "bg-amber-500/15 text-terra dark:text-[#E07A5F] border-amber-500/30";
+    }
+  };
+
   return (
-    <div className="w-full min-h-[calc(100vh-80px)] py-10 px-4 sm:px-6 lg:px-8 bg-nature-gradient dark:bg-night flex flex-col items-center">
-      <div className="max-w-7xl w-full space-y-10">
+    <div className="w-full min-h-[calc(100vh-68px)] py-12 px-4 sm:px-6 lg:px-8 bg-cream dark:bg-night text-charcoal dark:text-darktext flex flex-col items-center relative overflow-hidden transition-colors">
+      {/* Ambient background glow */}
+      <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[700px] h-96 bg-emerald-500/10 dark:bg-[#43E6A1]/5 rounded-full blur-[140px] pointer-events-none" />
+
+      <div className="max-w-7xl w-full space-y-10 relative z-10">
         {/* Header */}
         <div className="text-center space-y-3">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/25 text-emerald-800 dark:text-emerald-300 text-xs font-bold uppercase tracking-wider">
-            <Target className="w-4 h-4" />
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white dark:bg-night-secondary border border-sage/40 dark:border-night-border text-forest dark:text-emeraldaccent text-xs font-semibold uppercase tracking-wider">
+            <Target className="w-4 h-4 text-forest dark:text-emeraldaccent" />
             <span>Daily Sustainability Quests</span>
           </div>
-          <h1 className="text-3xl sm:text-5xl font-black text-emerald-950 dark:text-emerald-50 tracking-tight">
+          <h1 className="text-3xl sm:text-5xl font-black font-heading tracking-tight text-charcoal dark:text-darktext">
             Daily Eco Challenges
           </h1>
-          <p className="text-sm sm:text-base text-emerald-950/70 dark:text-emerald-300/80 max-w-2xl mx-auto">
+          <p className="text-sm sm:text-base text-charcoal/70 dark:text-darktext-secondary max-w-2xl mx-auto">
             Practical, zero-barrier everyday environmental habits. Take action, upload photo evidence, get verified, and earn eco-points toward community badges.
           </p>
         </div>
@@ -182,330 +199,256 @@ export default function ChallengesPage() {
         {/* FEATURED TODAY'S DAILY CHALLENGE */}
         {/* ======================================================== */}
         {dailyChallenge && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="p-8 sm:p-10 rounded-3xl bg-white/95 dark:bg-night-card/95 border-2 border-emerald-500/30 shadow-soft-lg space-y-6 relative overflow-hidden"
+          <div
+            className="p-8 sm:p-10 rounded-3xl bg-white dark:bg-night-secondary border border-sage/40 dark:border-night-border shadow-elevated space-y-6 relative overflow-hidden transition-colors"
           >
-            <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 dark:bg-[#43E6A1]/10 rounded-full blur-3xl pointer-events-none" />
 
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
               <div>
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="px-3 py-1 rounded-full bg-amber-500/15 text-amber-800 dark:text-amber-300 font-bold text-xs uppercase tracking-wider flex items-center gap-1.5">
+                  <span className="px-3 py-1 rounded-full bg-cream-50 dark:bg-night-card border border-sage/30 dark:border-night-border text-forest dark:text-emeraldaccent font-bold text-xs uppercase tracking-wider flex items-center gap-1.5">
                     <Sparkles className="w-3.5 h-3.5" />
                     <span>Today&apos;s Featured Quest</span>
                   </span>
-                  <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-800 dark:text-emerald-300">
+                  <span className={`text-xs font-bold px-2.5 py-1 rounded-full border ${getDifficultyBadge(dailyChallenge.difficulty)}`}>
                     Difficulty: {dailyChallenge.difficulty}
                   </span>
                 </div>
-                <h2 className="text-2xl sm:text-3xl font-black text-emerald-950 dark:text-emerald-100 tracking-tight">
+                <h2 className="text-2xl sm:text-3xl font-black font-heading text-charcoal dark:text-darktext tracking-tight">
                   {dailyChallenge.title}
                 </h2>
               </div>
 
-              <div className="flex items-center gap-3 shrink-0">
-                <div className="text-right">
-                  <div className="text-2xl font-black text-emerald-700 dark:text-emerald-300">
-                    +{dailyChallenge.pointsReward} pts
-                  </div>
-                  <div className="text-[11px] font-semibold text-emerald-900/60 dark:text-emerald-400">
-                    Resets in 24 hours
-                  </div>
+              <div className="text-left md:text-right shrink-0">
+                <div className="text-3xl font-black font-heading text-forest dark:text-emeraldaccent">
+                  +{dailyChallenge.pointsReward} pts
                 </div>
-
-                {dailyChallenge.userStatus === "APPROVED" ? (
-                  <span className="px-5 py-2.5 rounded-xl bg-emerald-500/20 text-emerald-800 dark:text-emerald-200 font-bold text-xs flex items-center gap-1.5">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                    <span>Completed & Rewarded</span>
-                  </span>
-                ) : dailyChallenge.userStatus === "PENDING" ? (
-                  <span className="px-5 py-2.5 rounded-xl bg-amber-500/20 text-amber-800 dark:text-amber-200 font-bold text-xs flex items-center gap-1.5">
-                    <Clock className="w-4 h-4 text-amber-600" />
-                    <span>Pending Verification</span>
-                  </span>
-                ) : (
-                  <button
-                    onClick={() => handleOpenSubmit(dailyChallenge)}
-                    className="px-6 py-3 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-emerald-700 to-green-600 hover:from-emerald-800 hover:to-green-700 shadow-soft transition-all flex items-center gap-2"
-                  >
-                    <Camera className="w-4 h-4" />
-                    <span>Submit Evidence</span>
-                  </button>
-                )}
+                <div className="text-xs text-charcoal/60 dark:text-darktext-muted">
+                  Verified Completion Reward
+                </div>
               </div>
             </div>
 
-            <p className="text-sm text-emerald-950/80 dark:text-emerald-200/90 leading-relaxed max-w-3xl">
+            <p className="text-sm text-charcoal/70 dark:text-darktext-secondary leading-relaxed relative z-10">
               {dailyChallenge.description}
             </p>
 
-            {/* Why It Matters */}
-            <div className="p-4 rounded-2xl bg-emerald-50/70 dark:bg-night-hover/70 border border-emerald-500/20 text-xs text-emerald-950/85 dark:text-emerald-200 leading-relaxed">
-              <strong className="text-emerald-800 dark:text-emerald-300 font-bold">Why it matters: </strong>
-              {dailyChallenge.whyItMatters}
+            <div className="p-4 rounded-2xl bg-cream-50 dark:bg-night-card border border-sage/30 dark:border-night-border text-xs text-charcoal/70 dark:text-darktext-secondary space-y-1 relative z-10 transition-colors">
+              <strong className="text-forest dark:text-emeraldaccent font-bold uppercase tracking-wider block">
+                Requirements:
+              </strong>
+              <span>{dailyChallenge.completionRequirements}</span>
             </div>
 
-            {/* Suggested actions & requirements */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-              <div className="p-4 rounded-2xl bg-white/70 dark:bg-night/70 border border-emerald-500/15">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-900 dark:text-emerald-300 mb-2">
-                  Suggested Practical Actions
-                </h4>
-                <ul className="space-y-1.5 text-xs text-emerald-950/80 dark:text-emerald-200">
-                  {dailyChallenge.suggestedActions?.map((act: string, i: number) => (
-                    <li key={i} className="flex items-start gap-2">
-                      <span className="text-emerald-600 font-bold">•</span>
-                      <span>{act}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-white/70 dark:bg-night/70 border border-emerald-500/15">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-900 dark:text-emerald-300 mb-2">
-                  Verification Requirements
-                </h4>
-                <p className="text-xs text-emerald-950/80 dark:text-emerald-200 leading-relaxed">
-                  {dailyChallenge.completionRequirements}
-                </p>
-              </div>
+            <div className="flex flex-col sm:flex-row items-center gap-3 pt-2 relative z-10">
+              <button
+                onClick={() => handleOpenSubmit(dailyChallenge)}
+                className="w-full sm:w-auto px-6 py-3.5 rounded-2xl font-bold text-sm text-white dark:text-night bg-forest hover:bg-forest-light dark:bg-emeraldaccent dark:hover:bg-emeraldaccent-hover shadow-glow transition-all flex items-center justify-center gap-2"
+              >
+                <Camera className="w-4 h-4 text-white dark:text-night" />
+                <span>Submit Photo Evidence</span>
+              </button>
+              <Link
+                href={`/challenges/${dailyChallenge.id}`}
+                className="w-full sm:w-auto px-6 py-3.5 rounded-2xl font-semibold text-sm text-charcoal/70 dark:text-darktext-secondary hover:text-charcoal dark:hover:text-darktext bg-cream-50 dark:bg-night-card hover:bg-cream-100 dark:hover:bg-night-border border border-sage/40 dark:border-night-border transition-colors flex items-center justify-center gap-1.5"
+              >
+                <span>View Full Details</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
             </div>
-          </motion.div>
+          </div>
         )}
 
         {/* ======================================================== */}
-        {/* ALL CHALLENGES LIST & FILTERS */}
+        {/* FILTER BAR */}
         {/* ======================================================== */}
-        <div className="space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <h3 className="text-2xl font-black text-emerald-950 dark:text-emerald-100 tracking-tight">
-                All Sustainability Quests
-              </h3>
-              <p className="text-xs text-emerald-900/60 dark:text-emerald-400">
-                Explore diverse tasks across plastics, food waste, zero-waste, and active transport.
-              </p>
-            </div>
-
-            {/* Category Filter Chips */}
-            <div className="flex flex-wrap items-center gap-2">
-              {categories.map((c) => (
-                <button
-                  key={c.id}
-                  onClick={() => setSelectedCategory(c.id)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
-                    selectedCategory === c.id
-                      ? "bg-emerald-700 text-white border-emerald-700 shadow-sm"
-                      : "bg-white/80 dark:bg-night-card/80 text-emerald-950/70 dark:text-emerald-300 border-emerald-500/20 hover:bg-emerald-50"
-                  }`}
-                >
-                  {c.label}
-                </button>
-              ))}
-            </div>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-2xl bg-white dark:bg-night-secondary border border-sage/40 dark:border-night-border transition-colors">
+          {/* Category Tabs */}
+          <div className="flex items-center gap-2 overflow-x-auto w-full sm:w-auto pb-2 sm:pb-0 scrollbar-none">
+            {categories.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => setSelectedCategory(cat.id)}
+                className={`px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all border ${
+                  selectedCategory === cat.id
+                    ? "bg-forest text-white border-forest shadow-glow dark:bg-emeraldaccent dark:text-night dark:border-emeraldaccent"
+                    : "bg-cream-50 dark:bg-night-card text-charcoal/70 dark:text-darktext-secondary border-sage/40 dark:border-night-border hover:text-charcoal dark:hover:text-darktext"
+                }`}
+              >
+                {cat.label}
+              </button>
+            ))}
           </div>
 
-          {/* Grid of Challenges */}
-          {loading ? (
-            <div className="p-12 text-center text-sm font-semibold text-emerald-900/60 dark:text-emerald-400">
-              Loading eco challenges...
-            </div>
-          ) : filteredChallenges.length === 0 ? (
-            <div className="p-12 rounded-3xl bg-white/80 dark:bg-night-card/80 border border-emerald-500/20 text-center space-y-2">
-              <p className="font-bold text-emerald-950 dark:text-emerald-100">No challenges found in this filter.</p>
+          {/* Difficulty Dropdown / Selector */}
+          <div className="flex items-center gap-1.5 shrink-0 self-end sm:self-auto">
+            {difficulties.map((diff) => (
               <button
-                onClick={() => {
-                  setSelectedCategory("all");
-                  setSelectedDifficulty("all");
-                }}
-                className="text-xs font-bold text-emerald-700 dark:text-emerald-300 hover:underline"
+                key={diff.id}
+                onClick={() => setSelectedDifficulty(diff.id)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  selectedDifficulty === diff.id
+                    ? "bg-cream-100 dark:bg-night-card border border-forest dark:border-emeraldaccent text-forest dark:text-emeraldaccent font-bold"
+                    : "text-charcoal/60 dark:text-darktext-muted hover:text-charcoal dark:hover:text-darktext-secondary"
+                }`}
               >
-                Clear Filters
+                {diff.label}
               </button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredChallenges.map((challenge) => (
-                <div
-                  key={challenge.id}
-                  className="p-6 rounded-3xl bg-white/95 dark:bg-night-card/95 border border-emerald-500/20 shadow-soft hover:shadow-soft-lg transition-all flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border border-emerald-500/20">
-                        {challenge.category.toUpperCase()}
-                      </span>
-                      <span className="text-xs font-black text-emerald-700 dark:text-emerald-300">
-                        +{challenge.pointsReward} pts
-                      </span>
-                    </div>
-
-                    <h4 className="text-lg font-bold text-emerald-950 dark:text-emerald-100 mb-2">
-                      <Link href={`/challenges/${challenge.slug || challenge.id}`} className="hover:underline">
-                        {challenge.title}
-                      </Link>
-                    </h4>
-
-                    <p className="text-xs text-emerald-950/70 dark:text-emerald-300/80 leading-relaxed mb-4 line-clamp-3">
-                      {challenge.description}
-                    </p>
-                  </div>
-
-                  <div className="pt-4 border-t border-emerald-500/10 flex items-center justify-between">
-                    <div>
-                      {challenge.userStatus === "APPROVED" ? (
-                        <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                          <CheckCircle2 className="w-3.5 h-3.5" />
-                          Approved
-                        </span>
-                      ) : challenge.userStatus === "PENDING" ? (
-                        <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1">
-                          <Clock className="w-3.5 h-3.5" />
-                          Under Review
-                        </span>
-                      ) : (
-                        <span className="text-[11px] font-semibold text-emerald-900/60 dark:text-emerald-400">
-                          {challenge.difficulty}
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <Link
-                        href={`/challenges/${challenge.slug || challenge.id}`}
-                        className="px-3 py-1.5 rounded-xl border border-emerald-500/20 text-xs font-semibold text-emerald-800 dark:text-emerald-200 hover:bg-emerald-50"
-                      >
-                        Details
-                      </Link>
-
-                      {challenge.userStatus !== "APPROVED" && (
-                        <button
-                          onClick={() => handleOpenSubmit(challenge)}
-                          className="px-3.5 py-1.5 rounded-xl text-xs font-bold text-white bg-emerald-700 hover:bg-emerald-800 shadow-sm"
-                        >
-                          Submit
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+            ))}
+          </div>
         </div>
+
+        {/* ======================================================== */}
+        {/* CHALLENGES GRID */}
+        {/* ======================================================== */}
+        {loading ? (
+          <div className="p-16 text-center text-sm font-semibold text-charcoal/60 dark:text-darktext-muted">
+            Loading challenges catalogue...
+          </div>
+        ) : filteredChallenges.length === 0 ? (
+          <div className="p-16 rounded-3xl bg-white dark:bg-night-secondary border border-sage/40 dark:border-night-border text-center space-y-3 transition-colors">
+            <Target className="w-10 h-10 text-charcoal/40 dark:text-darktext-muted mx-auto" />
+            <h3 className="text-lg font-bold font-heading text-charcoal dark:text-darktext">No challenges found</h3>
+            <p className="text-xs text-charcoal/60 dark:text-darktext-muted">Try adjusting your category or difficulty filter.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredChallenges.map((c) => (
+              <div
+                key={c.id}
+                className="p-6 rounded-3xl bg-white dark:bg-night-secondary border border-sage/40 dark:border-night-border shadow-elevated flex flex-col justify-between space-y-4 hover:border-forest/40 dark:hover:border-emeraldaccent/40 transition-colors"
+              >
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${getDifficultyBadge(c.difficulty)}`}>
+                      {c.difficulty}
+                    </span>
+                    <span className="text-xs font-black font-heading text-forest dark:text-emeraldaccent">
+                      +{c.pointsReward} pts
+                    </span>
+                  </div>
+
+                  <h3 className="text-lg font-bold font-heading text-charcoal dark:text-darktext line-clamp-1">
+                    {c.title}
+                  </h3>
+
+                  <p className="text-xs text-charcoal/70 dark:text-darktext-secondary line-clamp-3 leading-relaxed">
+                    {c.description}
+                  </p>
+                </div>
+
+                <div className="pt-3 border-t border-sage/30 dark:border-night-border flex items-center justify-between gap-2">
+                  <Link
+                    href={`/challenges/${c.id}`}
+                    className="text-xs font-semibold text-charcoal/70 dark:text-darktext-secondary hover:text-forest dark:hover:text-emeraldaccent transition-colors flex items-center gap-1"
+                  >
+                    <span>Details</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+
+                  <button
+                    onClick={() => handleOpenSubmit(c)}
+                    className="px-4 py-2 rounded-xl bg-forest hover:bg-forest-light dark:bg-emeraldaccent dark:hover:bg-emeraldaccent-hover text-white dark:text-night font-bold text-xs transition-all shadow-glow flex items-center gap-1.5"
+                  >
+                    <Camera className="w-3.5 h-3.5" />
+                    <span>Submit</span>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* ======================================================== */}
         {/* SUBMISSION MODAL */}
         {/* ======================================================== */}
         <AnimatePresence>
           {submitModalOpen && activeChallengeForSubmit && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 dark:bg-black/80 backdrop-blur-md">
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="w-full max-w-lg bg-white dark:bg-night-card rounded-3xl p-6 sm:p-8 shadow-soft-lg border border-emerald-500/25 space-y-5"
+                className="w-full max-w-lg bg-white dark:bg-night-secondary border border-sage/40 dark:border-night-border rounded-3xl p-6 sm:p-8 shadow-elevated space-y-6 max-h-[90vh] overflow-y-auto transition-colors"
               >
-                <div className="flex items-center justify-between border-b border-emerald-500/15 pb-4">
+                <div className="flex items-center justify-between border-b border-sage/30 dark:border-night-border pb-4">
                   <div>
-                    <h3 className="text-lg font-black text-emerald-950 dark:text-emerald-100">
+                    <h3 className="text-xl font-black font-heading text-charcoal dark:text-darktext">
                       Submit Challenge Evidence
                     </h3>
-                    <p className="text-xs text-emerald-900/60 dark:text-emerald-400 mt-0.5">
-                      {activeChallengeForSubmit.title}
+                    <p className="text-xs text-charcoal/60 dark:text-darktext-muted mt-0.5">
+                      Earn +{activeChallengeForSubmit.pointsReward} eco-points upon verification
                     </p>
                   </div>
                   <button
                     onClick={() => setSubmitModalOpen(false)}
-                    className="p-1 rounded-lg text-emerald-900/60 hover:text-emerald-900 dark:text-emerald-400 dark:hover:text-white"
+                    className="p-1.5 rounded-lg text-charcoal/60 dark:text-darktext-muted hover:text-charcoal dark:hover:text-darktext hover:bg-cream-100 dark:hover:bg-night-card transition-colors"
                   >
                     <X className="w-5 h-5" />
                   </button>
                 </div>
 
-                <div className="p-3.5 rounded-2xl bg-emerald-50/80 dark:bg-night-hover/80 border border-emerald-500/15 text-xs text-emerald-950 dark:text-emerald-200">
-                  <span className="font-bold">Requirements: </span>
-                  {activeChallengeForSubmit.completionRequirements}
-                </div>
-
                 <form onSubmit={handleSubmitEvidence} className="space-y-4">
-                  {/* Photo picker */}
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-emerald-900 dark:text-emerald-300 mb-2">
-                      Upload Verification Photo
-                    </label>
-                    {evidencePreview ? (
-                      <div className="relative w-full aspect-video rounded-2xl overflow-hidden border border-emerald-500/30">
-                        <img
-                          src={evidencePreview}
-                          alt="Evidence preview"
-                          className="w-full h-full object-cover"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setEvidenceFile(null);
-                            setEvidencePreview(null);
-                          }}
-                          className="absolute top-2 right-2 p-1.5 rounded-full bg-black/60 text-white"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ) : (
-                      <label className="border-2 border-dashed border-emerald-500/35 hover:border-emerald-500 rounded-2xl p-6 text-center cursor-pointer block hover:bg-emerald-500/5 transition-colors">
-                        <Camera className="w-8 h-8 text-emerald-600 mx-auto mb-2" />
-                        <span className="text-xs font-semibold text-emerald-900 dark:text-emerald-200">
-                          Click to select a photo of your action
-                        </span>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleFileChange}
-                          className="hidden"
-                          required
-                        />
-                      </label>
-                    )}
-                  </div>
-
-                  {/* Optional description */}
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-emerald-900 dark:text-emerald-300 mb-1.5">
-                      Short Description (Optional)
-                    </label>
-                    <textarea
-                      rows={2}
-                      value={submissionDescription}
-                      onChange={(e) => setSubmissionDescription(e.target.value)}
-                      placeholder="e.g. Carried my stainless bottle on my morning bus route."
-                      className="w-full p-3 rounded-xl border border-emerald-500/25 dark:border-emerald-500/30 bg-white/70 dark:bg-night-hover/70 text-emerald-950 dark:text-white placeholder:text-emerald-900/40 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                    />
-                  </div>
-
-                  <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-900 dark:text-emerald-300 flex items-center gap-2">
-                    <Award className="w-5 h-5 text-emerald-600 shrink-0" />
-                    <span>
-                      Earn <strong>+{activeChallengeForSubmit.pointsReward} Eco-Points</strong> upon reviewer approval.
+                  <div className="p-4 rounded-2xl bg-cream-50 dark:bg-night-card border border-sage/30 dark:border-night-border text-xs space-y-1 transition-colors">
+                    <span className="font-bold text-forest dark:text-emeraldaccent block uppercase tracking-wider">
+                      Active Quest:
+                    </span>
+                    <span className="text-charcoal dark:text-darktext font-semibold text-sm block">
+                      {activeChallengeForSubmit.title}
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-end gap-3 pt-2">
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-charcoal/80 dark:text-darktext-secondary mb-2">
+                      Upload Proof / Evidence Photo *
+                    </label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      required
+                      className="w-full text-xs text-charcoal/70 dark:text-darktext-secondary file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-forest dark:file:bg-[#43E6A1] file:text-white dark:file:text-[#0B1110] hover:file:bg-forest-light dark:hover:file:bg-[#75F0B7] file:cursor-pointer"
+                    />
+                  </div>
+
+                  {evidencePreview && (
+                    <div className="relative w-full aspect-video rounded-2xl overflow-hidden border border-sage/40 dark:border-night-border">
+                      <img
+                        src={evidencePreview}
+                        alt="Evidence preview"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
+
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-charcoal/80 dark:text-darktext-secondary mb-2">
+                      Activity Notes or Reflections (Optional)
+                    </label>
+                    <textarea
+                      rows={3}
+                      value={submissionDescription}
+                      onChange={(e) => setSubmissionDescription(e.target.value)}
+                      placeholder="Share details on how you completed this challenge..."
+                      className="w-full p-3.5 rounded-xl border border-sage/40 dark:border-night-border bg-white dark:bg-night-card text-xs text-charcoal dark:text-darktext placeholder:text-charcoal/40 dark:placeholder:text-darktext-muted focus:outline-none focus:border-forest dark:focus:border-emeraldaccent focus:ring-1 focus:ring-forest dark:focus:ring-emeraldaccent"
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-end gap-3 pt-3 border-t border-sage/30 dark:border-night-border">
                     <button
                       type="button"
                       onClick={() => setSubmitModalOpen(false)}
-                      className="px-4 py-2.5 rounded-xl border border-emerald-500/20 text-xs font-semibold text-emerald-900 dark:text-emerald-200"
+                      className="px-5 py-2.5 rounded-xl text-xs font-semibold text-charcoal/70 dark:text-darktext-secondary hover:bg-cream-100 dark:hover:bg-night-card transition-colors"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
                       disabled={submitting || !evidenceFile}
-                      className="px-6 py-2.5 rounded-xl font-bold text-xs text-white bg-emerald-700 hover:bg-emerald-800 disabled:opacity-50 transition-colors shadow-soft"
+                      className="px-6 py-2.5 rounded-xl font-bold text-xs text-white dark:text-night bg-forest hover:bg-forest-light dark:bg-emeraldaccent dark:hover:bg-emeraldaccent-hover disabled:opacity-50 transition-all shadow-glow"
                     >
-                      {submitting ? "Uploading..." : "Submit for Verification"}
+                      {submitting ? "Submitting..." : "Submit for Review"}
                     </button>
                   </div>
                 </form>

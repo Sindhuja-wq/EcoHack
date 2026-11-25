@@ -4,8 +4,8 @@ import React, { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth, useToast } from "@/components/Providers";
+import { Leaf, Mail, Lock, Eye, EyeOff, ArrowRight, Sparkles, AlertCircle, ShieldCheck } from "lucide-react";
 import { AnimatedTreeIllustration } from "@/components/AnimatedTreeIllustration";
-import { Leaf, Mail, Lock, Eye, EyeOff, ArrowRight, Sparkles, AlertCircle } from "lucide-react";
 import { motion } from "framer-motion";
 
 function LoginFormContent() {
@@ -54,57 +54,53 @@ function LoginFormContent() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-80px)] w-full flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-cream dark:bg-night relative overflow-hidden transition-colors">
-      {/* Decorative ambient leaf icons in background */}
-      <div className="absolute top-12 left-10 text-sage/20 dark:text-forest/15 pointer-events-none">
-        <Leaf className="w-32 h-32 rotate-12" />
-      </div>
-      <div className="absolute bottom-10 right-10 text-sage/20 dark:text-forest/15 pointer-events-none">
-        <Leaf className="w-48 h-48 -rotate-45" />
-      </div>
+    <div className="min-h-[calc(100vh-68px)] w-full flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-cream dark:bg-night text-charcoal dark:text-darktext relative overflow-hidden transition-colors">
+      {/* Background glow effects */}
+      <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-forest/5 dark:bg-emeraldaccent/5 rounded-full blur-[140px] pointer-events-none" />
 
       <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center z-10">
-        {/* Left Side: Realistic Nature Photograph & Inspiration */}
-        <motion.div
-          initial={{ opacity: 0, x: -30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8 }}
-          className="flex flex-col items-center text-center lg:items-start lg:text-left space-y-6"
-        >
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-forest/10 dark:bg-emeraldaccent/15 border border-forest/20 dark:border-emeraldaccent/30 text-forest dark:text-emeraldaccent text-xs font-bold uppercase tracking-wider">
+        {/* Left Side: Brand & Platform Inspiration */}
+        <div className="flex flex-col items-center text-center lg:items-start lg:text-left space-y-6">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white dark:bg-night-secondary border border-sage/40 dark:border-night-border text-forest dark:text-emeraldaccent text-xs font-semibold uppercase tracking-wider shadow-sm">
             <Sparkles className="w-3.5 h-3.5 text-forest dark:text-emeraldaccent" />
-            <span>Waste-to-Value Platform</span>
+            <span>Waste-to-Value Diagnostics</span>
           </div>
 
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-charcoal dark:text-cream leading-tight">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black font-heading text-charcoal dark:text-darktext leading-tight">
             Grow your impact, <br />
-            <span className="text-forest dark:text-limeaccent">
+            <span className="inline-block py-0.5 text-transparent bg-clip-text bg-gradient-to-r from-forest to-forest-500 dark:from-emeraldaccent dark:to-emeraldaccent-400">
               one discard at a time.
             </span>
           </h1>
 
-          <p className="text-base text-charcoal/70 dark:text-cream/70 max-w-md">
+          <p className="text-base text-charcoal/70 dark:text-darktext-secondary max-w-md leading-relaxed">
             Sign in to access your personal waste-to-value scanner, log daily challenges, save upcycling ideas, and climb the sustainability leaderboard.
           </p>
 
-          <div className="w-full flex justify-center lg:justify-start pt-2">
+          <div className="w-full pt-1 flex justify-center lg:justify-start">
             <AnimatedTreeIllustration size="md" priority={true} />
           </div>
-        </motion.div>
+
+          <div className="pt-1 flex flex-col gap-2.5 text-xs text-charcoal/60 dark:text-darktext-muted">
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-forest dark:text-emeraldaccent shrink-0" />
+              <span>Evidence-based EPA / UNEP carbon accounting</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-forest dark:text-emeraldaccent shrink-0" />
+              <span>Verified material diversion tracking</span>
+            </div>
+          </div>
+        </div>
 
         {/* Right Side: Login Form Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="w-full max-w-md mx-auto"
-        >
-          <div className="bg-white dark:bg-night-card rounded-3xl p-8 sm:p-10 shadow-soft-lg border border-sage/40 dark:border-forest/30">
+        <div className="w-full max-w-md mx-auto">
+          <div className="bg-white dark:bg-night-secondary rounded-3xl p-8 sm:p-10 shadow-soft-lg dark:shadow-elevated border border-sage/30 dark:border-night-border">
             <div className="mb-8">
-              <h2 className="text-2xl font-black text-charcoal dark:text-cream tracking-tight">
+              <h2 className="text-2xl font-black font-heading text-charcoal dark:text-darktext tracking-tight">
                 Welcome Back
               </h2>
-              <p className="text-sm text-charcoal/60 dark:text-cream/60 mt-1 font-medium">
+              <p className="text-sm text-charcoal/60 dark:text-darktext-muted mt-1 font-medium">
                 Enter your credentials to continue your journey.
               </p>
             </div>
@@ -113,20 +109,20 @@ function LoginFormContent() {
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="mb-6 p-4 rounded-xl bg-terracotta/10 border border-terracotta/30 flex items-start gap-3 text-sm text-terracotta-800 dark:text-terracotta-200"
+                className="mb-6 p-4 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 flex items-start gap-3 text-sm text-rose-700 dark:text-rose-300"
               >
-                <AlertCircle className="w-5 h-5 text-terracotta shrink-0 mt-0.5" />
+                <AlertCircle className="w-5 h-5 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
                 <span>{errorMsg}</span>
               </motion.div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/80 dark:text-cream/80 mb-2">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-charcoal/80 dark:text-darktext-secondary mb-2">
                   Email Address
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-charcoal/40 dark:text-cream/40">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-charcoal/40 dark:text-darktext-muted">
                     <Mail className="w-4 h-4" />
                   </div>
                   <input
@@ -135,25 +131,25 @@ function LoginFormContent() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="sustainability@ecohack.earth"
-                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-sage/40 dark:border-forest/30 bg-cream/30 dark:bg-night-hover text-charcoal dark:text-cream placeholder:text-charcoal/40 dark:placeholder:text-cream/40 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-forest transition-all"
+                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-sage/40 dark:border-night-border bg-cream-50 dark:bg-night-card text-charcoal dark:text-darktext placeholder:text-charcoal/40 dark:placeholder:text-darktext-muted text-sm font-medium focus:outline-none focus:border-forest dark:focus:border-emeraldaccent focus:ring-1 focus:ring-forest dark:focus:ring-emeraldaccent transition-all"
                   />
                 </div>
               </div>
 
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/80 dark:text-cream/80">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-charcoal/80 dark:text-darktext-secondary">
                     Password
                   </label>
                   <Link
                     href="/forgot-password"
-                    className="text-xs font-semibold text-forest dark:text-limeaccent hover:underline"
+                    className="text-xs font-semibold text-forest dark:text-emeraldaccent hover:underline"
                   >
                     Forgot password?
                   </Link>
                 </div>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-charcoal/40 dark:text-cream/40">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-charcoal/40 dark:text-darktext-muted">
                     <Lock className="w-4 h-4" />
                   </div>
                   <input
@@ -162,65 +158,54 @@ function LoginFormContent() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full pl-10 pr-10 py-3 rounded-xl border border-sage/40 dark:border-forest/30 bg-cream/30 dark:bg-night-hover text-charcoal dark:text-cream placeholder:text-charcoal/40 dark:placeholder:text-cream/40 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-forest transition-all"
+                    className="w-full pl-10 pr-10 py-3 rounded-xl border border-sage/40 dark:border-night-border bg-cream-50 dark:bg-night-card text-charcoal dark:text-darktext placeholder:text-charcoal/40 dark:placeholder:text-darktext-muted text-sm font-medium focus:outline-none focus:border-forest dark:focus:border-emeraldaccent focus:ring-1 focus:ring-forest dark:focus:ring-emeraldaccent transition-all"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-charcoal/40 dark:text-cream/40 hover:text-charcoal dark:hover:text-cream transition-colors"
-                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-charcoal/40 dark:text-darktext-muted hover:text-charcoal dark:hover:text-darktext"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
               </div>
 
-              <div className="flex items-center">
-                <input
-                  id="remember-me"
-                  name="remember-me"
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  className="h-4 w-4 rounded border-sage text-forest focus:ring-forest"
-                />
-                <label
-                  htmlFor="remember-me"
-                  className="ml-2 block text-xs font-medium text-charcoal/70 dark:text-cream/70 cursor-pointer"
-                >
-                  Remember this device for 30 days
+              <div className="flex items-center justify-between pt-1">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    className="w-4 h-4 rounded border-sage/40 dark:border-night-border bg-cream-50 dark:bg-night-card text-forest dark:text-emeraldaccent focus:ring-forest dark:focus:ring-emeraldaccent"
+                  />
+                  <span className="text-xs text-charcoal/70 dark:text-darktext-secondary">Remember this device</span>
                 </label>
               </div>
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3.5 px-6 rounded-2xl font-bold text-white bg-forest hover:bg-forest-800 shadow-soft transition-all transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2 disabled:opacity-60 text-sm"
+                className="w-full py-3.5 rounded-xl font-bold text-sm text-white dark:text-night bg-forest dark:bg-emeraldaccent hover:bg-forest-800 dark:hover:bg-emeraldaccent-400 shadow-soft-lg dark:shadow-glow transition-all flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 {loading ? (
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span>Signing in...</span>
                 ) : (
                   <>
-                    <span>Sign In to Dashboard</span>
-                    <ArrowRight className="w-4 h-4 text-limeaccent" />
+                    <span>Sign In</span>
+                    <ArrowRight className="w-4 h-4" />
                   </>
                 )}
               </button>
             </form>
 
-            <div className="mt-8 pt-6 border-t border-sage/20 text-center">
-              <p className="text-xs text-charcoal/60 dark:text-cream/60">
-                New to EcoHack?{" "}
-                <Link
-                  href="/register"
-                  className="font-bold text-forest dark:text-limeaccent hover:underline ml-1"
-                >
-                  Create free account
-                </Link>
-              </p>
+            <div className="mt-8 pt-6 border-t border-sage/30 dark:border-night-border text-center text-xs text-charcoal/70 dark:text-darktext-secondary">
+              Don&apos;t have an EcoHack account?{" "}
+              <Link href="/register" className="font-bold text-forest dark:text-emeraldaccent hover:underline">
+                Create one now
+              </Link>
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
     </div>
   );
@@ -228,13 +213,7 @@ function LoginFormContent() {
 
 export default function LoginPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="min-h-[calc(100vh-80px)] w-full flex items-center justify-center text-sm font-semibold text-charcoal/60 dark:text-cream/60">
-          Loading sign in...
-        </div>
-      }
-    >
+    <Suspense fallback={<div className="min-h-screen bg-cream dark:bg-night flex items-center justify-center text-xs text-charcoal/60 dark:text-darktext-muted">Loading...</div>}>
       <LoginFormContent />
     </Suspense>
   );

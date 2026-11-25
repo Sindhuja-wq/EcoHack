@@ -22,21 +22,21 @@
   }
 
   .dark {
-    --background: 210 33% 9.4%; /* #101820 Deep rich background */
-    --foreground: 137 18% 92.4%; /* #E8EFEA Crisp mint-cream text */
-    --card: 177 26% 14.9%; /* #1C302F Deep teal card */
-    --card-foreground: 137 18% 92.4%;
-    --primary: 159 55% 46.7%; /* #35B98A Primary emerald accent */
-    --primary-foreground: 210 33% 9.4%;
-    --secondary: 168 51% 55.5%; /* #55C6B0 Secondary mint accent */
-    --secondary-foreground: 210 33% 9.4%;
-    --muted: 200 30% 13%; /* #17252B Secondary background */
-    --muted-foreground: 153 11% 68.6%; /* #A6B8B0 Muted text */
-    --accent: 159 55% 46.7%; /* #35B98A Emerald accent */
-    --accent-foreground: 210 33% 9.4%;
+    --background: 168 20% 5.5%; /* #0B1110 Primary canvas */
+    --foreground: 135 15% 95%; /* #F1F5F2 Primary text */
+    --card: 164 22% 12%; /* #182521 Elevated surface */
+    --card-foreground: 135 15% 95%;
+    --primary: 155 76% 58%; /* #43E6A1 Primary green */
+    --primary-foreground: 168 20% 5.5%;
+    --secondary: 153 79% 70%; /* #75F0B7 Alternative premium accent */
+    --secondary-foreground: 168 20% 5.5%;
+    --muted: 163 21% 9%; /* #121C19 Secondary surface */
+    --muted-foreground: 150 7% 48%; /* #71857B Muted text */
+    --accent: 155 76% 58%; /* #43E6A1 */
+    --accent-foreground: 168 20% 5.5%;
     --terracotta: 21 47% 55%;
     --destructive: 0 62% 45%;
-    --border: 178 24% 20%; /* #273F3E Subtle dark green-grey border */
+    --border: 156 17% 18%; /* #263630 Borders */
   }
 
   body {
@@ -45,17 +45,20 @@
     font-family: var(--font-inter), "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 
   .dark body,
   html.dark body {
-    background-color: #101820; /* Main dark background */
-    color: #E8EFEA; /* Main dark text */
+    background-color: #0B1110; /* Primary canvas #0B1110 */
+    color: #F1F5F2; /* Primary text #F1F5F2 */
   }
 
   h1, h2, h3, h4, h5, h6, .font-heading {
     font-family: var(--font-sora), "Sora", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.015em;
+    text-rendering: optimizeLegibility;
   }
 
   button, input, textarea, select {
@@ -72,19 +75,19 @@
 }
 
 .dark .glass-panel {
-  background: rgba(28, 48, 47, 0.88); /* #1C302F card background */
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(39, 63, 62, 0.65); /* #273F3E border */
+  background: rgba(24, 37, 33, 0.85); /* #182521 elevated surface */
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(38, 54, 48, 0.85); /* #263630 borders */
 }
 
-/* Premium Warm Eco-Tech gradient backgrounds (no solid oversaturated greens) */
+/* Premium Eco-Tech gradient backgrounds (no solid oversaturated greens) */
 .bg-nature-gradient {
   background: radial-gradient(circle at 50% 0%, rgba(168, 191, 163, 0.25) 0%, rgba(245, 243, 234, 0.85) 55%, #F5F3EA 100%);
 }
 
 .dark .bg-nature-gradient {
-  background: radial-gradient(circle at 50% 0%, rgba(53, 185, 138, 0.12) 0%, rgba(23, 37, 43, 0.95) 55%, #101820 100%);
+  background: radial-gradient(circle at 50% 0%, rgba(67, 230, 161, 0.08) 0%, rgba(18, 28, 25, 0.95) 55%, #0B1110 100%);
 }
 
 .bg-hero-gradient {
@@ -92,31 +95,37 @@
 }
 
 .dark .bg-hero-gradient {
-  background: radial-gradient(ellipse at 50% 20%, rgba(53, 185, 138, 0.08) 0%, rgba(23, 37, 43, 0.15) 45%, transparent 75%);
+  background: radial-gradient(ellipse at 50% 20%, rgba(67, 230, 161, 0.06) 0%, rgba(18, 28, 25, 0.15) 45%, transparent 75%);
 }
 
 /* Dark Mode Palette Harmonization */
 .dark .dark\:text-limeaccent {
-  color: #35B98A !important;
+  color: #43E6A1 !important;
 }
 
 .dark .dark\:border-limeaccent {
-  border-color: #35B98A !important;
+  border-color: #43E6A1 !important;
 }
 
 .dark .dark\:bg-limeaccent {
-  background-color: #35B98A !important;
+  background-color: #43E6A1 !important;
 }
 
 .dark .dark\:text-cream {
-  color: #E8EFEA !important;
+  color: #F1F5F2 !important;
 }
 
 .dark .dark\:text-cream\/80,
 .dark .dark\:text-cream\/75,
-.dark .dark\:text-cream\/70,
-.dark .dark\:text-cream\/60 {
-  color: #A6B8B0 !important;
+.dark .dark\:text-cream\/70 {
+  color: #A1B2AA !important;
+}
+
+.dark .dark\:text-cream\/60,
+.dark .dark\:text-cream\/50,
+.dark .dark\:text-charcoal\/60,
+.dark .dark\:text-charcoal\/70 {
+  color: #8CA095 !important;
 }
 
 .dark .dark\:border-forest\/40,
@@ -124,14 +133,193 @@
 .dark .dark\:border-forest\/25,
 .dark .dark\:border-forest\/20,
 .dark .dark\:border-forest\/15 {
-  border-color: #273F3E !important;
+  border-color: #263630 !important;
 }
 
 .dark .dark\:border-sage\/40,
 .dark .dark\:border-sage\/30,
 .dark .dark\:border-sage\/25,
 .dark .dark\:border-sage\/20 {
-  border-color: #273F3E !important;
+  border-color: #263630 !important;
+}
+
+/* ======================================================== */
+/* DARK MODE HARMONIZATION & WCAG CONTRAST ENHANCEMENT      */
+/* ======================================================== */
+html.dark {
+  color-scheme: dark;
+}
+
+html.dark body {
+  background-color: #0B1110 !important;
+  color: #F1F5F2 !important;
+}
+
+/* Prevent any dark-on-dark invisible text in dark mode */
+.dark .text-charcoal {
+  color: #F1F5F2 !important;
+}
+.dark .text-charcoal\/90,
+.dark .text-charcoal\/80,
+.dark .text-charcoal\/70 {
+  color: #A1B2AA !important;
+}
+.dark .text-charcoal\/60,
+.dark .text-charcoal\/50,
+.dark .text-charcoal\/40 {
+  color: #8CA095 !important;
+}
+
+.dark .text-forest {
+  color: #43E6A1 !important;
+}
+.dark .text-forest\/90,
+.dark .text-forest\/80 {
+  color: #75F0B7 !important;
+}
+
+/* Boost muted text contrast from dim #71857B to clearly readable #8CA095 */
+.dark .text-\[\#71857B\] {
+  color: #8CA095 !important;
+}
+
+/* ======================================================== */
+/* LIGHT MODE AUTOMATIC ADAPTATION (when html is NOT .dark) */
+/* ======================================================== */
+html:not(.dark) {
+  color-scheme: light;
+}
+
+html:not(.dark) body {
+  background-color: #F5F3EA !important;
+  color: #202A24 !important;
+}
+
+/* Page canvas backgrounds */
+html:not(.dark) .bg-\[\#0B1110\],
+html:not(.dark) .bg-\[\#0B1110\]\/85,
+html:not(.dark) .bg-\[\#0B1110\]\/90,
+html:not(.dark) .bg-\[\#0B1110\]\/95 {
+  background-color: #F5F3EA !important;
+}
+
+/* Primary surface / card backgrounds */
+html:not(.dark) .bg-\[\#121C19\],
+html:not(.dark) .bg-\[\#121C19\]\/90,
+html:not(.dark) .bg-\[\#121C19\]\/95,
+html:not(.dark) .bg-\[\#121C19\]\/60 {
+  background-color: #FFFFFF !important;
+}
+
+/* Elevated surface / secondary card backgrounds */
+html:not(.dark) .bg-\[\#182521\],
+html:not(.dark) .bg-\[\#182521\]\/70,
+html:not(.dark) .bg-\[\#182521\]\/90,
+html:not(.dark) .bg-\[\#182521\]\/95 {
+  background-color: #F4F2E8 !important;
+}
+
+/* Hover surfaces */
+html:not(.dark) .bg-\[\#1F302B\],
+html:not(.dark) .hover\:bg-\[\#182521\]:hover,
+html:not(.dark) .hover\:bg-\[\#1F302B\]:hover {
+  background-color: #EAE6D8 !important;
+}
+
+/* Borders */
+html:not(.dark) .border-\[\#263630\],
+html:not(.dark) .border-\[\#263630\]\/60 {
+  border-color: #DCE5D9 !important;
+}
+
+/* Headings and primary text */
+html:not(.dark) .text-\[\#F1F5F2\] {
+  color: #17241E !important;
+}
+
+/* Secondary body text */
+html:not(.dark) .text-\[\#A1B2AA\] {
+  color: #384C42 !important;
+}
+
+/* Muted text - high contrast for light mode */
+html:not(.dark) .text-\[\#71857B\] {
+  color: #5C7065 !important;
+}
+
+/* Soft green text */
+html:not(.dark) .text-\[\#B6EAD0\] {
+  color: #174B35 !important;
+}
+
+/* Ensure vibrant accent text converts to high-contrast deep forest green on light mode */
+html:not(.dark) .text-\[\#43E6A1\] {
+  color: #174B35 !important;
+}
+html:not(.dark) .text-\[\#75F0B7\] {
+  color: #1E5A3F !important;
+}
+html:not(.dark) .text-\[\#E07A5F\] {
+  color: #B83A1B !important;
+}
+
+/* Badge backgrounds in light mode */
+html:not(.dark) .bg-\[\#43E6A1\]\/15,
+html:not(.dark) .bg-\[\#43E6A1\]\/10,
+html:not(.dark) .bg-\[\#43E6A1\]\/5 {
+  background-color: rgba(23, 75, 53, 0.08) !important;
+}
+html:not(.dark) .bg-\[\#75F0B7\]\/15 {
+  background-color: rgba(30, 90, 63, 0.08) !important;
+}
+html:not(.dark) .bg-\[\#E07A5F\]\/15 {
+  background-color: rgba(184, 58, 27, 0.08) !important;
+}
+
+/* Badge borders in light mode */
+html:not(.dark) .border-\[\#43E6A1\]\/30,
+html:not(.dark) .border-\[\#43E6A1\]\/40 {
+  border-color: rgba(23, 75, 53, 0.22) !important;
+}
+html:not(.dark) .border-\[\#75F0B7\]\/30 {
+  border-color: rgba(30, 90, 63, 0.22) !important;
+}
+html:not(.dark) .border-\[\#E07A5F\]\/30 {
+  border-color: rgba(184, 58, 27, 0.22) !important;
+}
+
+/* Secondary buttons: dark border/bg in dark mode becomes clean border/bg in light mode */
+html:not(.dark) button.bg-\[\#182521\],
+html:not(.dark) a.bg-\[\#182521\],
+html:not(.dark) button.bg-\[\#121C19\],
+html:not(.dark) a.bg-\[\#121C19\] {
+  background-color: #FFFFFF !important;
+  color: #17241E !important;
+  border-color: #DCE5D9 !important;
+}
+html:not(.dark) button.bg-\[\#182521\]:hover,
+html:not(.dark) a.bg-\[\#182521\]:hover,
+html:not(.dark) button.bg-\[\#121C19\]:hover,
+html:not(.dark) a.bg-\[\#121C19\]:hover {
+  background-color: #F4F2E8 !important;
+}
+
+/* Inputs in light mode */
+html:not(.dark) input.bg-\[\#182521\],
+html:not(.dark) textarea.bg-\[\#182521\],
+html:not(.dark) select.bg-\[\#182521\] {
+  background-color: #FFFFFF !important;
+  border-color: #DCE5D9 !important;
+  color: #17241E !important;
+}
+html:not(.dark) input::placeholder,
+html:not(.dark) textarea::placeholder {
+  color: #7A9084 !important;
+}
+
+/* Elevated shadows in light mode */
+html:not(.dark) .shadow-elevated {
+  box-shadow: 0 12px 36px -4px rgba(23, 75, 53, 0.10), 0 4px 12px -2px rgba(23, 75, 53, 0.05) !important;
 }
 
 /* 3D Perspective helper classes */
@@ -167,11 +355,11 @@
 }
 
 .dark ::-webkit-scrollbar-thumb {
-  background: rgba(39, 63, 62, 0.8);
+  background: rgba(38, 54, 48, 0.9);
 }
 
 .dark ::-webkit-scrollbar-thumb:hover {
-  background: #35B98A;
+  background: #43E6A1;
 }
 
 /* Respect reduced motion */

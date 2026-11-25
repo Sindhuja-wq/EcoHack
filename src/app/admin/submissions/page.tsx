@@ -123,22 +123,24 @@ export default function AdminSubmissionsPage() {
   const currentList = activeTab === "challenges" ? challengeSubmissions : projectSubmissions;
 
   return (
-    <div className="w-full min-h-[calc(100vh-80px)] py-10 px-4 sm:px-6 lg:px-8 bg-nature-gradient dark:bg-night flex justify-center">
-      <div className="max-w-7xl w-full space-y-8">
+    <div className="w-full min-h-[calc(100vh-68px)] py-12 px-4 sm:px-6 lg:px-8 bg-cream dark:bg-night text-charcoal dark:text-darktext flex justify-center relative overflow-hidden transition-colors">
+      <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[700px] h-96 bg-emerald-500/10 dark:bg-[#43E6A1]/5 rounded-full blur-[140px] pointer-events-none" />
+
+      <div className="max-w-7xl w-full space-y-8 relative z-10">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-emerald-500/20">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-sage/40 dark:border-night-border">
           <div>
             <Link
               href="/admin"
-              className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300 hover:underline mb-2"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-charcoal/70 dark:text-darktext-secondary hover:text-forest dark:hover:text-emeraldaccent transition-colors mb-2"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>Back to Admin Console</span>
             </Link>
-            <h1 className="text-3xl font-black text-emerald-950 dark:text-emerald-50 tracking-tight">
+            <h1 className="text-3xl font-black font-heading text-charcoal dark:text-darktext tracking-tight">
               Submission Verification Queue
             </h1>
-            <p className="text-xs text-emerald-900/60 dark:text-emerald-400 mt-0.5">
+            <p className="text-xs text-charcoal/60 dark:text-darktext-muted mt-0.5">
               Carefully verify evidence photos before approving to ensure genuine sustainability action and prevent gaming.
             </p>
           </div>
@@ -151,8 +153,8 @@ export default function AdminSubmissionsPage() {
                 onClick={() => setStatusFilter(st)}
                 className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
                   statusFilter === st
-                    ? "bg-emerald-700 text-white border-emerald-700 shadow-sm"
-                    : "bg-white/80 dark:bg-night-card/80 text-emerald-950/70 dark:text-emerald-200 border-emerald-500/20 hover:bg-emerald-50"
+                    ? "bg-forest hover:bg-forest-light text-white dark:bg-emeraldaccent dark:text-night dark:hover:bg-emeraldaccent-hover border-transparent shadow-glow"
+                    : "bg-white dark:bg-night-card text-charcoal/70 dark:text-darktext-secondary border-sage/40 dark:border-night-border hover:text-charcoal dark:hover:text-darktext hover:bg-cream-100 dark:hover:bg-night-border"
                 }`}
               >
                 {st}
@@ -167,8 +169,8 @@ export default function AdminSubmissionsPage() {
             onClick={() => setActiveTab("challenges")}
             className={`px-5 py-2.5 rounded-2xl font-bold text-xs transition-all border flex items-center gap-2 ${
               activeTab === "challenges"
-                ? "bg-emerald-700 text-white border-emerald-700 shadow-soft"
-                : "bg-white/80 dark:bg-night-card/80 text-emerald-950/80 dark:text-emerald-200 border-emerald-500/20 hover:bg-emerald-50"
+                ? "bg-forest hover:bg-forest-light text-white dark:bg-emeraldaccent dark:text-night dark:hover:bg-emeraldaccent-hover border-transparent shadow-glow"
+                : "bg-white dark:bg-night-secondary text-charcoal/70 dark:text-darktext-secondary border-sage/40 dark:border-night-border hover:bg-cream-100 dark:hover:bg-night-card hover:text-charcoal dark:hover:text-darktext"
             }`}
           >
             <Target className="w-4 h-4" />
@@ -179,8 +181,8 @@ export default function AdminSubmissionsPage() {
             onClick={() => setActiveTab("projects")}
             className={`px-5 py-2.5 rounded-2xl font-bold text-xs transition-all border flex items-center gap-2 ${
               activeTab === "projects"
-                ? "bg-emerald-700 text-white border-emerald-700 shadow-soft"
-                : "bg-white/80 dark:bg-night-card/80 text-emerald-950/80 dark:text-emerald-200 border-emerald-500/20 hover:bg-emerald-50"
+                ? "bg-forest hover:bg-forest-light text-white dark:bg-emeraldaccent dark:text-night dark:hover:bg-emeraldaccent-hover border-transparent shadow-glow"
+                : "bg-white dark:bg-night-secondary text-charcoal/70 dark:text-darktext-secondary border-sage/40 dark:border-night-border hover:bg-cream-100 dark:hover:bg-night-card hover:text-charcoal dark:hover:text-darktext"
             }`}
           >
             <Sparkles className="w-4 h-4" />
@@ -189,18 +191,18 @@ export default function AdminSubmissionsPage() {
         </div>
 
         {/* Submissions List */}
-        <div className="p-8 rounded-3xl bg-white/95 dark:bg-night-card/95 border border-emerald-500/20 shadow-soft space-y-4">
+        <div className="p-8 rounded-3xl bg-white dark:bg-night-secondary border border-sage/40 dark:border-night-border shadow-elevated space-y-4 transition-colors">
           {loading ? (
-            <p className="text-center py-12 text-sm text-emerald-900/60 dark:text-emerald-400 font-semibold">
+            <p className="text-center py-12 text-sm text-charcoal/60 dark:text-darktext-muted font-semibold">
               Loading submissions in queue...
             </p>
           ) : currentList.length === 0 ? (
             <div className="text-center py-16 space-y-2">
-              <CheckCircle2 className="w-10 h-10 text-emerald-600/40 mx-auto" />
-              <h3 className="font-bold text-emerald-950 dark:text-emerald-100 text-base">
+              <CheckCircle2 className="w-10 h-10 text-forest/40 dark:text-emeraldaccent/40 mx-auto" />
+              <h3 className="font-bold font-heading text-charcoal dark:text-darktext text-base">
                 Queue Clear!
               </h3>
-              <p className="text-xs text-emerald-900/60 dark:text-emerald-400">
+              <p className="text-xs text-charcoal/60 dark:text-darktext-muted">
                 No submissions matching &quot;{statusFilter}&quot; currently in the queue.
               </p>
             </div>
@@ -218,57 +220,57 @@ export default function AdminSubmissionsPage() {
                 return (
                   <div
                     key={sub.id}
-                    className="p-5 rounded-2xl bg-emerald-50/40 dark:bg-night-hover/40 border border-emerald-500/15 flex flex-col md:flex-row md:items-center justify-between gap-6"
+                    className="p-5 rounded-2xl bg-cream-50 dark:bg-night-card border border-sage/30 dark:border-night-border flex flex-col md:flex-row md:items-center justify-between gap-6 hover:border-forest/40 dark:hover:border-emeraldaccent/40 transition-colors"
                   >
                     {/* Left: User & Evidence Image */}
                     <div className="flex items-start gap-4">
                       <div
                         onClick={() => setImageModalUrl(sub.evidenceUrl)}
-                        className="relative w-24 h-24 rounded-2xl overflow-hidden border border-emerald-500/25 shrink-0 cursor-pointer group bg-black/10"
+                        className="relative w-24 h-24 rounded-2xl overflow-hidden border border-sage/40 dark:border-night-border shrink-0 cursor-pointer group bg-sage/20 dark:bg-black/40"
                       >
                         <img
                           src={sub.evidenceUrl}
                           alt="Evidence"
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                         />
-                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition-opacity">
-                          <Eye className="w-5 h-5" />
+                        <div className="absolute inset-0 bg-charcoal/50 dark:bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition-opacity">
+                          <Eye className="w-5 h-5 text-emeraldaccent" />
                         </div>
                       </div>
 
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                          <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-800 dark:text-emerald-300">
+                          <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-white dark:bg-night-secondary border border-sage/30 dark:border-night-border text-forest dark:text-emeraldaccent">
                             +{rewardPoints} pts
                           </span>
                           <span
-                            className={`text-[11px] font-bold px-2 py-0.5 rounded ${
+                            className={`text-[11px] font-bold px-2 py-0.5 rounded border ${
                               sub.status === "APPROVED"
-                                ? "bg-emerald-500/20 text-emerald-800 dark:text-emerald-300"
+                                ? "bg-emerald-500/15 text-forest dark:text-emeraldaccent border-emerald-500/30"
                                 : sub.status === "REJECTED"
-                                ? "bg-rose-500/20 text-rose-800 dark:text-rose-300"
-                                : "bg-amber-500/20 text-amber-800 dark:text-amber-300"
+                                ? "bg-amber-500/15 text-terra dark:text-[#E07A5F] border-amber-500/30 dark:border-[#E07A5F]/30"
+                                : "bg-white dark:bg-night-secondary text-charcoal/70 dark:text-darktext-secondary border-sage/30 dark:border-night-border"
                             }`}
                           >
                             {sub.status}
                           </span>
                         </div>
 
-                        <h4 className="font-bold text-base text-emerald-950 dark:text-emerald-100">
+                        <h4 className="font-bold font-heading text-base text-charcoal dark:text-darktext">
                           {title}
                         </h4>
 
-                        <p className="text-xs text-emerald-900/80 dark:text-emerald-300">
-                          Submitted by: <strong className="font-semibold">{sub.user?.name}</strong> ({sub.user?.email})
+                        <p className="text-xs text-charcoal/70 dark:text-darktext-secondary">
+                          Submitted by: <strong className="font-semibold text-charcoal dark:text-darktext">{sub.user?.name}</strong> ({sub.user?.email})
                         </p>
 
                         {(sub.description || sub.notes) && (
-                          <p className="text-xs text-emerald-950/70 dark:text-emerald-400 italic">
+                          <p className="text-xs text-charcoal/60 dark:text-darktext-muted italic">
                             &quot;{sub.description || sub.notes}&quot;
                           </p>
                         )}
 
-                        <p className="text-[10px] text-emerald-900/50 dark:text-emerald-400">
+                        <p className="text-[10px] text-charcoal/50 dark:text-darktext-muted">
                           Received: {new Date(sub.createdAt).toLocaleString()}
                         </p>
                       </div>
@@ -280,14 +282,14 @@ export default function AdminSubmissionsPage() {
                         <>
                           <button
                             onClick={() => handleOpenReview(sub, isChallenge ? "CHALLENGE" : "PROJECT", "APPROVE")}
-                            className="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-soft flex items-center gap-1.5"
+                            className="px-4 py-2 rounded-xl bg-forest hover:bg-forest-light text-white dark:bg-emeraldaccent dark:hover:bg-emeraldaccent-hover dark:text-night font-bold text-xs shadow-glow flex items-center gap-1.5 transition-all"
                           >
                             <Check className="w-4 h-4" />
                             <span>Approve & Award</span>
                           </button>
                           <button
                             onClick={() => handleOpenReview(sub, isChallenge ? "CHALLENGE" : "PROJECT", "REJECT")}
-                            className="px-4 py-2 rounded-xl border border-rose-500/30 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20 font-bold text-xs flex items-center gap-1.5"
+                            className="px-4 py-2 rounded-xl border border-amber-500/40 dark:border-[#E07A5F]/40 text-terra dark:text-[#E07A5F] hover:bg-amber-500/10 dark:hover:bg-[#E07A5F]/10 font-bold text-xs flex items-center gap-1.5 transition-colors"
                           >
                             <X className="w-4 h-4" />
                             <span>Reject with Reason</span>
@@ -295,11 +297,11 @@ export default function AdminSubmissionsPage() {
                         </>
                       ) : (
                         <div className="text-right text-xs">
-                          <span className="font-semibold text-emerald-900/70 dark:text-emerald-400">
+                          <span className="font-semibold text-charcoal/60 dark:text-darktext-muted">
                             Reviewed by: {sub.reviewer?.name || "Moderator"}
                           </span>
                           {sub.reviewerFeedback && (
-                            <p className="text-[11px] text-emerald-950/70 dark:text-emerald-400 mt-0.5 max-w-xs">
+                            <p className="text-[11px] text-charcoal/70 dark:text-darktext-secondary mt-0.5 max-w-xs">
                               Note: {sub.reviewerFeedback}
                             </p>
                           )}
@@ -316,20 +318,20 @@ export default function AdminSubmissionsPage() {
         {/* Review Decision Modal */}
         <AnimatePresence>
           {reviewModalOpen && activeSubmission && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="w-full max-w-md bg-white dark:bg-night-card rounded-3xl p-6 sm:p-8 shadow-soft-lg border border-emerald-500/25 space-y-5"
+                className="w-full max-w-md bg-white dark:bg-night-secondary border border-sage/40 dark:border-night-border rounded-3xl p-6 sm:p-8 shadow-elevated space-y-5"
               >
-                <div className="flex items-center justify-between border-b border-emerald-500/15 pb-4">
-                  <h3 className="text-base font-black text-emerald-950 dark:text-emerald-100">
+                <div className="flex items-center justify-between border-b border-sage/30 dark:border-night-border pb-4">
+                  <h3 className="text-base font-black font-heading text-charcoal dark:text-darktext">
                     Confirm Review Decision ({reviewAction})
                   </h3>
                   <button
                     onClick={() => setReviewModalOpen(false)}
-                    className="p-1 rounded-lg text-emerald-900/60 hover:text-emerald-900 dark:text-emerald-400"
+                    className="p-1.5 rounded-lg text-charcoal/50 dark:text-darktext-muted hover:text-charcoal dark:hover:text-darktext hover:bg-cream-100 dark:hover:bg-night-card transition-colors"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -337,7 +339,7 @@ export default function AdminSubmissionsPage() {
 
                 <form onSubmit={handleConfirmReview} className="space-y-4">
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-emerald-900 dark:text-emerald-300 mb-1.5">
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-charcoal/70 dark:text-darktext-secondary mb-1.5">
                       Reviewer Feedback / Reason
                     </label>
                     <textarea
@@ -345,7 +347,7 @@ export default function AdminSubmissionsPage() {
                       required
                       value={feedback}
                       onChange={(e) => setFeedback(e.target.value)}
-                      className="w-full p-3 rounded-xl border border-emerald-500/25 dark:border-emerald-500/30 bg-white/70 dark:bg-night-hover/70 text-emerald-950 dark:text-white text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      className="w-full p-3 rounded-xl border border-sage/40 dark:border-night-border bg-cream-50 dark:bg-night-card text-charcoal dark:text-darktext text-xs font-medium focus:outline-none focus:border-forest dark:focus:border-emeraldaccent focus:ring-1 focus:ring-forest dark:focus:ring-emeraldaccent"
                     />
                   </div>
 
@@ -353,15 +355,17 @@ export default function AdminSubmissionsPage() {
                     <button
                       type="button"
                       onClick={() => setReviewModalOpen(false)}
-                      className="px-4 py-2 rounded-xl border border-emerald-500/20 text-xs font-semibold"
+                      className="px-4 py-2 rounded-xl border border-sage/40 dark:border-night-border text-xs font-semibold text-charcoal/70 dark:text-darktext-secondary hover:bg-cream-100 dark:hover:bg-night-card transition-colors"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
                       disabled={submittingReview}
-                      className={`px-5 py-2 rounded-xl font-bold text-xs text-white shadow-soft ${
-                        reviewAction === "APPROVE" ? "bg-emerald-700 hover:bg-emerald-800" : "bg-rose-600 hover:bg-rose-700"
+                      className={`px-5 py-2 rounded-xl font-bold text-xs shadow-soft transition-all ${
+                        reviewAction === "APPROVE"
+                          ? "bg-forest hover:bg-forest-light text-white dark:bg-emeraldaccent dark:hover:bg-emeraldaccent-hover dark:text-night shadow-glow"
+                          : "bg-terra hover:bg-terra/90 text-white"
                       }`}
                     >
                       {submittingReview ? "Processing..." : `Confirm ${reviewAction}`}
@@ -378,9 +382,9 @@ export default function AdminSubmissionsPage() {
           {imageModalUrl && (
             <div
               onClick={() => setImageModalUrl(null)}
-              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md cursor-pointer"
+              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md cursor-pointer"
             >
-              <div className="relative max-w-3xl max-h-[85vh] rounded-2xl overflow-hidden shadow-2xl">
+              <div className="relative max-w-3xl max-h-[85vh] rounded-2xl overflow-hidden border border-sage/40 dark:border-night-border shadow-2xl">
                 <img src={imageModalUrl} alt="Evidence full preview" className="w-full h-full object-contain" />
               </div>
             </div>

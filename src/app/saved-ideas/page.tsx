@@ -16,6 +16,7 @@ import {
   X,
   Camera,
   Award,
+  Scan,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -162,104 +163,110 @@ export default function SavedIdeasPage() {
 
   if (authLoading || loading) {
     return (
-      <div className="w-full min-h-[calc(100vh-80px)] py-12 flex items-center justify-center bg-nature-gradient dark:bg-night text-sm font-semibold text-emerald-900/60 dark:text-emerald-400">
+      <div className="w-full min-h-[calc(100vh-68px)] py-12 flex items-center justify-center bg-cream dark:bg-night text-sm font-semibold text-charcoal/60 dark:text-darktext-muted transition-colors">
         Loading your saved transformation ideas...
       </div>
     );
   }
 
   return (
-    <div className="w-full min-h-[calc(100vh-80px)] py-10 px-4 sm:px-6 lg:px-8 bg-nature-gradient dark:bg-night flex justify-center">
-      <div className="max-w-7xl w-full space-y-8">
+    <div className="w-full min-h-[calc(100vh-68px)] py-12 px-4 sm:px-6 lg:px-8 bg-cream dark:bg-night text-charcoal dark:text-darktext flex justify-center relative overflow-hidden transition-colors">
+      <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[700px] h-96 bg-emerald-500/10 dark:bg-[#43E6A1]/5 rounded-full blur-[140px] pointer-events-none" />
+
+      <div className="max-w-7xl w-full space-y-8 relative z-10">
         <div className="text-center space-y-3">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/25 text-emerald-800 dark:text-emerald-300 text-xs font-bold uppercase tracking-wider">
-            <Bookmark className="w-4 h-4" />
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white dark:bg-night-secondary border border-sage/40 dark:border-night-border text-forest dark:text-emeraldaccent text-xs font-semibold uppercase tracking-wider">
+            <Bookmark className="w-4 h-4 text-forest dark:text-emeraldaccent" />
             <span>Personal DIY Library</span>
           </div>
-          <h1 className="text-3xl sm:text-5xl font-black text-emerald-950 dark:text-emerald-50 tracking-tight">
-            Saved Transformation Ideas
+          <h1 className="text-3xl sm:text-5xl font-black font-heading tracking-tight text-charcoal dark:text-darktext">
+            Saved Transformation Blueprints
           </h1>
-          <p className="text-sm sm:text-base text-emerald-950/70 dark:text-emerald-300/80 max-w-xl mx-auto">
+          <p className="text-sm sm:text-base text-charcoal/70 dark:text-darktext-secondary max-w-xl mx-auto">
             Review, craft, and complete your bookmarked waste-to-value blueprints.
           </p>
         </div>
 
         {savedIdeas.length === 0 ? (
-          <div className="p-16 rounded-3xl bg-white/95 dark:bg-night-card/95 border border-emerald-500/20 text-center space-y-4">
-            <Bookmark className="w-12 h-12 text-emerald-600/40 mx-auto" />
+          <div className="p-16 rounded-3xl bg-white dark:bg-night-secondary border border-sage/40 dark:border-night-border text-center space-y-4 transition-colors">
+            <Bookmark className="w-12 h-12 text-charcoal/40 dark:text-darktext-muted mx-auto" />
             <div className="space-y-1">
-              <h3 className="text-xl font-bold text-emerald-950 dark:text-emerald-100">
+              <h3 className="text-xl font-bold font-heading text-charcoal dark:text-darktext">
                 Your Saved Collection is Empty
               </h3>
-              <p className="text-xs text-emerald-900/60 dark:text-emerald-400 max-w-sm mx-auto">
+              <p className="text-xs text-charcoal/60 dark:text-darktext-muted max-w-sm mx-auto">
                 Whenever you analyze waste items in the AI Scanner, click &quot;Save This Idea&quot; to keep blueprints here for easy reference.
               </p>
             </div>
             <Link
               href="/scanner"
-              className="inline-block px-6 py-2.5 rounded-xl bg-emerald-700 text-white font-bold text-xs shadow-soft"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-forest hover:bg-forest-light dark:bg-emeraldaccent dark:hover:bg-emeraldaccent-hover text-white dark:text-night font-bold text-xs shadow-glow transition-all"
             >
-              Scan a Discard Now
+              <Scan className="w-4 h-4" />
+              <span>Scan Waste Item</span>
             </Link>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {savedIdeas.map((idea) => {
-              const opt = idea.transformationOption;
-              const analysis = opt?.analysis;
-              const materials = opt?.materialsTools ? JSON.parse(opt.materialsTools) : [];
+            {savedIdeas.map((saved) => {
+              const opt = saved.transformationOption;
+              if (!opt) return null;
 
               return (
                 <div
-                  key={idea.id}
-                  className="p-6 rounded-3xl bg-white/95 dark:bg-night-card/95 border border-emerald-500/20 shadow-soft hover:shadow-soft-lg transition-all flex flex-col justify-between"
+                  key={saved.id}
+                  className="p-6 rounded-3xl bg-white dark:bg-night-secondary border border-sage/40 dark:border-night-border shadow-elevated flex flex-col justify-between space-y-4 hover:border-forest/40 dark:hover:border-emeraldaccent/40 transition-colors"
                 >
-                  <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-800 dark:text-emerald-300">
-                        {opt?.difficulty} Difficulty
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-cream-50 dark:bg-night-card border border-sage/30 dark:border-night-border text-forest dark:text-emeraldaccent">
+                        {opt.difficulty} Difficulty
                       </span>
-                      <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 flex items-center gap-1">
-                        <Clock className="w-3.5 h-3.5" />
-                        {opt?.estimatedTime}
-                      </span>
+                      <button
+                        onClick={() => handleRemoveIdea(saved.transformationOptionId)}
+                        className="p-1 rounded-lg text-charcoal/60 dark:text-darktext-muted hover:text-terra dark:hover:text-[#E07A5F] transition-colors"
+                        title="Remove saved blueprint"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
 
-                    <h3 className="text-lg font-bold text-emerald-950 dark:text-emerald-100 mb-1">
-                      {opt?.title}
+                    <h3 className="text-lg font-bold font-heading text-charcoal dark:text-darktext line-clamp-1">
+                      {opt.title}
                     </h3>
-                    <p className="text-xs text-emerald-900/60 dark:text-emerald-400 mb-3 font-medium">
-                      Item: {analysis?.detectedItem || "Household discard"}
+
+                    <p className="text-xs text-charcoal/70 dark:text-darktext-secondary line-clamp-3 leading-relaxed">
+                      {opt.shortExplanation}
                     </p>
 
-                    <p className="text-xs text-emerald-950/75 dark:text-emerald-300/80 leading-relaxed mb-4 line-clamp-3">
-                      {opt?.shortExplanation}
-                    </p>
+                    <div className="flex items-center gap-4 text-xs text-charcoal/60 dark:text-darktext-muted pt-1">
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-3.5 h-3.5 text-forest dark:text-emeraldaccent" />
+                        {opt.estimatedTime}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <DollarSign className="w-3.5 h-3.5 text-forest dark:text-emeraldaccent" />
+                        {opt.estimatedCost || "Free"}
+                      </span>
+                    </div>
                   </div>
 
-                  <div className="pt-4 border-t border-emerald-500/10 flex items-center justify-between gap-2">
+                  <div className="pt-3 border-t border-sage/30 dark:border-night-border flex items-center justify-between gap-2">
                     <button
-                      onClick={() => handleRemoveIdea(opt.id)}
-                      className="p-2 rounded-xl text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-colors"
-                      title="Remove from saved"
+                      onClick={() => setActiveIdeaForDetail(saved)}
+                      className="text-xs font-semibold text-charcoal/70 dark:text-darktext-secondary hover:text-forest dark:hover:text-emeraldaccent transition-colors flex items-center gap-1"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <span>View Guide</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
                     </button>
 
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => setActiveIdeaForDetail(idea)}
-                        className="px-3.5 py-2 rounded-xl border border-emerald-500/20 text-xs font-bold text-emerald-800 dark:text-emerald-200 hover:bg-emerald-50"
-                      >
-                        Blueprint
-                      </button>
-                      <button
-                        onClick={() => handleOpenCompletionModal(opt)}
-                        className="px-3.5 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold shadow-sm"
-                      >
-                        I Completed This
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => handleOpenCompletionModal(opt)}
+                      className="px-4 py-2 rounded-xl bg-forest hover:bg-forest-light dark:bg-emeraldaccent dark:hover:bg-emeraldaccent-hover text-white dark:text-night font-bold text-xs transition-all shadow-glow flex items-center gap-1.5"
+                    >
+                      <Check className="w-3.5 h-3.5" />
+                      <span>Completed (+40)</span>
+                    </button>
                   </div>
                 </div>
               );
@@ -270,81 +277,86 @@ export default function SavedIdeasPage() {
         {/* Blueprint Details Modal */}
         <AnimatePresence>
           {activeIdeaForDetail && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 dark:bg-black/80 backdrop-blur-md">
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="w-full max-w-2xl bg-white dark:bg-night-card rounded-3xl p-6 sm:p-8 shadow-soft-lg border border-emerald-500/25 space-y-6 my-8"
+                className="w-full max-w-2xl bg-white dark:bg-night-secondary border border-sage/40 dark:border-night-border rounded-3xl p-6 sm:p-8 shadow-elevated space-y-6 max-h-[90vh] overflow-y-auto transition-colors"
               >
-                <div className="flex items-start justify-between border-b border-emerald-500/15 pb-4">
+                <div className="flex items-center justify-between border-b border-sage/30 dark:border-night-border pb-4">
                   <div>
-                    <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-800 dark:text-emerald-300">
-                      {activeIdeaForDetail.transformationOption?.difficulty}
+                    <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-cream-50 dark:bg-night-card border border-sage/30 dark:border-night-border text-forest dark:text-emeraldaccent">
+                      {activeIdeaForDetail.transformationOption?.difficulty} Difficulty
                     </span>
-                    <h3 className="text-xl font-black text-emerald-950 dark:text-emerald-100 mt-1">
+                    <h3 className="text-2xl font-black font-heading text-charcoal dark:text-darktext mt-2">
                       {activeIdeaForDetail.transformationOption?.title}
                     </h3>
                   </div>
                   <button
                     onClick={() => setActiveIdeaForDetail(null)}
-                    className="p-1 rounded-lg text-emerald-900/60 hover:text-emerald-900 dark:text-emerald-400"
+                    className="p-1.5 rounded-lg text-charcoal/60 dark:text-darktext-muted hover:text-charcoal dark:hover:text-darktext hover:bg-cream-100 dark:hover:bg-night-card transition-colors"
                   >
                     <X className="w-5 h-5" />
                   </button>
                 </div>
 
-                <div className="space-y-4 text-xs">
-                  <div className="p-4 rounded-2xl bg-emerald-50/70 dark:bg-night-hover/70 border border-emerald-500/15">
-                    <strong className="block text-emerald-800 dark:text-emerald-300 font-bold mb-1">
-                      Summary & Purpose:
-                    </strong>
-                    <p className="text-emerald-950/80 dark:text-emerald-200 leading-relaxed">
+                <div className="space-y-4 text-xs text-charcoal/70 dark:text-darktext-secondary">
+                  <div>
+                    <h5 className="font-semibold uppercase tracking-wider text-charcoal/60 dark:text-darktext-muted mb-2">
+                      Overview
+                    </h5>
+                    <p className="leading-relaxed">
                       {activeIdeaForDetail.transformationOption?.shortExplanation}
                     </p>
                   </div>
 
                   <div>
-                    <strong className="block text-emerald-900 dark:text-emerald-300 font-bold uppercase tracking-wider mb-2">
-                      Step-by-Step Instructions:
-                    </strong>
-                    <div className="space-y-2">
-                      {(activeIdeaForDetail.transformationOption?.stepByStep
-                        ? JSON.parse(activeIdeaForDetail.transformationOption.stepByStep)
-                        : []
-                      ).map((s: any, idx: number) => (
-                        <div key={idx} className="p-3 rounded-xl bg-white dark:bg-night border border-emerald-500/15 flex items-start gap-2.5">
-                          <span className="w-5 h-5 rounded-full bg-emerald-700 text-white flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">
+                    <h5 className="font-semibold uppercase tracking-wider text-charcoal/60 dark:text-darktext-muted mb-2">
+                      Required Materials & Tools
+                    </h5>
+                    <div className="flex flex-wrap gap-2">
+                      {activeIdeaForDetail.transformationOption?.materialsTools?.map((m: string, i: number) => (
+                        <span key={i} className="px-3 py-1 rounded-xl bg-cream-50 dark:bg-night-card border border-sage/30 dark:border-night-border text-charcoal dark:text-darktext">
+                          • {m}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <h5 className="font-semibold uppercase tracking-wider text-charcoal/60 dark:text-darktext-muted mb-2">
+                      Step-by-Step Instructions
+                    </h5>
+                    <div className="space-y-2.5">
+                      {activeIdeaForDetail.transformationOption?.stepByStep?.map((s: any, idx: number) => (
+                        <div key={idx} className="p-3.5 rounded-2xl bg-cream-50 dark:bg-night-card border border-sage/30 dark:border-night-border flex items-start gap-3 transition-colors">
+                          <span className="w-5 h-5 rounded-full bg-forest dark:bg-emeraldaccent text-white dark:text-night font-bold flex items-center justify-center shrink-0 mt-0.5 text-[11px]">
                             {s.step || idx + 1}
                           </span>
-                          <span className="text-emerald-950 dark:text-emerald-100 leading-relaxed font-medium">
+                          <span className="text-charcoal dark:text-darktext font-medium leading-relaxed">
                             {s.instruction}
                           </span>
                         </div>
                       ))}
                     </div>
                   </div>
-
-                  {activeIdeaForDetail.transformationOption?.safetyPrecautions && (
-                    <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/25">
-                      <span className="font-bold text-amber-900 dark:text-amber-300 block mb-1">
-                        Safety Precautions:
-                      </span>
-                      <p className="text-amber-950/80 dark:text-amber-200">
-                        {activeIdeaForDetail.transformationOption.safetyPrecautions}
-                      </p>
-                    </div>
-                  )}
                 </div>
 
-                <div className="flex items-center justify-end gap-3 pt-4 border-t border-emerald-500/15">
+                <div className="flex items-center justify-end gap-3 pt-4 border-t border-sage/30 dark:border-night-border">
+                  <button
+                    onClick={() => setActiveIdeaForDetail(null)}
+                    className="px-5 py-2.5 rounded-xl text-xs font-semibold text-charcoal/70 dark:text-darktext-secondary hover:bg-cream-100 dark:hover:bg-night-card transition-colors"
+                  >
+                    Close
+                  </button>
                   <button
                     onClick={() => {
                       const opt = activeIdeaForDetail.transformationOption;
                       setActiveIdeaForDetail(null);
                       handleOpenCompletionModal(opt);
                     }}
-                    className="px-5 py-2.5 rounded-xl font-bold text-xs text-white bg-emerald-700 hover:bg-emerald-800 shadow-soft"
+                    className="px-6 py-2.5 rounded-xl font-bold text-xs text-white dark:text-night bg-forest hover:bg-forest-light dark:bg-emeraldaccent dark:hover:bg-emeraldaccent-hover shadow-glow transition-all"
                   >
                     I Completed This (+40 pts)
                   </button>
@@ -354,28 +366,23 @@ export default function SavedIdeasPage() {
           )}
         </AnimatePresence>
 
-        {/* Completion Modal */}
+        {/* Completion Evidence Submission Modal */}
         <AnimatePresence>
           {completionModalOpen && selectedOptionForCompletion && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 dark:bg-black/80 backdrop-blur-md">
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="w-full max-w-lg bg-white dark:bg-night-card rounded-3xl p-6 sm:p-8 shadow-soft-lg border border-emerald-500/25 space-y-5"
+                className="w-full max-w-lg bg-white dark:bg-night-secondary border border-sage/40 dark:border-night-border rounded-3xl p-6 sm:p-8 shadow-elevated space-y-6 max-h-[90vh] overflow-y-auto transition-colors"
               >
-                <div className="flex items-center justify-between border-b border-emerald-500/15 pb-4">
-                  <div>
-                    <h3 className="text-lg font-black text-emerald-950 dark:text-emerald-100">
-                      Submit Completed Project
-                    </h3>
-                    <p className="text-xs text-emerald-900/60 dark:text-emerald-400 mt-0.5">
-                      {selectedOptionForCompletion.title}
-                    </p>
-                  </div>
+                <div className="flex items-center justify-between border-b border-sage/30 dark:border-night-border pb-4">
+                  <h3 className="text-xl font-black font-heading text-charcoal dark:text-darktext">
+                    Submit Completed Blueprint
+                  </h3>
                   <button
                     onClick={() => setCompletionModalOpen(false)}
-                    className="p-1 rounded-lg text-emerald-900/60 hover:text-emerald-900 dark:text-emerald-400"
+                    className="p-1.5 rounded-lg text-charcoal/60 dark:text-darktext-muted hover:text-charcoal dark:hover:text-darktext hover:bg-cream-100 dark:hover:bg-night-card transition-colors"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -383,67 +390,55 @@ export default function SavedIdeasPage() {
 
                 <form onSubmit={handleSubmitCompletion} className="space-y-4">
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-emerald-900 dark:text-emerald-300 mb-2">
-                      Upload Proof Photo
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-charcoal/80 dark:text-darktext-secondary mb-2">
+                      Upload Proof / Evidence Photo *
                     </label>
-                    {evidencePreview ? (
-                      <div className="relative w-full aspect-video rounded-2xl overflow-hidden border border-emerald-500/30">
-                        <img src={evidencePreview} alt="Evidence preview" className="w-full h-full object-cover" />
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setEvidenceFile(null);
-                            setEvidencePreview(null);
-                          }}
-                          className="absolute top-2 right-2 p-1.5 rounded-full bg-black/60 text-white"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ) : (
-                      <label className="border-2 border-dashed border-emerald-500/35 hover:border-emerald-500 rounded-2xl p-6 text-center cursor-pointer block hover:bg-emerald-500/5 transition-colors">
-                        <Camera className="w-8 h-8 text-emerald-600 mx-auto mb-2" />
-                        <span className="text-xs font-semibold text-emerald-900 dark:text-emerald-200">
-                          Select photo of finished transformation
-                        </span>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleEvidenceFileChange}
-                          className="hidden"
-                          required
-                        />
-                      </label>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-emerald-900 dark:text-emerald-300 mb-1.5">
-                      Notes or Learnings (Optional)
-                    </label>
-                    <textarea
-                      rows={2}
-                      value={completionNotes}
-                      onChange={(e) => setCompletionNotes(e.target.value)}
-                      placeholder="e.g. Worked great with my plants!"
-                      className="w-full p-3 rounded-xl border border-emerald-500/25 dark:border-emerald-500/30 bg-white/70 dark:bg-night-hover/70 text-emerald-950 dark:text-white placeholder:text-emerald-900/40 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleEvidenceFileChange}
+                      required
+                      className="w-full text-xs text-charcoal/70 dark:text-darktext-secondary file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-forest dark:file:bg-[#43E6A1] file:text-white dark:file:text-[#0B1110] hover:file:bg-forest-light dark:hover:file:bg-[#75F0B7] file:cursor-pointer"
                     />
                   </div>
 
-                  <div className="flex items-center justify-end gap-3 pt-2">
+                  {evidencePreview && (
+                    <div className="relative w-full aspect-video rounded-2xl overflow-hidden border border-sage/40 dark:border-night-border">
+                      <img
+                        src={evidencePreview}
+                        alt="Evidence preview"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
+
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-charcoal/80 dark:text-darktext-secondary mb-2">
+                      Project Notes (Optional)
+                    </label>
+                    <textarea
+                      rows={3}
+                      value={completionNotes}
+                      onChange={(e) => setCompletionNotes(e.target.value)}
+                      placeholder="Share your experience crafting this project..."
+                      className="w-full p-3.5 rounded-xl border border-sage/40 dark:border-night-border bg-white dark:bg-night-card text-xs text-charcoal dark:text-darktext placeholder:text-charcoal/40 dark:placeholder:text-darktext-muted focus:outline-none focus:border-forest dark:focus:border-emeraldaccent focus:ring-1 focus:ring-forest dark:focus:ring-emeraldaccent"
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-end gap-3 pt-3 border-t border-sage/30 dark:border-night-border">
                     <button
                       type="button"
                       onClick={() => setCompletionModalOpen(false)}
-                      className="px-4 py-2.5 rounded-xl border border-emerald-500/20 text-xs font-semibold text-emerald-900 dark:text-emerald-200"
+                      className="px-5 py-2.5 rounded-xl text-xs font-semibold text-charcoal/70 dark:text-darktext-secondary hover:bg-cream-100 dark:hover:bg-night-card transition-colors"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
                       disabled={submittingCompletion || !evidenceFile}
-                      className="px-6 py-2.5 rounded-xl font-bold text-xs text-white bg-emerald-700 hover:bg-emerald-800 disabled:opacity-50 transition-colors shadow-soft"
+                      className="px-6 py-2.5 rounded-xl font-bold text-xs text-white dark:text-night bg-forest hover:bg-forest-light dark:bg-emeraldaccent dark:hover:bg-emeraldaccent-hover disabled:opacity-50 transition-all shadow-glow"
                     >
-                      {submittingCompletion ? "Uploading..." : "Submit for Verification"}
+                      {submittingCompletion ? "Submitting..." : "Submit Completion (+40 pts)"}
                     </button>
                   </div>
                 </form>

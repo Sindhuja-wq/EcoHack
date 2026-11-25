@@ -126,7 +126,7 @@ export default function ChallengeDetailPage() {
 
   if (loading) {
     return (
-      <div className="w-full min-h-[calc(100vh-80px)] py-12 flex items-center justify-center bg-nature-gradient dark:bg-night text-sm font-semibold text-emerald-900/60 dark:text-emerald-400">
+      <div className="w-full min-h-[calc(100vh-68px)] py-12 flex items-center justify-center bg-cream dark:bg-night text-sm font-semibold text-charcoal/60 dark:text-darktext-muted transition-colors">
         Loading challenge details...
       </div>
     );
@@ -134,9 +134,9 @@ export default function ChallengeDetailPage() {
 
   if (!challenge) {
     return (
-      <div className="w-full min-h-[calc(100vh-80px)] py-12 flex flex-col items-center justify-center bg-nature-gradient dark:bg-night space-y-4">
-        <h2 className="text-xl font-bold text-emerald-950 dark:text-emerald-100">Challenge Not Found</h2>
-        <Link href="/challenges" className="px-5 py-2.5 rounded-xl bg-emerald-700 text-white font-bold text-xs">
+      <div className="w-full min-h-[calc(100vh-68px)] py-12 flex flex-col items-center justify-center bg-cream dark:bg-night space-y-4 text-center transition-colors">
+        <h2 className="text-xl font-bold font-heading text-charcoal dark:text-darktext">Challenge Not Found</h2>
+        <Link href="/challenges" className="px-5 py-2.5 rounded-xl bg-forest hover:bg-forest-light dark:bg-emeraldaccent dark:hover:bg-emeraldaccent-hover text-white dark:text-night font-bold text-xs shadow-glow transition-all">
           Back to Challenges
         </Link>
       </div>
@@ -144,38 +144,40 @@ export default function ChallengeDetailPage() {
   }
 
   return (
-    <div className="w-full min-h-[calc(100vh-80px)] py-10 px-4 sm:px-6 lg:px-8 bg-nature-gradient dark:bg-night flex justify-center">
-      <div className="max-w-4xl w-full space-y-8">
+    <div className="w-full min-h-[calc(100vh-68px)] py-12 px-4 sm:px-6 lg:px-8 bg-cream dark:bg-night text-charcoal dark:text-darktext flex justify-center relative overflow-hidden transition-colors">
+      <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[700px] h-96 bg-emerald-500/10 dark:bg-[#43E6A1]/5 rounded-full blur-[140px] pointer-events-none" />
+
+      <div className="max-w-4xl w-full space-y-8 relative z-10">
         <Link
           href="/challenges"
-          className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300 hover:underline"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-charcoal/70 dark:text-darktext-secondary hover:text-forest dark:hover:text-emeraldaccent transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back to All Challenges</span>
         </Link>
 
         {/* Main Details Card */}
-        <div className="p-8 sm:p-10 rounded-3xl bg-white/95 dark:bg-night-card/95 border border-emerald-500/25 shadow-soft-lg space-y-8">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-emerald-500/15">
+        <div className="p-8 sm:p-10 rounded-3xl bg-white dark:bg-night-secondary border border-sage/40 dark:border-night-border shadow-elevated space-y-8 transition-colors">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-sage/30 dark:border-night-border">
             <div>
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-xs font-bold px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-800 dark:text-emerald-300">
+                <span className="text-xs font-bold px-3 py-1 rounded-full bg-cream-50 dark:bg-night-card border border-sage/30 dark:border-night-border text-forest dark:text-emeraldaccent">
                   {challenge.category.toUpperCase()}
                 </span>
-                <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">
+                <span className="text-xs font-medium text-charcoal/70 dark:text-darktext-secondary">
                   Difficulty: {challenge.difficulty}
                 </span>
               </div>
-              <h1 className="text-3xl sm:text-4xl font-black text-emerald-950 dark:text-emerald-100 tracking-tight">
+              <h1 className="text-3xl sm:text-4xl font-black font-heading text-charcoal dark:text-darktext tracking-tight">
                 {challenge.title}
               </h1>
             </div>
 
-            <div className="text-right shrink-0">
-              <div className="text-3xl font-black text-emerald-700 dark:text-emerald-300">
+            <div className="text-left sm:text-right shrink-0">
+              <div className="text-3xl font-black font-heading text-forest dark:text-emeraldaccent">
                 +{challenge.pointsReward} pts
               </div>
-              <div className="text-xs font-semibold text-emerald-900/60 dark:text-emerald-400">
+              <div className="text-xs text-charcoal/60 dark:text-darktext-muted">
                 Approved Reward
               </div>
             </div>
@@ -183,156 +185,69 @@ export default function ChallengeDetailPage() {
 
           {/* Description */}
           <div className="space-y-2">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-900 dark:text-emerald-300">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-charcoal/60 dark:text-darktext-muted">
               Quest Briefing
             </h3>
-            <p className="text-base text-emerald-950/85 dark:text-emerald-200 leading-relaxed">
+            <p className="text-base text-charcoal/70 dark:text-darktext-secondary leading-relaxed">
               {challenge.description}
             </p>
           </div>
 
           {/* Why It Matters */}
-          <div className="p-5 rounded-2xl bg-emerald-50/80 dark:bg-night-hover/80 border border-emerald-500/20 space-y-1">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">
+          <div className="p-5 rounded-2xl bg-cream-50 dark:bg-night-card border border-sage/30 dark:border-night-border space-y-1 transition-colors">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-forest dark:text-emeraldaccent">
               Environmental Significance
             </h4>
-            <p className="text-xs text-emerald-950/80 dark:text-emerald-200 leading-relaxed">
+            <p className="text-xs text-charcoal/70 dark:text-darktext-secondary leading-relaxed">
               {challenge.whyItMatters}
             </p>
           </div>
 
-          {/* Suggested Actions */}
-          <div className="space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-900 dark:text-emerald-300">
-              Suggested Practical Actions
-            </h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {challenge.suggestedActions?.map((act: string, i: number) => (
-                <div
-                  key={i}
-                  className="p-3.5 rounded-xl bg-white dark:bg-night border border-emerald-500/15 flex items-start gap-2 text-xs text-emerald-950 dark:text-emerald-200 font-medium"
-                >
-                  <span className="text-emerald-600 font-bold">•</span>
-                  <span>{act}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Completion Requirements */}
-          <div className="p-5 rounded-2xl bg-white dark:bg-night border border-emerald-500/15 space-y-1">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-900 dark:text-emerald-300">
-              Evidence Requirements
-            </h4>
-            <p className="text-xs text-emerald-950/80 dark:text-emerald-200 leading-relaxed">
+          {/* Requirements */}
+          <div className="space-y-2">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-charcoal/60 dark:text-darktext-muted">
+              Completion Requirements
+            </h3>
+            <p className="text-sm text-charcoal dark:text-darktext leading-relaxed">
               {challenge.completionRequirements}
             </p>
           </div>
 
-          {/* User Status / Action Button */}
-          <div className="pt-4 border-t border-emerald-500/15 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div>
-              <span className="text-xs text-emerald-900/60 dark:text-emerald-400 block font-medium">
-                Current Status for Your Account:
-              </span>
-              <span className="text-sm font-bold text-emerald-950 dark:text-emerald-100">
-                {challenge.userStatus === "APPROVED"
-                  ? "✅ Completed & Verified"
-                  : challenge.userStatus === "PENDING"
-                  ? "⏳ Evidence Under Review"
-                  : challenge.userStatus === "REJECTED"
-                  ? "❌ Changes Requested"
-                  : "⚪ Not Yet Started"}
-              </span>
-            </div>
-
-            {challenge.userStatus !== "APPROVED" && (
-              <button
-                onClick={() => {
-                  if (!user) {
-                    showToast("Please log in to submit challenge evidence.", "info");
-                    return;
-                  }
-                  setSubmitModalOpen(true);
-                }}
-                className="w-full sm:w-auto px-8 py-3.5 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-emerald-700 to-green-600 hover:from-emerald-800 hover:to-green-700 shadow-soft transition-all flex items-center justify-center gap-2"
-              >
-                <Camera className="w-4 h-4" />
-                <span>Submit Verification Photo</span>
-              </button>
-            )}
+          {/* Action Button */}
+          <div className="pt-4 border-t border-sage/30 dark:border-night-border flex items-center justify-between">
+            <button
+              onClick={() => {
+                if (!user) {
+                  showToast("Please sign in to submit challenge evidence.", "info");
+                  return;
+                }
+                setSubmitModalOpen(true);
+              }}
+              className="px-8 py-3.5 rounded-2xl font-bold text-sm text-white dark:text-night bg-forest hover:bg-forest-light dark:bg-emeraldaccent dark:hover:bg-emeraldaccent-hover shadow-glow transition-all flex items-center gap-2"
+            >
+              <Camera className="w-4 h-4 text-white dark:text-night" />
+              <span>Submit Photo Evidence</span>
+            </button>
           </div>
         </div>
 
-        {/* User's Previous Submissions History for this Challenge */}
-        {challenge.submissions && challenge.submissions.length > 0 && (
-          <div className="p-8 rounded-3xl bg-white/95 dark:bg-night-card/95 border border-emerald-500/20 shadow-soft space-y-4">
-            <h3 className="text-lg font-bold text-emerald-950 dark:text-emerald-100">
-              Your Submission History
-            </h3>
-            <div className="space-y-3">
-              {challenge.submissions.map((sub: any) => (
-                <div
-                  key={sub.id}
-                  className="p-4 rounded-2xl bg-emerald-50/50 dark:bg-night-hover/50 border border-emerald-500/15 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs"
-                >
-                  <div className="flex items-center gap-3">
-                    <img
-                      src={sub.evidenceUrl}
-                      alt="Submitted evidence"
-                      className="w-14 h-14 rounded-xl object-cover border border-emerald-500/20"
-                    />
-                    <div>
-                      <p className="font-semibold text-emerald-950 dark:text-emerald-100">
-                        {sub.description || "Photo evidence submitted"}
-                      </p>
-                      <p className="text-[11px] text-emerald-900/60 dark:text-emerald-400">
-                        Submitted on {new Date(sub.createdAt).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="text-right">
-                    <span
-                      className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${
-                        sub.status === "APPROVED"
-                          ? "bg-emerald-500/20 text-emerald-800 dark:text-emerald-300"
-                          : sub.status === "REJECTED"
-                          ? "bg-rose-500/20 text-rose-800 dark:text-rose-300"
-                          : "bg-amber-500/20 text-amber-800 dark:text-amber-300"
-                      }`}
-                    >
-                      {sub.status}
-                    </span>
-                    {sub.reviewerFeedback && (
-                      <p className="text-[11px] text-emerald-900/70 dark:text-emerald-300 mt-1">
-                        Feedback: {sub.reviewerFeedback}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Evidence Submission Modal */}
+        {/* Submission Modal */}
         <AnimatePresence>
           {submitModalOpen && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 dark:bg-black/80 backdrop-blur-md">
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="w-full max-w-lg bg-white dark:bg-night-card rounded-3xl p-6 sm:p-8 shadow-soft-lg border border-emerald-500/25 space-y-5"
+                className="w-full max-w-lg bg-white dark:bg-night-secondary border border-sage/40 dark:border-night-border rounded-3xl p-6 sm:p-8 shadow-elevated space-y-6 max-h-[90vh] overflow-y-auto transition-colors"
               >
-                <div className="flex items-center justify-between border-b border-emerald-500/15 pb-4">
-                  <h3 className="text-lg font-black text-emerald-950 dark:text-emerald-100">
-                    Upload Quest Evidence
+                <div className="flex items-center justify-between border-b border-sage/30 dark:border-night-border pb-4">
+                  <h3 className="text-xl font-black font-heading text-charcoal dark:text-darktext">
+                    Submit Challenge Proof
                   </h3>
                   <button
                     onClick={() => setSubmitModalOpen(false)}
-                    className="p-1 rounded-lg text-emerald-900/60 hover:text-emerald-900 dark:text-emerald-400"
+                    className="p-1.5 rounded-lg text-charcoal/60 dark:text-darktext-muted hover:text-charcoal dark:hover:text-darktext hover:bg-cream-100 dark:hover:bg-night-card transition-colors"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -340,67 +255,55 @@ export default function ChallengeDetailPage() {
 
                 <form onSubmit={handleSubmitEvidence} className="space-y-4">
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-emerald-900 dark:text-emerald-300 mb-2">
-                      Proof Photo
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-charcoal/80 dark:text-darktext-secondary mb-2">
+                      Upload Proof Photo *
                     </label>
-                    {evidencePreview ? (
-                      <div className="relative w-full aspect-video rounded-2xl overflow-hidden border border-emerald-500/30">
-                        <img src={evidencePreview} alt="Preview" className="w-full h-full object-cover" />
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setEvidenceFile(null);
-                            setEvidencePreview(null);
-                          }}
-                          className="absolute top-2 right-2 p-1.5 rounded-full bg-black/60 text-white"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ) : (
-                      <label className="border-2 border-dashed border-emerald-500/35 hover:border-emerald-500 rounded-2xl p-6 text-center cursor-pointer block hover:bg-emerald-500/5 transition-colors">
-                        <Camera className="w-8 h-8 text-emerald-600 mx-auto mb-2" />
-                        <span className="text-xs font-semibold text-emerald-900 dark:text-emerald-200">
-                          Select photo showing completion
-                        </span>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleFileChange}
-                          className="hidden"
-                          required
-                        />
-                      </label>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-emerald-900 dark:text-emerald-300 mb-1.5">
-                      Description (Optional)
-                    </label>
-                    <textarea
-                      rows={2}
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
-                      placeholder="e.g. Completed today during afternoon commute"
-                      className="w-full p-3 rounded-xl border border-emerald-500/25 dark:border-emerald-500/30 bg-white/70 dark:bg-night-hover/70 text-emerald-950 dark:text-white placeholder:text-emerald-900/40 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      required
+                      className="w-full text-xs text-charcoal/70 dark:text-darktext-secondary file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-forest dark:file:bg-[#43E6A1] file:text-white dark:file:text-[#0B1110] hover:file:bg-forest-light dark:hover:file:bg-[#75F0B7] file:cursor-pointer"
                     />
                   </div>
 
-                  <div className="flex items-center justify-end gap-3 pt-2">
+                  {evidencePreview && (
+                    <div className="relative w-full aspect-video rounded-2xl overflow-hidden border border-sage/40 dark:border-night-border">
+                      <img
+                        src={evidencePreview}
+                        alt="Evidence preview"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
+
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-charcoal/80 dark:text-darktext-secondary mb-2">
+                      Notes (Optional)
+                    </label>
+                    <textarea
+                      rows={3}
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      placeholder="Share how you completed this challenge..."
+                      className="w-full p-3.5 rounded-xl border border-sage/40 dark:border-night-border bg-white dark:bg-night-card text-xs text-charcoal dark:text-darktext placeholder:text-charcoal/40 dark:placeholder:text-darktext-muted focus:outline-none focus:border-forest dark:focus:border-emeraldaccent focus:ring-1 focus:ring-forest dark:focus:ring-emeraldaccent"
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-end gap-3 pt-3 border-t border-sage/30 dark:border-night-border">
                     <button
                       type="button"
                       onClick={() => setSubmitModalOpen(false)}
-                      className="px-4 py-2.5 rounded-xl border border-emerald-500/20 text-xs font-semibold text-emerald-900 dark:text-emerald-200"
+                      className="px-5 py-2.5 rounded-xl text-xs font-semibold text-charcoal/70 dark:text-darktext-secondary hover:bg-cream-100 dark:hover:bg-night-card transition-colors"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
                       disabled={submitting || !evidenceFile}
-                      className="px-6 py-2.5 rounded-xl font-bold text-xs text-white bg-emerald-700 hover:bg-emerald-800 disabled:opacity-50 transition-colors shadow-soft"
+                      className="px-6 py-2.5 rounded-xl font-bold text-xs text-white dark:text-night bg-forest hover:bg-forest-light dark:bg-emeraldaccent dark:hover:bg-emeraldaccent-hover disabled:opacity-50 transition-all shadow-glow"
                     >
-                      {submitting ? "Uploading..." : "Submit for Verification"}
+                      {submitting ? "Submitting..." : "Submit for Verification"}
                     </button>
                   </div>
                 </form>

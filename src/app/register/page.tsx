@@ -4,8 +4,8 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth, useToast } from "@/components/Providers";
+import { Leaf, User, Mail, Lock, Eye, EyeOff, ArrowRight, Sparkles, AlertCircle, Award, ShieldCheck } from "lucide-react";
 import { AnimatedTreeIllustration } from "@/components/AnimatedTreeIllustration";
-import { Leaf, User, Mail, Lock, Eye, EyeOff, ArrowRight, Sparkles, AlertCircle, Award } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function RegisterPage() {
@@ -69,54 +69,53 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-80px)] w-full flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-cream dark:bg-night relative overflow-hidden transition-colors">
-      {/* Decorative leaf icons */}
-      <div className="absolute top-10 right-10 text-sage/20 dark:text-forest/15 pointer-events-none">
-        <Leaf className="w-36 h-36 -rotate-12" />
-      </div>
+    <div className="min-h-[calc(100vh-68px)] w-full flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-cream dark:bg-night text-charcoal dark:text-darktext relative overflow-hidden transition-colors">
+      {/* Background glow effects */}
+      <div className="absolute top-1/4 right-1/4 w-[600px] h-[600px] bg-forest/5 dark:bg-emeraldaccent/5 rounded-full blur-[140px] pointer-events-none" />
 
       <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center z-10">
-        {/* Left Side: Realistic Nature Photograph & Inspiration */}
-        <motion.div
-          initial={{ opacity: 0, x: -30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8 }}
-          className="flex flex-col items-center text-center lg:items-start lg:text-left space-y-6"
-        >
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-forest/10 border border-forest/20 text-forest dark:text-limeaccent text-xs font-bold uppercase tracking-wider">
-            <Award className="w-3.5 h-3.5 text-forest dark:text-limeaccent" />
+        {/* Left Side: Brand Inspiration */}
+        <div className="flex flex-col items-center text-center lg:items-start lg:text-left space-y-6">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white dark:bg-night-secondary border border-sage/40 dark:border-night-border text-forest dark:text-emeraldaccent text-xs font-semibold uppercase tracking-wider shadow-sm">
+            <Award className="w-3.5 h-3.5 text-forest dark:text-emeraldaccent" />
             <span>Join 10,000+ Eco Guardians</span>
           </div>
 
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-charcoal dark:text-cream leading-tight">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black font-heading text-charcoal dark:text-darktext leading-tight">
             Start transforming waste into{" "}
-            <span className="text-forest dark:text-limeaccent">
+            <span className="inline-block py-0.5 text-transparent bg-clip-text bg-gradient-to-r from-forest to-forest-500 dark:from-emeraldaccent dark:to-emeraldaccent-400">
               real value today.
             </span>
           </h1>
 
-          <p className="text-base text-charcoal/70 dark:text-cream/70 max-w-md">
+          <p className="text-base text-charcoal/70 dark:text-darktext-secondary max-w-md leading-relaxed">
             Join the EcoHack community. Get immediate AI waste diagnosis, step-by-step DIY blueprints, earn verified eco-badges, and take part in daily zero-waste challenges.
           </p>
 
-          <div className="w-full flex justify-center lg:justify-start pt-2">
+          <div className="w-full pt-1 flex justify-center lg:justify-start">
             <AnimatedTreeIllustration size="md" priority={true} />
           </div>
-        </motion.div>
+
+          <div className="pt-1 flex flex-col gap-2.5 text-xs text-charcoal/60 dark:text-darktext-muted">
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-forest dark:text-emeraldaccent shrink-0" />
+              <span>Unlock the starter badge immediately upon joining</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-forest dark:text-emeraldaccent shrink-0" />
+              <span>Track verified grams diverted & carbon saved</span>
+            </div>
+          </div>
+        </div>
 
         {/* Right Side: Registration Form Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="w-full max-w-md mx-auto"
-        >
-          <div className="bg-white dark:bg-night-card rounded-3xl p-8 sm:p-10 shadow-soft-lg border border-sage/40 dark:border-forest/30">
+        <div className="w-full max-w-md mx-auto">
+          <div className="bg-white dark:bg-night-secondary rounded-3xl p-8 sm:p-10 shadow-soft-lg dark:shadow-elevated border border-sage/30 dark:border-night-border">
             <div className="mb-6">
-              <h2 className="text-2xl font-black text-charcoal dark:text-cream tracking-tight">
+              <h2 className="text-2xl font-black font-heading text-charcoal dark:text-darktext tracking-tight">
                 Create Account
               </h2>
-              <p className="text-sm text-charcoal/60 dark:text-cream/60 mt-1 font-medium">
+              <p className="text-sm text-charcoal/60 dark:text-darktext-muted mt-1 font-medium">
                 Free forever. No credit card required.
               </p>
             </div>
@@ -125,20 +124,20 @@ export default function RegisterPage() {
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="mb-5 p-4 rounded-xl bg-terracotta/10 border border-terracotta/30 flex items-start gap-3 text-sm text-terracotta-800 dark:text-terracotta-200"
+                className="mb-5 p-4 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 flex items-start gap-3 text-sm text-rose-700 dark:text-rose-300"
               >
-                <AlertCircle className="w-5 h-5 text-terracotta shrink-0 mt-0.5" />
+                <AlertCircle className="w-5 h-5 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
                 <span>{errorMsg}</span>
               </motion.div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/80 dark:text-cream/80 mb-1.5">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-charcoal/80 dark:text-darktext-secondary mb-1.5">
                   Full Name
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-charcoal/40 dark:text-cream/40">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-charcoal/40 dark:text-darktext-muted">
                     <User className="w-4 h-4" />
                   </div>
                   <input
@@ -147,17 +146,17 @@ export default function RegisterPage() {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Jane Doe"
-                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-sage/40 dark:border-forest/30 bg-cream/30 dark:bg-night-hover text-charcoal dark:text-cream placeholder:text-charcoal/40 dark:placeholder:text-cream/40 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-forest transition-all"
+                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-sage/40 dark:border-night-border bg-cream-50 dark:bg-night-card text-charcoal dark:text-darktext placeholder:text-charcoal/40 dark:placeholder:text-darktext-muted text-sm font-medium focus:outline-none focus:border-forest dark:focus:border-emeraldaccent focus:ring-1 focus:ring-forest dark:focus:ring-emeraldaccent transition-all"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/80 dark:text-cream/80 mb-1.5">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-charcoal/80 dark:text-darktext-secondary mb-1.5">
                   Email Address
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-charcoal/40 dark:text-cream/40">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-charcoal/40 dark:text-darktext-muted">
                     <Mail className="w-4 h-4" />
                   </div>
                   <input
@@ -166,17 +165,17 @@ export default function RegisterPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="jane@ecohack.earth"
-                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-sage/40 dark:border-forest/30 bg-cream/30 dark:bg-night-hover text-charcoal dark:text-cream placeholder:text-charcoal/40 dark:placeholder:text-cream/40 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-forest transition-all"
+                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-sage/40 dark:border-night-border bg-cream-50 dark:bg-night-card text-charcoal dark:text-darktext placeholder:text-charcoal/40 dark:placeholder:text-darktext-muted text-sm font-medium focus:outline-none focus:border-forest dark:focus:border-emeraldaccent focus:ring-1 focus:ring-forest dark:focus:ring-emeraldaccent transition-all"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/80 dark:text-cream/80 mb-1.5">
-                  Password (min 8 characters)
+                <label className="block text-xs font-semibold uppercase tracking-wider text-charcoal/80 dark:text-darktext-secondary mb-1.5">
+                  Password (8+ chars)
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-charcoal/40 dark:text-cream/40">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-charcoal/40 dark:text-darktext-muted">
                     <Lock className="w-4 h-4" />
                   </div>
                   <input
@@ -185,13 +184,12 @@ export default function RegisterPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full pl-10 pr-10 py-3 rounded-xl border border-sage/40 dark:border-forest/30 bg-cream/30 dark:bg-night-hover text-charcoal dark:text-cream placeholder:text-charcoal/40 dark:placeholder:text-cream/40 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-forest transition-all"
+                    className="w-full pl-10 pr-10 py-3 rounded-xl border border-sage/40 dark:border-night-border bg-cream-50 dark:bg-night-card text-charcoal dark:text-darktext placeholder:text-charcoal/40 dark:placeholder:text-darktext-muted text-sm font-medium focus:outline-none focus:border-forest dark:focus:border-emeraldaccent focus:ring-1 focus:ring-forest dark:focus:ring-emeraldaccent transition-all"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-charcoal/40 dark:text-cream/40 hover:text-charcoal dark:hover:text-cream transition-colors"
-                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-charcoal/40 dark:text-darktext-muted hover:text-charcoal dark:hover:text-darktext"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -199,11 +197,11 @@ export default function RegisterPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-charcoal/80 dark:text-cream/80 mb-1.5">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-charcoal/80 dark:text-darktext-secondary mb-1.5">
                   Confirm Password
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-charcoal/40 dark:text-cream/40">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-charcoal/40 dark:text-darktext-muted">
                     <Lock className="w-4 h-4" />
                   </div>
                   <input
@@ -212,56 +210,53 @@ export default function RegisterPage() {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-sage/40 dark:border-forest/30 bg-cream/30 dark:bg-night-hover text-charcoal dark:text-cream placeholder:text-charcoal/40 dark:placeholder:text-cream/40 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-forest transition-all"
+                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-sage/40 dark:border-night-border bg-cream-50 dark:bg-night-card text-charcoal dark:text-darktext placeholder:text-charcoal/40 dark:placeholder:text-darktext-muted text-sm font-medium focus:outline-none focus:border-forest dark:focus:border-emeraldaccent focus:ring-1 focus:ring-forest dark:focus:ring-emeraldaccent transition-all"
                   />
                 </div>
               </div>
 
-              <div className="flex items-start pt-1">
-                <input
-                  id="accept-terms"
-                  type="checkbox"
-                  checked={acceptTerms}
-                  onChange={(e) => setAcceptTerms(e.target.checked)}
-                  className="h-4 w-4 rounded border-sage text-forest focus:ring-forest mt-0.5"
-                />
-                <label
-                  htmlFor="accept-terms"
-                  className="ml-2 block text-xs text-charcoal/70 dark:text-cream/70 leading-relaxed cursor-pointer"
-                >
-                  I pledge to participate honestly in daily eco quests and divert waste mindfully.
+              <div className="pt-2">
+                <label className="flex items-start gap-2.5 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={acceptTerms}
+                    onChange={(e) => setAcceptTerms(e.target.checked)}
+                    className="w-4 h-4 mt-0.5 rounded border-sage/40 dark:border-night-border bg-cream-50 dark:bg-night-card text-forest dark:text-emeraldaccent focus:ring-forest dark:focus:ring-emeraldaccent"
+                  />
+                  <span className="text-xs text-charcoal/70 dark:text-darktext-secondary leading-relaxed">
+                    I pledge to practice mindful waste habits and abide by the{" "}
+                    <Link href="/privacy" className="text-forest dark:text-emeraldaccent hover:underline font-semibold">
+                      EcoHack Community Guidelines
+                    </Link>
+                    .
+                  </span>
                 </label>
               </div>
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3.5 px-6 rounded-2xl font-bold text-white bg-forest hover:bg-forest-800 shadow-soft transition-all transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2 disabled:opacity-60 text-sm mt-2"
+                className="w-full py-3.5 rounded-xl font-bold text-sm text-white dark:text-night bg-forest dark:bg-emeraldaccent hover:bg-forest-800 dark:hover:bg-emeraldaccent-400 shadow-soft-lg dark:shadow-glow transition-all flex items-center justify-center gap-2 disabled:opacity-50 mt-4"
               >
                 {loading ? (
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span>Creating Account...</span>
                 ) : (
                   <>
-                    <span>Create Free Eco Account</span>
-                    <ArrowRight className="w-4 h-4 text-limeaccent" />
+                    <span>Create Free Account</span>
+                    <ArrowRight className="w-4 h-4" />
                   </>
                 )}
               </button>
             </form>
 
-            <div className="mt-6 pt-5 border-t border-sage/20 text-center">
-              <p className="text-xs text-charcoal/60 dark:text-cream/60">
-                Already have an account?{" "}
-                <Link
-                  href="/login"
-                  className="font-bold text-forest dark:text-limeaccent hover:underline ml-1"
-                >
-                  Sign in
-                </Link>
-              </p>
+            <div className="mt-6 pt-5 border-t border-sage/30 dark:border-night-border text-center text-xs text-charcoal/70 dark:text-darktext-secondary">
+              Already have an account?{" "}
+              <Link href="/login" className="font-bold text-forest dark:text-emeraldaccent hover:underline">
+                Sign in here
+              </Link>
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
     </div>
   );

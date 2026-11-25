@@ -14,6 +14,7 @@ import {
   AlertCircle,
   ArrowRight,
   Calendar,
+  Layers,
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -53,7 +54,7 @@ export default function HistoryPage() {
 
   if (authLoading || loading) {
     return (
-      <div className="w-full min-h-[calc(100vh-80px)] py-12 flex items-center justify-center bg-nature-gradient dark:bg-night text-sm font-semibold text-emerald-900/60 dark:text-emerald-400">
+      <div className="w-full min-h-[calc(100vh-68px)] py-12 flex items-center justify-center bg-cream dark:bg-night text-sm font-semibold text-charcoal/60 dark:text-darktext-muted transition-colors">
         Loading personal history timeline...
       </div>
     );
@@ -116,17 +117,19 @@ export default function HistoryPage() {
   }
 
   return (
-    <div className="w-full min-h-[calc(100vh-80px)] py-10 px-4 sm:px-6 lg:px-8 bg-nature-gradient dark:bg-night flex justify-center">
-      <div className="max-w-4xl w-full space-y-8">
+    <div className="w-full min-h-[calc(100vh-68px)] py-12 px-4 sm:px-6 lg:px-8 bg-cream dark:bg-night text-charcoal dark:text-darktext flex justify-center relative overflow-hidden transition-colors">
+      <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[700px] h-96 bg-emerald-500/10 dark:bg-[#43E6A1]/5 rounded-full blur-[140px] pointer-events-none" />
+
+      <div className="max-w-4xl w-full space-y-8 relative z-10">
         <div className="text-center space-y-3">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/25 text-emerald-800 dark:text-emerald-300 text-xs font-bold uppercase tracking-wider">
-            <HistoryIcon className="w-4 h-4" />
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white dark:bg-night-secondary border border-sage/40 dark:border-night-border text-forest dark:text-emeraldaccent text-xs font-semibold uppercase tracking-wider">
+            <HistoryIcon className="w-4 h-4 text-forest dark:text-emeraldaccent" />
             <span>Environmental Journal</span>
           </div>
-          <h1 className="text-3xl sm:text-5xl font-black text-emerald-950 dark:text-emerald-50 tracking-tight">
+          <h1 className="text-3xl sm:text-5xl font-black font-heading tracking-tight text-charcoal dark:text-darktext">
             Activity Timeline
           </h1>
-          <p className="text-sm sm:text-base text-emerald-950/70 dark:text-emerald-300/80 max-w-xl mx-auto">
+          <p className="text-sm sm:text-base text-charcoal/70 dark:text-darktext-secondary max-w-xl mx-auto">
             A comprehensive, transparent record of your scans, verified quest completions, and eco-point transactions.
           </p>
         </div>
@@ -142,10 +145,10 @@ export default function HistoryPage() {
             <button
               key={tab.id}
               onClick={() => setFilterType(tab.id as any)}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${
+              className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all border ${
                 filterType === tab.id
-                  ? "bg-emerald-700 text-white border-emerald-700 shadow-soft"
-                  : "bg-white/80 dark:bg-night-card/80 text-emerald-950/70 dark:text-emerald-200 border-emerald-500/20 hover:bg-emerald-50"
+                  ? "bg-forest text-white border-forest shadow-glow dark:bg-emeraldaccent dark:text-night dark:border-emeraldaccent"
+                  : "bg-white dark:bg-night-secondary text-charcoal/70 dark:text-darktext-secondary border-sage/40 dark:border-night-border hover:text-charcoal dark:hover:text-darktext hover:bg-cream-50 dark:hover:bg-night-card"
               }`}
             >
               {tab.label}
@@ -153,85 +156,61 @@ export default function HistoryPage() {
           ))}
         </div>
 
-        {/* Timeline list */}
-        <div className="p-8 rounded-3xl bg-white/95 dark:bg-night-card/95 border border-emerald-500/20 shadow-soft space-y-6">
+        {/* Timeline Entries */}
+        <div className="space-y-4">
           {allEvents.length === 0 ? (
-            <div className="py-12 text-center space-y-3">
-              <p className="text-sm font-semibold text-emerald-900/60 dark:text-emerald-400">
-                No activity found matching this filter.
+            <div className="p-16 rounded-3xl bg-white dark:bg-night-secondary border border-sage/40 dark:border-night-border text-center space-y-3 transition-colors">
+              <HistoryIcon className="w-10 h-10 text-charcoal/40 dark:text-darktext-muted mx-auto" />
+              <h3 className="text-lg font-bold font-heading text-charcoal dark:text-darktext">No events found</h3>
+              <p className="text-xs text-charcoal/60 dark:text-darktext-muted">
+                Your activity timeline updates automatically whenever you scan waste items or complete challenges.
               </p>
-              <Link
-                href="/scanner"
-                className="inline-block px-5 py-2.5 rounded-xl bg-emerald-700 text-white font-bold text-xs"
-              >
-                Scan Your First Item
-              </Link>
             </div>
           ) : (
-            <div className="space-y-4">
-              {allEvents.map((evt, idx) => (
-                <div
-                  key={`${evt.id}-${idx}`}
-                  className="p-4 rounded-2xl bg-emerald-50/40 dark:bg-night-hover/40 border border-emerald-500/15 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs"
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 flex items-center justify-center shrink-0 mt-0.5">
-                      {evt.type === "SCAN" && <Camera className="w-5 h-5" />}
-                      {evt.type === "CHALLENGE_SUBMISSION" && <Target className="w-5 h-5" />}
-                      {evt.type === "PROJECT_SUBMISSION" && <Sparkles className="w-5 h-5" />}
-                      {evt.type === "POINT_TRANSACTION" && <CheckCircle2 className="w-5 h-5" />}
-                    </div>
-
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-800 dark:text-emerald-300">
-                          {evt.category}
-                        </span>
-                        <span className="text-[11px] text-emerald-900/50 dark:text-emerald-400">
-                          {evt.date.toLocaleDateString()} at {evt.date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                        </span>
-                      </div>
-
-                      <h4 className="font-bold text-sm text-emerald-950 dark:text-emerald-100 mt-1">
-                        {evt.title}
-                      </h4>
-
-                      {evt.details && (
-                        <p className="text-emerald-900/70 dark:text-emerald-300 mt-0.5">
-                          {evt.details}
-                        </p>
-                      )}
-
-                      {evt.feedback && (
-                        <p className="text-[11px] text-emerald-900/80 dark:text-emerald-300 mt-1 italic">
-                          Moderator Note: {evt.feedback}
-                        </p>
-                      )}
-                    </div>
+            allEvents.map((event, idx) => (
+              <div
+                key={event.id || idx}
+                className="p-5 rounded-2xl bg-white dark:bg-night-secondary border border-sage/40 dark:border-night-border shadow-elevated flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-forest/40 dark:hover:border-emeraldaccent/40 transition-colors"
+              >
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-cream-50 dark:bg-night-card border border-sage/30 dark:border-night-border text-forest dark:text-emeraldaccent">
+                      {event.category}
+                    </span>
+                    <span className="text-xs text-charcoal/60 dark:text-darktext-muted">
+                      {event.date.toLocaleDateString()} at {event.date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                    </span>
                   </div>
-
-                  <div className="text-right shrink-0">
-                    {evt.amount !== undefined ? (
-                      <span className="font-black text-sm text-emerald-600 dark:text-emerald-400">
-                        +{evt.amount} pts
-                      </span>
-                    ) : (
-                      <span
-                        className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${
-                          evt.status === "APPROVED" || evt.status === "COMPLETED"
-                            ? "bg-emerald-500/20 text-emerald-800 dark:text-emerald-300"
-                            : evt.status === "REJECTED"
-                            ? "bg-rose-500/20 text-rose-800 dark:text-rose-300"
-                            : "bg-amber-500/20 text-amber-800 dark:text-amber-300"
-                        }`}
-                      >
-                        {evt.status}
-                      </span>
-                    )}
-                  </div>
+                  <h4 className="font-bold font-heading text-sm text-charcoal dark:text-darktext">
+                    {event.title}
+                  </h4>
+                  {event.details && (
+                    <p className="text-xs text-charcoal/70 dark:text-darktext-secondary">{event.details}</p>
+                  )}
+                  {event.feedback && (
+                    <p className="text-xs text-forest dark:text-emeraldaccent italic">Reviewer Feedback: {event.feedback}</p>
+                  )}
                 </div>
-              ))}
-            </div>
+
+                <div className="shrink-0 self-start sm:self-center">
+                  {event.amount !== undefined ? (
+                    <span className={`font-black font-heading text-sm ${event.amount > 0 ? "text-forest dark:text-emeraldaccent" : "text-terra dark:text-[#E07A5F]"}`}>
+                      {event.amount > 0 ? `+${event.amount}` : event.amount} pts
+                    </span>
+                  ) : (
+                    <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full border ${
+                      event.status === "APPROVED" || event.status === "COMPLETED"
+                        ? "bg-emerald-500/15 text-forest dark:text-emeraldaccent border-emerald-500/30"
+                        : event.status === "REJECTED"
+                        ? "bg-amber-500/15 text-terra dark:text-[#E07A5F] border-amber-500/30"
+                        : "bg-cream-50 dark:bg-night-card text-charcoal/70 dark:text-darktext-secondary border border-sage/30 dark:border-night-border"
+                    }`}>
+                      {event.status}
+                    </span>
+                  )}
+                </div>
+              </div>
+            ))
           )}
         </div>
       </div>

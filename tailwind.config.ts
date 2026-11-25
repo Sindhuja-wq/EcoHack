@@ -86,21 +86,23 @@ const config: Config = {
           950: "#0B0E0C",
         },
         night: {
-          DEFAULT: "#101820", // Main background: #101820
-          secondary: "#17252B", // Secondary background: #17252B
-          card: "#1C302F", // Card background: #1C302F
-          border: "#273F3E", // Subtle dark green-grey border: #273F3E
-          hover: "#223837", // Card hover: #223837
+          DEFAULT: "#0B1110", // Primary canvas: #0B1110
+          secondary: "#121C19", // Secondary surface: #121C19
+          card: "#182521", // Elevated surface: #182521
+          border: "#263630", // Borders: #263630
+          hover: "#1F302B", // Hover surface: #1F302B
         },
         emeraldaccent: {
-          DEFAULT: "#35B98A", // Primary dark accent: #35B98A
-          400: "#55C6B0", // Secondary dark accent: #55C6B0
-          500: "#35B98A",
-          600: "#2B9E75",
+          DEFAULT: "#43E6A1", // Primary green: #43E6A1
+          400: "#75F0B7", // Alternative premium accent: #75F0B7
+          500: "#43E6A1",
+          600: "#32C988",
+          soft: "#B6EAD0", // Soft green: #B6EAD0
         },
         darktext: {
-          DEFAULT: "#E8EFEA", // Main text: #E8EFEA
-          muted: "#A6B8B0", // Muted text: #A6B8B0
+          DEFAULT: "#F1F5F2", // Primary text: #F1F5F2
+          secondary: "#A1B2AA", // Secondary text: #A1B2AA
+          muted: "#8CA095", // Muted text: #8CA095 (WCAG AA compliant)
         },
       },
       fontFamily: {
@@ -113,9 +115,11 @@ const config: Config = {
         soft: "0 4px 20px -2px rgba(32, 42, 36, 0.05), 0 2px 6px -1px rgba(32, 42, 36, 0.03)",
         "soft-md": "0 10px 25px -4px rgba(23, 75, 53, 0.08), 0 4px 10px -2px rgba(23, 75, 53, 0.04)",
         "soft-lg": "0 20px 40px -8px rgba(23, 75, 53, 0.10), 0 8px 16px -4px rgba(23, 75, 53, 0.04)",
-        "dark-card": "0 4px 24px -2px rgba(0, 0, 0, 0.40), 0 1px 3px 0 rgba(0, 0, 0, 0.25)",
-        "dark-soft": "0 4px 20px -2px rgba(0, 0, 0, 0.35)",
-        glow: "0 0 20px rgba(53, 185, 138, 0.18)",
+        "dark-card": "0 8px 32px -4px rgba(0, 0, 0, 0.50), 0 1px 3px 0 rgba(0, 0, 0, 0.35)",
+        "dark-soft": "0 4px 20px -2px rgba(0, 0, 0, 0.40)",
+        elevated: "0 12px 40px -8px rgba(0, 0, 0, 0.60), 0 4px 12px -2px rgba(0, 0, 0, 0.40)",
+        glow: "0 0 20px rgba(67, 230, 161, 0.20)",
+        "glow-subtle": "0 0 15px rgba(67, 230, 161, 0.12)",
         "forest-glow": "0 0 25px rgba(23, 75, 53, 0.20)",
       },
       animation: {

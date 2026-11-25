@@ -1,42 +1,45 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useAuth, useTheme } from "./Providers";
 import {
-  Sparkles,
   Camera,
   Target,
   Trophy,
   LayoutDashboard,
   Bookmark,
-  ShieldCheck,
+  Sparkles,
+  Flame,
   User,
+  History,
   LogOut,
-  Menu,
-  X,
   Sun,
   Moon,
-  Flame,
+  Menu,
+  X,
+  ShieldCheck,
   Leaf,
-  History,
+  Layers,
 } from "lucide-react";
+import { useAuth, useTheme } from "./Providers";
 import { motion, AnimatePresence } from "framer-motion";
 
 export function Navbar() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
-  const { isDark, toggleTheme } = useTheme();
-
+  const { isDark, mounted, toggleTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdown on outside click
+  // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setUserDropdownOpen(false);
       }
     }
@@ -63,29 +66,31 @@ export function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full backdrop-blur-md bg-cream/90 dark:bg-night-card/90 border-b border-sage/30 dark:border-night-border transition-colors">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+    <header className="sticky top-0 z-40 w-full backdrop-blur-xl bg-cream/90 dark:bg-night/85 border-b border-sage/30 dark:border-night-border transition-colors">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 sm:h-20 flex items-center justify-between">
         {/* Brand Logo */}
         <Link href="/" className="flex items-center gap-3 group focus:outline-none">
-          <div className="w-11 h-11 rounded-2xl bg-forest p-0.5 shadow-soft transition-transform group-hover:scale-105 flex items-center justify-center">
-            <div className="w-full h-full bg-cream dark:bg-night rounded-[14px] flex items-center justify-center">
-              <Leaf className="w-6 h-6 text-forest dark:text-emeraldaccent group-hover:rotate-12 transition-transform duration-300" />
+          <div className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br from-[#43E6A1] to-[#174B35] p-0.5 shadow-sm transition-transform duration-300 group-hover:scale-105 flex items-center justify-center">
+            <div className="w-full h-full bg-cream dark:bg-night rounded-[10px] flex items-center justify-center">
+              <Leaf className="w-5 h-5 text-forest dark:text-emeraldaccent group-hover:rotate-12 transition-transform duration-300" />
             </div>
+            {/* Subtle ambient pulse */}
+            <span className="absolute -inset-1 rounded-xl bg-emeraldaccent/20 blur-sm opacity-0 group-hover:opacity-100 transition-opacity" />
           </div>
           <div>
-            <div className="flex items-center">
+            <div className="flex items-center gap-2">
               <span className="font-heading font-extrabold text-2xl tracking-tight text-forest dark:text-darktext">
                 EcoHack
               </span>
             </div>
-            <p className="text-[11px] font-medium text-charcoal/70 dark:text-darktext-muted hidden sm:block tracking-wide">
+            <p className="text-[11px] font-medium text-charcoal/70 dark:text-darktext-secondary hidden sm:block tracking-wide">
               Turn Waste Into Worth
             </p>
           </div>
         </Link>
 
-        {/* Desktop Navigation Links */}
-        <nav className="hidden lg:flex items-center gap-1 xl:gap-2">
+        {/* Desktop Navigation Links (Linear-inspired clean pills) */}
+        <nav className="hidden lg:flex items-center gap-1 xl:gap-1.5 p-1 rounded-2xl bg-forest/5 dark:bg-night-secondary/60 border border-transparent dark:border-night-border/60">
           {navLinks.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.href);
@@ -95,8 +100,8 @@ export function Navbar() {
                 href={item.href}
                 className={`relative px-3.5 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all ${
                   active
-                    ? "text-forest dark:text-emeraldaccent bg-forest/10 dark:bg-forest/20"
-                    : "text-charcoal/70 dark:text-darktext-muted hover:text-forest dark:hover:text-darktext hover:bg-forest/5"
+                    ? "text-forest dark:text-emeraldaccent bg-forest/10 dark:bg-emeraldaccent/10 border border-forest/15 dark:border-emeraldaccent/20 shadow-sm"
+                    : "text-charcoal/70 dark:text-darktext-secondary hover:text-forest dark:hover:text-darktext hover:bg-forest/5 dark:hover:bg-night-card"
                 }`}
               >
                 <Icon className={`w-4 h-4 ${active ? "text-forest dark:text-emeraldaccent" : ""}`} />
@@ -104,7 +109,7 @@ export function Navbar() {
                 {active && (
                   <motion.div
                     layoutId="activeNavIndicator"
-                    className="absolute bottom-0 left-3 right-3 h-0.5 bg-forest dark:bg-emeraldaccent rounded-full"
+                    className="absolute -bottom-1 left-3 right-3 h-0.5 bg-forest dark:bg-emeraldaccent rounded-full shadow-[0_0_8px_rgba(67,230,161,0.6)]"
                     transition={{ type: "spring", stiffness: 380, damping: 30 }}
                   />
                 )}
@@ -133,9 +138,9 @@ export function Navbar() {
           <button
             onClick={toggleTheme}
             aria-label="Toggle theme"
-            className="p-2.5 rounded-xl border border-sage/40 dark:border-night-border bg-white/70 dark:bg-night-card text-charcoal dark:text-darktext hover:bg-cream dark:hover:bg-night-hover transition-colors focus:outline-none"
+            className="p-2.5 rounded-xl border border-sage/40 dark:border-night-border bg-white dark:bg-night-card text-charcoal dark:text-darktext hover:bg-cream dark:hover:bg-night-hover hover:border-forest dark:hover:border-emeraldaccent/40 transition-all focus:outline-none focus:ring-2 focus:ring-emeraldaccent/50 shadow-sm"
           >
-            {isDark ? <Sun className="w-4 h-4 text-emeraldaccent" /> : <Moon className="w-4 h-4 text-forest" />}
+            {mounted && isDark ? <Sun className="w-4 h-4 text-emeraldaccent" /> : <Moon className="w-4 h-4 text-forest" />}
           </button>
 
           {/* User state */}
@@ -145,7 +150,7 @@ export function Navbar() {
               <div className="hidden sm:flex items-center gap-2">
                 <div
                   title="Total Eco-Points"
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-forest/10 dark:bg-forest/20 text-forest dark:text-emeraldaccent border border-forest/25 text-xs font-bold"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-forest/10 dark:bg-emeraldaccent/10 text-forest dark:text-emeraldaccent border border-forest/25 dark:border-emeraldaccent/30 text-xs font-bold"
                 >
                   <Sparkles className="w-3.5 h-3.5 text-forest dark:text-emeraldaccent" />
                   <span>{user.points} pts</span>
@@ -164,7 +169,7 @@ export function Navbar() {
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                  className="flex items-center gap-2 p-1.5 pl-2.5 rounded-2xl border border-sage/40 dark:border-night-border hover:border-forest bg-white dark:bg-night-hover text-sm font-semibold transition-all focus:outline-none"
+                  className="flex items-center gap-2 p-1.5 pl-2.5 rounded-2xl border border-sage/40 dark:border-night-border hover:border-forest dark:hover:border-emeraldaccent/40 bg-white dark:bg-night-card text-sm font-semibold transition-all focus:outline-none"
                 >
                   <span className="hidden md:inline max-w-[120px] truncate text-charcoal dark:text-darktext">
                     {user.name.split(" ")[0]}
@@ -180,11 +185,11 @@ export function Navbar() {
                       initial={{ opacity: 0, y: 10, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      className="absolute right-0 mt-2 w-56 rounded-2xl bg-white dark:bg-night-card border border-sage/40 dark:border-night-border shadow-dark-card py-2 z-50 overflow-hidden"
+                      className="absolute right-0 mt-2 w-56 rounded-2xl bg-white dark:bg-night-card border border-sage/40 dark:border-night-border shadow-elevated py-2 z-50 overflow-hidden"
                     >
-                      <div className="px-4 py-2 border-b border-sage/20">
-                        <p className="text-xs text-charcoal/60 dark:text-cream/60">Signed in as</p>
-                        <p className="text-sm font-bold text-charcoal dark:text-cream truncate">
+                      <div className="px-4 py-2 border-b border-sage/20 dark:border-night-border">
+                        <p className="text-xs text-charcoal/60 dark:text-darktext-muted">Signed in as</p>
+                        <p className="text-sm font-bold text-charcoal dark:text-darktext truncate">
                           {user.email}
                         </p>
                       </div>
@@ -193,41 +198,41 @@ export function Navbar() {
                         <Link
                           href="/dashboard"
                           onClick={() => setUserDropdownOpen(false)}
-                          className="flex items-center gap-2.5 px-4 py-2 text-sm text-charcoal dark:text-cream hover:bg-cream dark:hover:bg-night-hover transition-colors font-medium"
+                          className="flex items-center gap-2.5 px-4 py-2 text-sm text-charcoal dark:text-darktext hover:bg-cream dark:hover:bg-night-hover hover:text-forest dark:hover:text-emeraldaccent transition-colors font-medium"
                         >
-                          <LayoutDashboard className="w-4 h-4 text-forest dark:text-limeaccent" />
+                          <LayoutDashboard className="w-4 h-4 text-forest dark:text-emeraldaccent" />
                           Dashboard
                         </Link>
                         <Link
                           href="/profile"
                           onClick={() => setUserDropdownOpen(false)}
-                          className="flex items-center gap-2.5 px-4 py-2 text-sm text-charcoal dark:text-cream hover:bg-cream dark:hover:bg-night-hover transition-colors font-medium"
+                          className="flex items-center gap-2.5 px-4 py-2 text-sm text-charcoal dark:text-darktext hover:bg-cream dark:hover:bg-night-hover hover:text-forest dark:hover:text-emeraldaccent transition-colors font-medium"
                         >
-                          <User className="w-4 h-4 text-forest dark:text-limeaccent" />
+                          <User className="w-4 h-4 text-forest dark:text-emeraldaccent" />
                           My Profile
                         </Link>
                         <Link
                           href="/history"
                           onClick={() => setUserDropdownOpen(false)}
-                          className="flex items-center gap-2.5 px-4 py-2 text-sm text-charcoal dark:text-cream hover:bg-cream dark:hover:bg-night-hover transition-colors font-medium"
+                          className="flex items-center gap-2.5 px-4 py-2 text-sm text-charcoal dark:text-darktext hover:bg-cream dark:hover:bg-night-hover hover:text-forest dark:hover:text-emeraldaccent transition-colors font-medium"
                         >
-                          <History className="w-4 h-4 text-forest dark:text-limeaccent" />
+                          <History className="w-4 h-4 text-forest dark:text-emeraldaccent" />
                           Activity History
                         </Link>
                         <Link
                           href="/saved-ideas"
                           onClick={() => setUserDropdownOpen(false)}
-                          className="flex items-center gap-2.5 px-4 py-2 text-sm text-charcoal dark:text-cream hover:bg-cream dark:hover:bg-night-hover transition-colors font-medium"
+                          className="flex items-center gap-2.5 px-4 py-2 text-sm text-charcoal dark:text-darktext hover:bg-cream dark:hover:bg-night-hover hover:text-forest dark:hover:text-emeraldaccent transition-colors font-medium"
                         >
-                          <Bookmark className="w-4 h-4 text-forest dark:text-limeaccent" />
-                          Saved Ideas
+                          <Bookmark className="w-4 h-4 text-forest dark:text-emeraldaccent" />
+                          Saved Blueprints
                         </Link>
 
                         {user.role === "ADMIN" && (
                           <Link
                             href="/admin"
                             onClick={() => setUserDropdownOpen(false)}
-                            className="flex items-center gap-2.5 px-4 py-2 text-sm text-terracotta hover:bg-cream dark:hover:bg-night-hover transition-colors font-semibold border-t border-sage/20 mt-1"
+                            className="flex items-center gap-2.5 px-4 py-2 text-sm text-terracotta hover:bg-cream dark:hover:bg-night-hover transition-colors font-semibold border-t border-sage/20 dark:border-night-border mt-1"
                           >
                             <ShieldCheck className="w-4 h-4 text-terracotta" />
                             Admin Console
@@ -235,7 +240,7 @@ export function Navbar() {
                         )}
                       </div>
 
-                      <div className="border-t border-sage/20 pt-1">
+                      <div className="border-t border-sage/20 dark:border-night-border pt-1">
                         <button
                           onClick={() => {
                             setUserDropdownOpen(false);
@@ -256,13 +261,13 @@ export function Navbar() {
             <div className="flex items-center gap-2">
               <Link
                 href="/login"
-                className="px-4 py-2 rounded-xl text-sm font-semibold text-charcoal dark:text-cream hover:text-forest dark:hover:text-limeaccent hover:bg-forest/5 transition-colors"
+                className="px-4 py-2 rounded-xl text-sm font-semibold text-charcoal dark:text-darktext hover:text-forest dark:hover:text-emeraldaccent hover:bg-forest/5 dark:hover:bg-night-card transition-colors"
               >
                 Sign In
               </Link>
               <Link
                 href="/register"
-                className="px-4 py-2 rounded-xl text-sm font-bold text-white bg-forest hover:bg-forest-800 transition-colors shadow-soft"
+                className="px-4 py-2 rounded-xl text-sm font-bold text-white dark:text-night bg-forest dark:bg-emeraldaccent hover:bg-forest-800 dark:hover:bg-emeraldaccent-400 transition-all shadow-sm hover:shadow-[0_0_15px_rgba(67,230,161,0.35)]"
               >
                 Join Free
               </Link>
@@ -272,7 +277,7 @@ export function Navbar() {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="lg:hidden p-2.5 rounded-xl border border-sage/40 text-charcoal dark:text-cream hover:bg-cream transition-colors"
+            className="lg:hidden p-2.5 rounded-xl border border-sage/40 dark:border-night-border text-charcoal dark:text-darktext hover:bg-cream dark:hover:bg-night-card transition-colors"
             aria-label="Toggle mobile menu"
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -287,7 +292,7 @@ export function Navbar() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="lg:hidden border-b border-sage/30 dark:border-night-border bg-cream/95 dark:bg-night-card/95 backdrop-blur-xl px-4 pt-2 pb-6 space-y-3"
+            className="lg:hidden border-b border-sage/30 dark:border-night-border bg-cream/95 dark:bg-night-secondary/95 backdrop-blur-xl px-4 pt-2 pb-6 space-y-3"
           >
             <div className="space-y-1">
               {navLinks.map((item) => {
@@ -299,8 +304,8 @@ export function Navbar() {
                     href={item.href}
                     className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
                       active
-                        ? "bg-forest/15 text-forest dark:text-limeaccent font-bold"
-                        : "text-charcoal/80 dark:text-cream/80 hover:bg-cream hover:text-forest"
+                        ? "bg-forest/15 dark:bg-emeraldaccent/15 text-forest dark:text-emeraldaccent font-bold border border-forest/20 dark:border-emeraldaccent/30"
+                        : "text-charcoal/80 dark:text-darktext-secondary hover:bg-cream dark:hover:bg-night-card hover:text-forest dark:hover:text-darktext"
                     }`}
                   >
                     <Icon className="w-4 h-4" />
